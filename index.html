@@ -5,31 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Calculator - Every Calculation. One Intelligent Calculator.</title>
 
+    <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
         darkMode: 'class',
         theme: {
         extend: {
-        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        },
         colors: {
-        brand: { 50: '#f0fdfa', 100: '#ccfbf1', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 900: '#134e4a' },
-        dark: { bg: '#0a0a0a', surface: '#171717', border: '#262626' }
+        brand: {
+        50: '#f0fdfa',
+        100: '#ccfbf1',
+        400: '#2dd4bf',
+        500: '#14b8a6',
+        600: '#0d9488',
+        900: '#134e4a',
+        },
+        dark: {
+        bg: '#0a0a0a',
+        surface: '#171717',
+        border: '#262626'
+        }
         },
         animation: {
+        'gradient-x': 'gradient-x 3s ease infinite',
         'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-        'spin-slow': 'spin 3s linear infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        },
+        keyframes: {
+        'gradient-x': {
+        '0%, 100%': {
+        'background-size': '200% 200%',
+        'background-position': 'left center'
+        },
+        '50%': {
+        'background-size': '200% 200%',
+        'background-position': 'right center'
+        },
+        },
+        fadeInUp: {
+        '0%': { opacity: '0', transform: 'translateY(20px)' },
+        '100%': { opacity: '1', transform: 'translateY(0)' },
+        }
         }
         }
         }
         }
     </script>
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Math.js for Deterministic Calculation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 
     <style>
         body {
@@ -41,6 +82,7 @@
         .glass-panel {
             background: rgba(23, 23, 23, 0.7);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -51,6 +93,10 @@
             background-clip: text;
         }
 
+        .ai-gradient-bg {
+            background: linear-gradient(135deg, rgba(45,212,191,0.1), rgba(59,130,246,0.1), rgba(168,85,247,0.1));
+        }
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -68,15 +114,38 @@
                 background: #404040;
             }
 
-        @keyframes fadeInUp {
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+            .loader::after {
+                content: '';
+                box-sizing: border-box;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                border: 3px solid transparent;
+                border-bottom-color: #2dd4bf;
+            }
+
+        @keyframes rotation {
             0% {
-                opacity: 0;
-                transform: translateY(20px);
+                transform: rotate(0deg);
             }
 
             100% {
-                opacity: 1;
-                transform: translateY(0);
+                transform: rotate(360deg);
             }
         }
     </style>
@@ -84,73 +153,361 @@
 <body>
     <div id="root"></div>
 
+    <script type="module" data-plugins="transform-modules-umd">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, onSnapshot, addDoc, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Environment Variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ai-calculator-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        if (firebaseConfig) {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        }
+
+        window.FirebaseServices = { db, auth, initialAuthToken, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, deleteDoc, appId };
+    </script>
+
     <script type="text/babel">
-        // ============================================================================
-        // PRODUCTION CONFIGURATION
-        // ============================================================================
-        // If your frontend and backend are hosted on different domains, set this:
-        // window.CONFIG_API_BASE_URL = "https://your-backend-api-domain.com";
-        window.CONFIG_API_BASE_URL = "";
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
-        const { useState, useEffect, useRef } = React;
+        // The API key is securely injected by the platform runtime via a proxy. Leave as empty string.
+        const geminiApiKey = "";
 
+        // --- Audio Utils for TTS ---
+        const writeString = (view, offset, string) => {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        };
+
+        const base64ToArrayBuffer = (base64) => {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        };
+
+        const pcmToWav = (pcm16, sampleRate) => {
+            const numChannels = 1;
+            const byteRate = sampleRate * numChannels * 2;
+            const blockAlign = numChannels * 2;
+            const dataSize = pcm16.length * 2;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true); // bits per sample
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        };
+
+        // --- Icons Component Helper ---
         const Icon = ({ name, size = 24, className = "" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
                 if (iconRef.current && window.lucide && window.lucide.icons[name]) {
-                    iconRef.current.innerHTML = window.lucide.icons[name].toSvg({ width: size, height: size, class: className });
+                    iconRef.current.innerHTML = '';
+                    const iconElement = window.lucide.icons[name].toSvg({ width: size, height: size, class: className });
+                    iconRef.current.innerHTML = iconElement;
                 }
             }, [name, size, className]);
             return <span ref={iconRef} className="inline-flex items-center justify-center" />;
         };
 
-        // ============================================================================
-        // API SERVICE: Only talks to our secure Node.js backend
-        // ============================================================================
-        const hostname = window.location.hostname;
+        // --- Services ---
+        const aiSystemPrompt = `You are the brain of an intelligent AI Calculator. Your job is to understand natural language math, financial, and geometric problems in English, Hindi, or Hinglish.
 
-        // Dynamically configure endpoint based on deployment environment
-        let API_BASE_URL = window.CONFIG_API_BASE_URL;
-        if (!API_BASE_URL) {
-            API_BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '')
-                ? 'http://localhost:3000'
-                : ''; // Default to relative path for unified deployments
-        }
+        If the user asks about currency conversion (e.g. USD to INR) or real-time financial data (current gold rate, stock price, etc.), you have access to Google Search. Use the live data to formulate the expression. For example, if 1 USD = 83.5 INR, and user asks for 500 USD in INR, output: "500 * 83.5".
 
-        const CALCULATE_ENDPOINT = `${API_BASE_URL}/api/calculate`;
+        You must extract the intent, the numbers, and construct a mathematical expression that can be evaluated safely using standard math operators (+, -, *, /, ^, %).
+        DO NOT calculate the final answer yourself unless absolutely necessary. Rely on the 'executable_expression' to be evaluated by a deterministic math engine later.
+
+        CRITICAL RULES for 'executable_expression':
+        - For percentage like "18% of 5000", output: "5000 * (18 / 100)"
+        - STRICT GST RULES:
+          - "18% GST on 50000" (User wants ONLY the tax amount) -> "50000 * 0.18"
+          - "50000 including 18% GST" (User wants to find base price or tax from a total) -> Base is "50000 / 1.18", Tax is "50000 - (50000 / 1.18)". Extract what is logical.
+          - "Add 18% GST to 50000" or "50000 me 18% GST jodkar" (User wants total inclusive of tax) -> "50000 + (50000 * 0.18)"
+        - For simple interest "loan 2 lakh, 10%, 5 years", output: "(200000 * 10 * 5) / 100"
+        - For area "12 by 15 room", output: "12 * 15"
+        - It must be a valid string that math.js can evaluate. Do NOT include currency symbols in the expression.
+        - If it requires complex custom logic (like EMI), try to formulate the standard math formula: P * r * (1 + r)^n / ((1 + r)^n - 1) where r is monthly rate. Example: 200000 loan, 10% annual, 5 years (60 months). Monthly rate = 10/(12*100) = 0.008333. Expression: "200000 * (10/1200) * ((1 + (10/1200))^60) / (((1 + (10/1200))^60) - 1)"
+        - If you absolutely cannot format it as an expression, format a fallback logic in steps.
+
+        Respond ONLY with a valid JSON object matching this schema:
+        {
+            "type": "OBJECT",
+            "properties": {
+                "intent": { "type": "STRING", "description": "Category e.g., 'Percentage', 'EMI', 'Area', 'Basic Math'" },
+                "title": { "type": "STRING", "description": "Short title for history e.g., '18% of ₹5000'" },
+                "executable_expression": { "type": "STRING", "description": "Strictly math operators and numbers. e.g. '5000 * 0.18'" },
+                "formula_display": { "type": "STRING", "description": "Human readable formula e.g. 'Amount × (Rate/100)'" },
+                "steps": { "type": "ARRAY", "items": { "type": "STRING" }, "description": "Step by step textual explanation of values." },
+                "explanation_hindi": { "type": "STRING", "description": "Explanation in simple Hindi/Hinglish" },
+                "explanation_english": { "type": "STRING", "description": "Explanation in English" },
+                "unit": { "type": "STRING", "description": "Output unit if any e.g. '₹', 'sq ft', 'years'. Put symbol if currency." },
+                "unit_position": { "type": "STRING", "description": "'prefix' or 'suffix'" }
+            }
+        }`;
 
         const AIService = {
             async analyzeCalculation(query, context = null) {
+                const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+                const apiUrl = `${baseUrl}?key=${geminiApiKey}`;
+
+                let prompt = aiSystemPrompt;
+                if (context) {
+                    prompt += `\n\nPREVIOUS CALCULATION CONTEXT:\nUser previously asked: "${context.query}"\nPrevious Executable Expression: "${context.expression}"\nPrevious Result: ${context.result}\n\nINSTRUCTION FOR FOLLOW-UP: The user is asking a follow-up question. You MUST use the previous context (like principal, base amounts, tenure, etc.) and only change the variables the user mentions. Replace the updated variables and output a NEW complete 'executable_expression' that recalculates the entire problem with the new variables.`;
+                }
+
+                const payload = {
+                    contents: [{ parts: [{ text: `User Query: "${query}"` }] }],
+                    systemInstruction: { parts: [{ text: prompt }] },
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+
                 try {
-                    const response = await fetch(CALCULATE_ENDPOINT, {
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query, context })
+                        body: JSON.stringify(payload)
                     });
 
-                    if (!response.ok) {
-                        const err = await response.json().catch(() => ({}));
-                        throw new Error(err.error || `Server Error: ${response.status}`);
+                    if(!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Gemini API Error Response:", errorText);
+                        let errMsg = `API Error: ${response.status}`;
+                        try {
+                            const errData = JSON.parse(errorText);
+                            if (errData.error && errData.error.message) {
+                                errMsg = errData.error.message;
+                            }
+                        } catch(e) {}
+                        throw new Error(errMsg);
                     }
-                    return await response.json();
+                    const data = await response.json();
+                    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (textResponse) {
+                        try {
+                            // Strip markdown code blocks if the AI accidentally includes them
+                            let cleanText = textResponse.trim();
+                            if (cleanText.startsWith('```')) {
+                                cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/```$/, '').trim();
+                            }
+                            return JSON.parse(cleanText);
+                        } catch (err) {
+                            console.error("JSON Parse Error. Raw AI Response:", textResponse);
+                            throw new Error("The AI returned a malformed calculation response.");
+                        }
+                    }
+                    throw new Error("Received an empty response from AI.");
                 } catch (error) {
-                    console.error("Frontend Request Error:", error);
-                    if (error.message.includes('Failed to fetch') || error.message.includes('Server Error: 404')) {
-                        throw new Error("DEV_ERROR: The backend server is not running. Please start the Node.js server on port 3000.");
+                    console.error("AI Analysis Error:", error);
+                    throw error;
+                }
+            },
+            async analyzeImage(base64Data, mimeType) {
+                const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+                const apiUrl = `${baseUrl}?key=${geminiApiKey}`;
+
+                const prompt = aiSystemPrompt + `\n\nIMAGE TASK: Extract the main mathematical, financial, or logic problem from the image. If it's a receipt/bill, calculate what is logically required (e.g. total with tax). If it's a handwritten problem, solve it.`;
+
+                const payload = {
+                    contents: [
+                        {
+                            parts: [
+                                { text: "Solve the calculation problem shown in this image." },
+                                { inlineData: { mimeType: mimeType, data: base64Data } }
+                            ]
+                        }
+                    ],
+                    systemInstruction: { parts: [{ text: prompt }] },
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Gemini Image API Error Response:", errorText);
+                        let errMsg = `API Error: ${response.status}`;
+                        try {
+                            const errData = JSON.parse(errorText);
+                            if (errData.error && errData.error.message) {
+                                errMsg = errData.error.message;
+                            }
+                        } catch(e) {}
+                        throw new Error(errMsg);
                     }
+                    const data = await response.json();
+                    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (textResponse) {
+                        try {
+                            let cleanText = textResponse.trim();
+                            if (cleanText.startsWith('```')) {
+                                cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/```$/, '').trim();
+                            }
+                            return JSON.parse(cleanText);
+                        } catch (err) {
+                            console.error("JSON Parse Error. Raw AI Response:", textResponse);
+                            throw new Error("The AI returned a malformed image calculation response.");
+                        }
+                    }
+                    throw new Error("Received an empty response from AI.");
+                } catch (error) {
+                    console.error("AI Image Analysis Error:", error);
+                    throw error;
+                }
+            },
+            async speakExplanation(text, language = 'en') {
+                const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+                const apiUrl = `${baseUrl}?key=${geminiApiKey}`;
+
+                const payload = {
+                    contents: [{
+                        parts: [{ text: text }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: language === 'hi' ? "Aoede" : "Puck" }
+                            }
+                        }
+                    }
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Gemini TTS API Error Response:", errorText);
+                        throw new Error(`TTS API Request Failed: ${response.status} - ${errorText}`);
+                    }
+                    const result = await response.json();
+
+                    const part = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType;
+
+                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                        const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                        const pcmData = base64ToArrayBuffer(audioData);
+                        const pcm16 = new Int16Array(pcmData);
+                        const wavBlob = pcmToWav(pcm16, sampleRate);
+                        return URL.createObjectURL(wavBlob);
+                    }
+                    throw new Error("Invalid audio response");
+                } catch (error) {
+                    console.error("TTS Error:", error);
                     throw error;
                 }
             }
         };
 
-        const Header = ({ setView }) => (
+        const MathService = {
+            evaluate(expression) {
+                try {
+                    // Use math.js for deterministic, safe evaluation
+                    let result = math.evaluate(expression);
+
+                    // Format appropriately (avoid long decimals unless necessary)
+                    if (typeof result === 'number') {
+                        // Round to 4 decimal places max to avoid floating point weirdness
+                        result = Math.round(result * 10000) / 10000;
+                    }
+                    return result;
+                } catch (error) {
+                    console.error("Math Evaluation Error:", error, "Expression:", expression);
+                    return "Error calculating";
+                }
+            },
+            formatResult(value, unit, position) {
+                if (value === "Error calculating" || isNaN(value)) return value;
+
+                // Format numbers with commas (Indian numbering system preference if currency, otherwise standard)
+                let formattedStr = value.toString();
+                if (typeof value === 'number') {
+                     formattedStr = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(value);
+                }
+
+                if (!unit) return formattedStr;
+                if (position === 'prefix') return `${unit}${formattedStr}`;
+                return `${formattedStr} ${unit}`;
+            }
+        };
+
+        // --- Components ---
+
+        const Header = ({ user, onLogin, onLogout, setView }) => (
             <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border">
                 <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
                             <Icon name="calculator" size={20} className="text-white" />
                         </div>
-                        <span className="font-bold text-xl tracking-tight hidden sm:block">AI Calculator</span>
+                        <span className="font-bold text-xl tracking-tight hidden sm:block">
+                            AI Calculator
+                        </span>
+                    </div>
+
+                    <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+                        <button onClick={() => setView('home')} className="hover:text-white transition-colors">Home</button>
+                        <button onClick={() => setView('library')} className="hover:text-white transition-colors">Library</button>
+                        {user && <button onClick={() => setView('history')} className="hover:text-white transition-colors">History</button>}
+                    </nav>
+
+                    <div className="flex items-center gap-3">
+                        {user ? (
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs text-gray-400 hidden sm:block">ID: {user.uid.substring(0,6)}...</span>
+                                <button onClick={onLogout} className="text-sm px-4 py-2 rounded-full border border-dark-border hover:bg-dark-border transition-colors">
+                                    Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <button onClick={onLogin} className="text-sm px-4 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors font-medium flex items-center gap-2">
+                                <Icon name="user" size={16} /> Sign In
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>
@@ -158,9 +515,13 @@
 
         const SmartInputArea = ({ onCalculate, isProcessing }) => {
             const [query, setQuery] = useState('');
+            const textareaRef = useRef(null);
+            const fileInputRef = useRef(null);
 
             const handleSubmit = () => {
-                if (query.trim() && !isProcessing) onCalculate(query);
+                if (query.trim() && !isProcessing) {
+                    onCalculate(query);
+                }
             };
 
             const handleKeyDown = (e) => {
@@ -170,20 +531,40 @@
                 }
             };
 
+            const insertExample = (text) => {
+                setQuery(text);
+                if (textareaRef.current) textareaRef.current.focus();
+            };
+
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const base64 = event.target.result.split(',')[1];
+                    onCalculate(null, { base64, mimeType: file.type });
+                };
+                reader.readAsDataURL(file);
+                e.target.value = ''; // Reset input
+            };
+
             return (
-                <div className="w-full max-w-3xl mx-auto animate-[fadeInUp_0.5s_ease-out]">
+                <div className="w-full max-w-3xl mx-auto animate-fade-in-up">
                     <div className="text-center mb-8">
                         <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
                             Every Calculation.<br/>
                             <span className="ai-gradient-text">One Intelligent Calculator.</span>
                         </h1>
-                        <p className="text-gray-400 text-lg md:text-xl">"हर सवाल का हिसाब, AI के साथ।"</p>
+                        <p className="text-gray-400 text-lg md:text-xl">
+                            "हर सवाल का हिसाब, AI के साथ।"
+                        </p>
                     </div>
 
                     <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                         <div className="relative glass-panel rounded-[2rem] p-2 flex flex-col transition-all border border-dark-border focus-within:border-brand-500/50">
                             <textarea
+                                ref={textareaRef}
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleKeyDown}
@@ -192,11 +573,21 @@
                                 disabled={isProcessing}
                             />
 
-                            <div className="flex items-center justify-end px-4 pb-3">
+                            <div className="flex items-center justify-between px-4 pb-3">
+                                <div className="flex gap-2 text-gray-400">
+                                    <button className="p-2 rounded-full hover:bg-white/5 hover:text-white transition-colors cursor-not-allowed opacity-50" title="Voice coming soon">
+                                        <Icon name="mic" size={20} />
+                                    </button>
+                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+                                    <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-full hover:bg-white/5 hover:text-brand-400 transition-colors" title="Scan Problem with Image" disabled={isProcessing}>
+                                        <Icon name="camera" size={20} />
+                                    </button>
+                                </div>
                                 <button
                                     onClick={handleSubmit}
                                     disabled={!query.trim() || isProcessing}
-                                    className={`px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2 ${query.trim() && !isProcessing ? 'bg-white text-black hover:scale-105' : 'bg-white/10 text-white/50 cursor-not-allowed'}`}
+                                    className={`px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2
+                                        ${query.trim() && !isProcessing ? 'bg-white text-black hover:scale-105' : 'bg-white/10 text-white/50 cursor-not-allowed'}`}
                                 >
                                     {isProcessing ? 'Thinking...' : 'Calculate'}
                                     {!isProcessing && <Icon name="arrow-right" size={18} />}
@@ -207,8 +598,13 @@
 
                     <div className="mt-8 flex flex-wrap gap-2 justify-center text-sm">
                         <span className="text-gray-500 px-3 py-1">Examples:</span>
-                        {["18% GST on ₹50,000", "5000 ka 20 percent", "2 lakh loan 10% 5 years EMI", "12 feet by 15 feet room area"].map((ex, i) => (
-                            <button key={i} onClick={() => {setQuery(ex)}} className="px-4 py-1.5 rounded-full border border-dark-border hover:border-brand-500/50 hover:text-brand-400 text-gray-300 transition-colors">
+                        {[
+                            "18% GST on ₹50,000",
+                            "5000 ka 20 percent",
+                            "2 lakh loan 10% 5 years EMI",
+                            "12 feet by 15 feet room area"
+                        ].map((ex, i) => (
+                            <button key={i} onClick={() => insertExample(ex)} className="px-4 py-1.5 rounded-full border border-dark-border hover:border-brand-500/50 hover:text-brand-400 text-gray-300 transition-colors">
                                 {ex}
                             </button>
                         ))}
@@ -217,109 +613,159 @@
             );
         };
 
-        const ResultCard = ({ originalQuery, resultData, onClear, onFollowUp, isProcessing }) => {
+        const ResultCard = ({ resultData, onClear, onFollowUp, isProcessing }) => {
             if (!resultData) return null;
 
-            const { calculationType, result, formula, steps, explanationEnglish, explanationHindi, followUpContext } = resultData;
-
+            const { query, analysis, finalResult, formattedResult } = resultData;
             const [followUpQuery, setFollowUpQuery] = useState('');
+            const [audioPlaying, setAudioPlaying] = useState({ en: false, hi: false });
+            const [loadingAudio, setLoadingAudio] = useState({ en: false, hi: false });
             const [isCopied, setIsCopied] = useState(false);
             const [shareState, setShareState] = useState({ status: 'idle', text: 'Share' });
+            const audioRef = useRef(null);
             const textareaRef = useRef(null);
 
             const handleFollowUp = () => {
                 if (followUpQuery.trim() && !isProcessing) {
-                    onFollowUp(followUpQuery, followUpContext);
+                    onFollowUp(followUpQuery);
                     setFollowUpQuery('');
-                    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+                    if (textareaRef.current) {
+                        textareaRef.current.style.height = 'auto';
+                    }
                 }
             };
 
             const handleCopy = async () => {
-                const textToCopy = `AI Calculator\nQuery: ${originalQuery}\nResult: ${result}\nFormula: ${formula}\nExplanation: ${explanationEnglish}`;
+                const textToCopy = `AI Calculator\nQuery: ${query}\nResult: ${formattedResult}\nFormula: ${analysis.formula_display}\nExplanation: ${analysis.explanation_english}`;
                 try {
-                    // Modern robust clipboard approach
-                    if (navigator.clipboard && window.isSecureContext) {
-                        await navigator.clipboard.writeText(textToCopy);
-                    } else {
-                        // Safe fallback for older browsers or iframes
-                        const textArea = document.createElement("textarea");
-                        textArea.value = textToCopy;
-                        document.body.appendChild(textArea);
-                        textArea.select();
+                    // Use document.execCommand as primary to bypass iframe clipboard restrictions
+                    const textArea = document.createElement("textarea");
+                    textArea.value = textToCopy;
+                    textArea.style.top = "0";
+                    textArea.style.left = "0";
+                    textArea.style.position = "fixed";
+                    textArea.style.opacity = "0"; // Make it invisible
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
                         document.execCommand('copy');
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                    } catch (err) {
+                        console.error('Fallback: Oops, unable to copy', err);
+                    } finally {
                         document.body.removeChild(textArea);
                     }
-                    setIsCopied(true);
-                    setTimeout(() => setIsCopied(false), 2000);
                 } catch (err) {
-                    console.error("Copy failed", err);
+                    console.error("Failed to copy", err);
                 }
             };
 
             const handleShare = async () => {
+                // Ensure URL is valid for sharing (iframe about:srcdoc will fail)
                 const shareData = {
                     title: 'AI Calculator Result',
-                    text: `AI Calculator\nQuery: ${originalQuery}\nResult: ${result}\nExplanation: ${explanationEnglish}`
+                    text: `AI Calculator\nQuery: ${query}\nResult: ${formattedResult}\nFormula: ${analysis.formula_display}`
                 };
+
+                if (window.location.href.startsWith('http')) {
+                    shareData.url = window.location.href;
+                }
+
                 try {
                     if (navigator.share) {
                         await navigator.share(shareData);
                         setShareState({ status: 'success', text: 'Shared!' });
                     } else {
-                        // Fallback if Web Share is unsupported
+                        // Graceful fallback to copy
                         await handleCopy();
-                        setShareState({ status: 'success', text: 'Result copied — you can share it anywhere!' });
+                        setShareState({ status: 'success', text: 'Copied!' });
                     }
                 } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        await handleCopy();
-                        setShareState({ status: 'success', text: 'Copied to share!' });
-                    }
+                    console.error("Error sharing", err);
+                    // If sharing fails (e.g., user cancels or environment blocks it), fallback to copy
+                    await handleCopy();
+                    setShareState({ status: 'success', text: 'Copied!' });
                 } finally {
-                    setTimeout(() => setShareState({ status: 'idle', text: 'Share' }), 3000);
+                    setTimeout(() => setShareState({ status: 'idle', text: 'Share' }), 2000);
+                }
+            };
+
+            const playExplanation = async (text, lang) => {
+                if (audioPlaying[lang]) {
+                    if (audioRef.current) {
+                        audioRef.current.pause();
+                        audioRef.current = null;
+                    }
+                    setAudioPlaying({ en: false, hi: false });
+                    return;
+                }
+
+                try {
+                    setLoadingAudio({ ...loadingAudio, [lang]: true });
+                    // Stop any current playing audio
+                    if (audioRef.current) audioRef.current.pause();
+
+                    const audioUrl = await AIService.speakExplanation(text, lang);
+                    const audio = new Audio(audioUrl);
+                    audioRef.current = audio;
+
+                    audio.onended = () => {
+                        setAudioPlaying({ en: false, hi: false });
+                    };
+
+                    await audio.play();
+                    setAudioPlaying({ en: false, hi: false, [lang]: true });
+                } catch (err) {
+                    console.error("Failed to play audio", err);
+                } finally {
+                    setLoadingAudio({ ...loadingAudio, [lang]: false });
                 }
             };
 
             return (
-                <div className="w-full max-w-3xl mx-auto mt-8 animate-[fadeInUp_0.5s_ease-out]">
-                    <div className="glass-panel rounded-3xl p-6 md:p-8 relative overflow-hidden border border-brand-500/30">
+                <div className="w-full max-w-3xl mx-auto mt-8 animate-fade-in-up">
+                    <div className="glass-panel rounded-3xl p-6 md:p-8 relative overflow-hidden border border-brand-500/30 shadow-[0_0_40px_-15px_rgba(45,212,191,0.2)]">
+
+                        {/* decorative element */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-                        <div className="flex justify-between items-start mb-6 relative z-10">
+                        <div className="flex justify-between items-start mb-6">
                             <div>
                                 <span className="inline-block px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold mb-3 tracking-wider uppercase">
-                                    {calculationType}
+                                    {analysis.intent}
                                 </span>
                                 <h3 className="text-gray-400 text-lg mb-1 font-medium">Your Query:</h3>
-                                <p className="text-white text-xl">"{originalQuery}"</p>
+                                <p className="text-white text-xl">"{query}"</p>
                             </div>
-                            <button onClick={onClear} className="text-gray-500 hover:text-white p-2 transition-colors">
+                            <button onClick={onClear} className="text-gray-500 hover:text-white p-2">
                                 <Icon name="x" size={24} />
                             </button>
                         </div>
 
-                        <div className="my-8 flex items-baseline gap-2 pb-6 border-b border-dark-border relative z-10">
+                        <div className="my-8 flex items-baseline gap-2 pb-6 border-b border-dark-border">
                             <span className="text-6xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-                                {result}
+                                {formattedResult}
                             </span>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8 relative z-10">
+                        <div className="grid md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <div>
                                     <h4 className="text-brand-400 font-medium mb-2 flex items-center gap-2">
                                         <Icon name="function-square" size={16} /> Formula Used
                                     </h4>
-                                    <div className="bg-dark-surface p-3 rounded-xl border border-dark-border font-mono text-sm text-gray-300">
-                                        {formula}
+                                    <div className="bg-dark-surface p-3 rounded-xl border border-dark-border font-mono text-sm text-gray-300 overflow-x-auto">
+                                        {analysis.formula_display || analysis.executable_expression}
                                     </div>
                                 </div>
-                                {steps && steps.length > 0 && (
+
+                                {analysis.steps && analysis.steps.length > 0 && (
                                     <div>
                                         <h4 className="text-gray-400 font-medium mb-2">Steps</h4>
                                         <ul className="space-y-2">
-                                            {steps.map((step, i) => (
+                                            {analysis.steps.map((step, i) => (
                                                 <li key={i} className="flex gap-3 text-gray-300 text-sm">
                                                     <span className="text-brand-600 font-bold">{i+1}.</span>
                                                     <span>{step}</span>
@@ -332,26 +778,53 @@
 
                             <div className="space-y-4 bg-dark-surface/50 p-5 rounded-2xl border border-dark-border/50">
                                 <div>
-                                    <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider mb-2">Explanation</h4>
-                                    <p className="text-gray-200 text-sm leading-relaxed">{explanationEnglish}</p>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider">Explanation (English)</h4>
+                                        <button
+                                            onClick={() => playExplanation(analysis.explanation_english, 'en')}
+                                            disabled={loadingAudio.en}
+                                            className="text-gray-400 hover:text-brand-400 transition-colors p-1"
+                                            title="Listen to explanation"
+                                        >
+                                            {loadingAudio.en ? <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div> :
+                                             audioPlaying.en ? <Icon name="volume-x" size={16} /> : <Icon name="volume-2" size={16} />}
+                                        </button>
+                                    </div>
+                                    <p className="text-gray-200 text-sm leading-relaxed">
+                                        {analysis.explanation_english}
+                                    </p>
                                 </div>
                                 <div className="border-t border-dark-border/50 pt-4 mt-2">
-                                    <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider mb-2">विवरण (Hindi)</h4>
-                                    <p className="text-gray-200 text-sm leading-relaxed">{explanationHindi}</p>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider">विवरण (Hindi)</h4>
+                                        <button
+                                            onClick={() => playExplanation(analysis.explanation_hindi, 'hi')}
+                                            disabled={loadingAudio.hi}
+                                            className="text-gray-400 hover:text-brand-400 transition-colors p-1"
+                                            title="विवरण सुनें"
+                                        >
+                                            {loadingAudio.hi ? <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div> :
+                                             audioPlaying.hi ? <Icon name="volume-x" size={16} /> : <Icon name="volume-2" size={16} />}
+                                        </button>
+                                    </div>
+                                    <p className="text-gray-200 text-sm leading-relaxed">
+                                        {analysis.explanation_hindi}
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-8 flex gap-3 pt-6 border-t border-dark-border relative z-10">
-                            <button onClick={handleCopy} aria-label="Copy Result" className={`flex-1 py-3 rounded-xl border transition-colors text-sm font-medium flex justify-center items-center gap-2 ${isCopied ? 'bg-brand-500/20 border-brand-500/50 text-brand-400' : 'bg-dark-surface hover:bg-dark-border border-dark-border'}`}>
+                        <div className="mt-8 flex gap-3 pt-6 border-t border-dark-border">
+                            <button onClick={handleCopy} aria-label="Copy Result" className="flex-1 py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium flex justify-center items-center gap-2">
                                 <Icon name={isCopied ? "check" : "copy"} size={16} /> {isCopied ? "Copied!" : "Copy Result"}
                             </button>
-                            <button onClick={handleShare} aria-label="Share Result" className={`flex-1 py-3 rounded-xl border transition-colors text-sm font-medium flex justify-center items-center gap-2 ${shareState.status === 'success' ? 'bg-brand-500/20 border-brand-500/50 text-brand-400' : 'bg-dark-surface hover:bg-dark-border border-dark-border'}`}>
+                            <button onClick={handleShare} aria-label="Share Result" className="flex-1 py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium flex justify-center items-center gap-2">
                                 <Icon name={shareState.status === 'success' ? "check" : "share-2"} size={16} /> {shareState.text}
                             </button>
                         </div>
 
-                        <div className="mt-6 pt-6 border-t border-dark-border relative z-10">
+                        {/* Follow-up Chat Section */}
+                        <div className="mt-6 pt-6 border-t border-dark-border">
                             <div className="flex gap-3 items-end">
                                 <textarea
                                     ref={textareaRef}
@@ -371,7 +844,6 @@
                                     placeholder="Ask a follow-up... (e.g., 'What if the interest is 12%?')"
                                     className="flex-1 bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500/50 resize-none overflow-hidden max-h-32 min-h-[46px]"
                                     disabled={isProcessing}
-                                    aria-label="Follow up query"
                                 />
                                 <button
                                     onClick={handleFollowUp}
@@ -379,7 +851,7 @@
                                     aria-label="Send message"
                                     className="h-[46px] px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
                                 >
-                                    {isProcessing ? <div className="w-5 h-5 border-2 border-white/30 border-t-transparent rounded-full animate-spin"></div> : <Icon name="send" size={18} />}
+                                    {isProcessing ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Icon name="send" size={18} />}
                                 </button>
                             </div>
                         </div>
@@ -388,105 +860,272 @@
             );
         };
 
-        const App = () => {
-            const [view, setView] = useState('home');
-            const [isProcessing, setIsProcessing] = useState(false);
-            const [currentQuery, setCurrentQuery] = useState("");
-            const [currentResult, setCurrentResult] = useState(null);
-            const [errorMsg, setErrorMsg] = useState(null);
-            const [devError, setDevError] = useState(false);
+        const CategoryLibrary = () => {
+            const categories = [
+                { icon: 'percent', name: 'Percentage', desc: 'Find %, GST, discounts' },
+                { icon: 'landmark', name: 'Finance', desc: 'EMI, SIP, Compound Interest' },
+                { icon: 'ruler', name: 'Geometry', desc: 'Area, Volume, Perimeter' },
+                { icon: 'briefcase', name: 'Business', desc: 'Profit, Loss, Margins' },
+                { icon: 'scale', name: 'Unit Converter', desc: 'Length, Weight, Temp' },
+                { icon: 'calendar', name: 'Time & Date', desc: 'Age, Duration, Days' },
+            ];
 
-            const processCalculation = async (queryText, context = null) => {
+            return (
+                <div className="max-w-6xl mx-auto py-12 animate-fade-in-up">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-bold mb-4">Calculator Library</h2>
+                        <p className="text-gray-400">Can't find the words? Browse our deterministic calculators.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {categories.map((cat, i) => (
+                            <div key={i} className="glass-panel p-6 rounded-2xl hover:border-brand-500/50 transition-colors cursor-pointer group">
+                                <div className="w-12 h-12 rounded-xl bg-dark-surface flex items-center justify-center mb-4 group-hover:bg-brand-500/20 group-hover:text-brand-400 transition-colors">
+                                    <Icon name={cat.icon} size={24} />
+                                </div>
+                                <h3 className="text-lg font-semibold mb-2">{cat.name}</h3>
+                                <p className="text-sm text-gray-400">{cat.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-12 text-center text-gray-500 text-sm">
+                        Pro tip: You don't need to select a category. Just ask your question on the home page!
+                    </div>
+                </div>
+            );
+        };
+
+        const HistoryPanel = ({ user }) => {
+            const [history, setHistory] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                if (!user || !window.FirebaseServices.db) return;
+
+                const { db, collection, query, orderBy, onSnapshot, appId } = window.FirebaseServices;
+                const historyRef = collection(db, 'artifacts', appId, 'users', user.uid, 'history');
+                const q = query(historyRef, orderBy('timestamp', 'desc'));
+
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const items = [];
+                    snapshot.forEach((doc) => {
+                        items.push({ id: doc.id, ...doc.data() });
+                    });
+                    setHistory(items);
+                    setLoading(false);
+                }, (error) => {
+                    console.error("History fetch error:", error);
+                    setLoading(false);
+                });
+
+                return () => unsubscribe();
+            }, [user]);
+
+            if (loading) return <div className="text-center py-20 text-gray-400">Loading history...</div>;
+
+            return (
+                <div className="max-w-4xl mx-auto py-12 animate-fade-in-up">
+                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                        <Icon name="history" size={28} className="text-brand-400" /> Your Calculations
+                    </h2>
+
+                    {history.length === 0 ? (
+                        <div className="text-center py-20 bg-dark-surface rounded-2xl border border-dark-border">
+                            <Icon name="inbox" size={48} className="mx-auto mb-4 text-gray-600" />
+                            <p className="text-gray-400">No calculations saved yet.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {history.map(item => (
+                                <div key={item.id} className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between group">
+                                    <div>
+                                        <div className="text-xs text-brand-400 font-semibold mb-1 uppercase tracking-wider">{item.category}</div>
+                                        <h3 className="text-lg text-white font-medium mb-1">{item.query}</h3>
+                                        <p className="text-sm text-gray-400">Result: <span className="text-gray-200">{item.result}</span></p>
+                                    </div>
+                                    <div className="text-sm text-gray-500 whitespace-nowrap">
+                                        {item.timestamp ? new Date(item.timestamp.toDate()).toLocaleDateString() : 'Just now'}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [view, setView] = useState('home'); // home, library, history
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [currentResult, setCurrentResult] = useState(null);
+            const [authLoading, setAuthLoading] = useState(true);
+            const [errorMsg, setErrorMsg] = useState(null);
+
+            useEffect(() => {
+                const { auth, signInAnonymously, signInWithCustomToken, initialAuthToken, onAuthStateChanged } = window.FirebaseServices;
+                if (!auth) {
+                    setAuthLoading(false);
+                    return;
+                }
+
+                const initAuth = async () => {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Auth error:", error);
+                    }
+                };
+
+                initAuth();
+
+                const unsubscribe = onAuthStateChanged(auth, (u) => {
+                    setUser(u);
+                    setAuthLoading(false);
+                });
+
+                return () => unsubscribe();
+            }, []);
+
+            const handleLogin = async () => {
+                 const { auth, signInAnonymously } = window.FirebaseServices;
+                 if(auth) {
+                     setAuthLoading(true);
+                     try {
+                         await signInAnonymously(auth);
+                     } catch(e) {
+                         console.error(e);
+                     }
+                 }
+            };
+
+            const handleLogout = async () => {
+                const { auth, signOut } = window.FirebaseServices;
+                if(auth) await signOut(auth);
+            };
+
+            const saveToHistory = async (query, analysis, formattedResult) => {
+                if (!user || !window.FirebaseServices.db) return;
+                const { db, collection, addDoc, serverTimestamp, appId } = window.FirebaseServices;
+
+                try {
+                    const historyRef = collection(db, 'artifacts', appId, 'users', user.uid, 'history');
+                    await addDoc(historyRef, {
+                        query: query,
+                        category: analysis.intent,
+                        result: formattedResult,
+                        expression: analysis.executable_expression,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Failed to save history:", error);
+                }
+            };
+
+            const processCalculation = async (queryText, imagePayload = null, context = null) => {
                 setIsProcessing(true);
                 setErrorMsg(null);
-                setDevError(false);
 
-                // If it's a new query, clear old result. Followups preserve it visually until done.
                 if (!context) {
                     setCurrentResult(null);
-                    setCurrentQuery(queryText);
                 }
 
                 try {
-                    // Call the secure Node.js backend
-                    const resultData = await AIService.analyzeCalculation(queryText, context);
+                    let analysis;
+                    let displayQuery = queryText;
+
+                    if (imagePayload) {
+                        analysis = await AIService.analyzeImage(imagePayload.base64, imagePayload.mimeType);
+                        displayQuery = analysis.title || "Image Calculation";
+                    } else {
+                        analysis = await AIService.analyzeCalculation(queryText, context);
+                    }
+
+                    console.log("AI Analysis:", analysis);
+
+                    // 2. Perform deterministic calculation locally based on AI's expression extraction
+                    const rawResult = MathService.evaluate(analysis.executable_expression);
+
+                    // 3. Format result
+                    const formattedResult = MathService.formatResult(rawResult, analysis.unit, analysis.unit_position);
+
+                    const resultData = {
+                        query: displayQuery,
+                        analysis,
+                        finalResult: rawResult,
+                        formattedResult
+                    };
+
                     setCurrentResult(resultData);
-                    setCurrentQuery(queryText);
+
+                    // 4. Save to history
+                    if(rawResult !== "Error calculating") {
+                        saveToHistory(displayQuery, analysis, formattedResult);
+                    }
+
                 } catch (error) {
                     console.error("Processing failed:", error);
-                    const msg = error.message || "";
-                    if (msg.includes("DEV_ERROR")) {
-                        setDevError(true);
-                    } else {
-                        setErrorMsg(msg || "I couldn't understand that calculation. Try phrasing it as a math problem.");
-                    }
+                    // Pass the exact error message to the UI instead of a generic one
+                    setErrorMsg(error.message || "I couldn't understand that calculation. Try phrasing it as a math problem.");
                 } finally {
                     setIsProcessing(false);
                 }
             };
 
+            if (authLoading) {
+                return <div className="min-h-screen flex items-center justify-center bg-dark-bg"><span className="loader"></span></div>;
+            }
+
             return (
                 <div className="min-h-screen bg-dark-bg text-gray-100 flex flex-col relative selection:bg-brand-500/30">
+                    {/* Background decoration */}
                     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
                         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-900/20 blur-[120px]"></div>
                         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/10 blur-[120px]"></div>
                     </div>
 
-                    <Header setView={setView} />
+                    <Header user={user} onLogin={handleLogin} onLogout={handleLogout} setView={setView} />
 
                     <main className="flex-1 pt-24 px-4 pb-12 z-10">
                         {view === 'home' && (
                             <div className="flex flex-col items-center justify-center min-h-[80vh]">
-                                {!currentResult && !devError && (
-                                    <SmartInputArea onCalculate={(q) => processCalculation(q)} isProcessing={isProcessing} />
-                                )}
-
-                                {currentResult && !devError && (
+                                {!currentResult ? (
+                                    <SmartInputArea onCalculate={(q, img) => processCalculation(q, img)} isProcessing={isProcessing} />
+                                ) : (
                                     <ResultCard
-                                        originalQuery={currentQuery}
                                         resultData={currentResult}
-                                        onClear={() => { setCurrentResult(null); setCurrentQuery(""); }}
-                                        onFollowUp={(q, context) => processCalculation(q, context)}
+                                        onClear={() => setCurrentResult(null)}
+                                        onFollowUp={(followUpQuery) => processCalculation(followUpQuery, null, {
+                                            query: currentResult.query,
+                                            result: currentResult.formattedResult,
+                                            expression: currentResult.analysis.executable_expression
+                                        })}
                                         isProcessing={isProcessing}
                                     />
                                 )}
 
-                                {devError && (
-                                    <div className="mt-8 p-6 bg-red-900/20 border border-red-500/30 rounded-2xl text-left max-w-3xl mx-auto animate-[fadeInUp_0.5s_ease-out]">
-                                        <div className="flex items-center gap-3 text-red-400 font-bold mb-4 text-lg">
-                                            <Icon name="server-crash" size={24} />
-                                            Deployment Configuration Required
-                                        </div>
-                                        <p className="text-gray-300 text-sm mb-6 leading-relaxed">
-                                            This UI is strictly configured for production architecture and prohibits client-side API keys.
-                                            Because you are currently viewing this in a static browser environment, the required Node.js backend is unreachable.
-                                        </p>
-                                        <div className="bg-dark-bg rounded-lg p-5 font-mono text-xs text-gray-400 border border-dark-border shadow-inner">
-                                            <p className="text-white mb-2 font-bold">To run this successfully on your local machine:</p>
-                                            1. Download the generated <span className="text-brand-400">package.json</span>, <span className="text-brand-400">server.js</span>, and <span className="text-brand-400">.env</span> files.<br/>
-                                            2. Add your Gemini API key to the <span className="text-brand-400">.env</span> file.<br/>
-                                            3. Run <span className="text-brand-400">npm install</span> to install Express and MathJS.<br/>
-                                            4. Run <span className="text-brand-400">npm start</span> to start the backend on port 3000.<br/>
-                                            5. Open this <span className="text-brand-400">index.html</span> file in your browser. The app will automatically connect to your secure backend.
-                                        </div>
-                                    </div>
-                                )}
-
-                                {!devError && errorMsg && (
-                                    <div className="mt-8 p-5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-center max-w-lg mx-auto animate-[fadeInUp_0.5s_ease-out]">
+                                {errorMsg && (
+                                    <div className="mt-8 p-5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-center max-w-lg mx-auto animate-fade-in-up">
                                         <Icon name="alert-circle" size={24} className="mx-auto mb-2 opacity-80" />
                                         <p>{errorMsg}</p>
                                     </div>
                                 )}
 
-                                {isProcessing && !currentResult && (
-                                    <div className="mt-12 flex flex-col items-center text-brand-400 animate-[fadeInUp_0.5s_ease-out]">
-                                        <Icon name="loader-2" size={32} className="animate-spin-slow mb-4" />
-                                        <span>Calculating...</span>
+                                {isProcessing && (
+                                    <div className="mt-12 flex flex-col items-center text-brand-400 animate-pulse">
+                                        <div className="loader mb-4"></div>
+                                        <span>AI is decoding your calculation...</span>
                                     </div>
                                 )}
                             </div>
                         )}
+
+                        {view === 'library' && <CategoryLibrary />}
+
+                        {view === 'history' && <HistoryPanel user={user} />}
                     </main>
                 </div>
             );

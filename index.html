@@ -155,7 +155,7 @@
 
     <script type="module" data-plugins="transform-modules-umd">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, query, onSnapshot, addDoc, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global Environment Variables
@@ -170,7 +170,7 @@
         auth = getAuth(app);
         }
 
-        window.FirebaseServices = { db, auth, initialAuthToken, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, deleteDoc, appId };
+        window.FirebaseServices = { db, auth, initialAuthToken, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, deleteDoc, appId };
     </script>
 
     <script type="text/babel">
@@ -477,41 +477,175 @@
 
         // --- Components ---
 
-        const Header = ({ user, onLogin, onLogout, setView }) => (
-            <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border">
-                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
-                            <Icon name="calculator" size={20} className="text-white" />
-                        </div>
-                        <span className="font-bold text-xl tracking-tight hidden sm:block">
-                            AI Calculator
-                        </span>
-                    </div>
+        const AuthModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+            const [isSignUp, setIsSignUp] = useState(false);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
 
-                    <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
-                        <button onClick={() => setView('home')} className="hover:text-white transition-colors">Home</button>
-                        <button onClick={() => setView('library')} className="hover:text-white transition-colors">Library</button>
-                        {user && <button onClick={() => setView('history')} className="hover:text-white transition-colors">History</button>}
-                    </nav>
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoading(true);
+                const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.FirebaseServices;
+                try {
+                    if (!auth) throw new Error("Authentication service is unavailable.");
+                    if (isSignUp) {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                    } else {
+                        await signInWithEmailAndPassword(auth, email, password);
+                    }
+                    onClose();
+                } catch (err) {
+                    setError(err.message.replace('Firebase: ', ''));
+                }
+                setLoading(false);
+            };
 
-                    <div className="flex items-center gap-3">
-                        {user ? (
-                            <div className="flex items-center gap-3">
-                                <span className="text-xs text-gray-400 hidden sm:block">ID: {user.uid.substring(0,6)}...</span>
-                                <button onClick={onLogout} className="text-sm px-4 py-2 rounded-full border border-dark-border hover:bg-dark-border transition-colors">
-                                    Logout
-                                </button>
+            const handleGuest = async () => {
+                const { auth, signInAnonymously } = window.FirebaseServices;
+                if(auth) {
+                    setLoading(true);
+                    try {
+                        await signInAnonymously(auth);
+                        onClose();
+                    } catch(err) {
+                        setError(err.message);
+                    }
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in-up">
+                    <div className="glass-panel w-full max-w-md rounded-3xl p-8 relative border border-brand-500/30 shadow-[0_0_40px_-15px_rgba(45,212,191,0.2)]">
+                        <button onClick={onClose} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors">
+                            <Icon name="x" size={24} />
+                        </button>
+
+                        <h2 className="text-2xl font-bold mb-2 text-white">
+                            {isSignUp ? 'Create an Account' : 'Welcome Back'}
+                        </h2>
+                        <p className="text-gray-400 text-sm mb-6">
+                            {isSignUp ? 'Sign up to save your calculation history.' : 'Sign in to access your calculations.'}
+                        </p>
+
+                        {error && (
+                            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                                {error}
                             </div>
-                        ) : (
-                            <button onClick={onLogin} className="text-sm px-4 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors font-medium flex items-center gap-2">
-                                <Icon name="user" size={16} /> Sign In
-                            </button>
                         )}
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-400 mb-1 ml-1 uppercase tracking-wider">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50"
+                                    placeholder="you@example.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-400 mb-1 ml-1 uppercase tracking-wider">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-medium transition-all disabled:opacity-50"
+                            >
+                                {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                            </button>
+                        </form>
+
+                        <div className="mt-6 pt-6 border-t border-dark-border">
+                            <button
+                                onClick={handleGuest}
+                                disabled={loading}
+                                className="w-full py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium text-white mb-4"
+                            >
+                                Continue as Guest
+                            </button>
+
+                            <p className="text-center text-sm text-gray-400">
+                                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+                                <button onClick={() => setIsSignUp(!isSignUp)} className="text-brand-400 hover:text-brand-300 font-medium">
+                                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                                </button>
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </header>
-        );
+            );
+        };
+
+        const Header = ({ user, onLogin, onLogout, setView, view }) => {
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+            return (
+                <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border">
+                    <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+                                <Icon name="sparkles" size={18} className="text-white" />
+                            </div>
+                            <span className="font-bold text-lg sm:text-xl tracking-tight">
+                                AI Calculator
+                            </span>
+                        </div>
+
+                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+                            <button onClick={() => setView('home')} className={`hover:text-white transition-colors ${view === 'home' ? 'text-white' : ''}`}>Home</button>
+                            <button onClick={() => setView('library')} className={`hover:text-white transition-colors ${view === 'library' ? 'text-white' : ''}`}>Library</button>
+                            {user && <button onClick={() => setView('history')} className={`hover:text-white transition-colors ${view === 'history' ? 'text-white' : ''}`}>History</button>}
+                        </nav>
+
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            {user ? (
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <span className="text-xs text-gray-400 hidden sm:block">ID: {user.uid.substring(0,6)}...</span>
+                                    <button onClick={onLogout} className="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full border border-dark-border hover:bg-dark-border transition-colors">
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <button onClick={onLogin} className="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors font-medium flex items-center gap-1 sm:gap-2">
+                                    <Icon name="user" size={16} /> <span className="hidden sm:inline">Sign In</span>
+                                </button>
+                            )}
+
+                            <button className="md:hidden p-2 text-gray-400 hover:text-white ml-1" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                                <Icon name={isMobileMenuOpen ? "x" : "menu"} size={24} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu Dropdown */}
+                    {isMobileMenuOpen && (
+                        <div className="md:hidden glass-panel border-b border-dark-border animate-fade-in-up">
+                            <nav className="flex flex-col px-4 py-4 space-y-4 text-sm font-medium text-gray-400">
+                                <button onClick={() => { setView('home'); setIsMobileMenuOpen(false); }} className={`text-left hover:text-white ${view === 'home' ? 'text-white' : ''}`}>Home</button>
+                                <button onClick={() => { setView('library'); setIsMobileMenuOpen(false); }} className={`text-left hover:text-white ${view === 'library' ? 'text-white' : ''}`}>Library</button>
+                                {user && <button onClick={() => { setView('history'); setIsMobileMenuOpen(false); }} className={`text-left hover:text-white ${view === 'history' ? 'text-white' : ''}`}>History</button>}
+                            </nav>
+                        </div>
+                    )}
+                </header>
+            );
+        };
 
         const SmartInputArea = ({ onCalculate, isProcessing }) => {
             const [query, setQuery] = useState('');
@@ -550,12 +684,12 @@
 
             return (
                 <div className="w-full max-w-3xl mx-auto animate-fade-in-up">
-                    <div className="text-center mb-8">
-                        <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
+                    <div className="text-center mb-6 md:mb-8">
+                        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight">
                             Every Calculation.<br/>
                             <span className="ai-gradient-text">One Intelligent Calculator.</span>
                         </h1>
-                        <p className="text-gray-400 text-lg md:text-xl">
+                        <p className="text-gray-400 text-sm sm:text-base md:text-xl px-4">
                             "हर सवाल का हिसाब, AI के साथ।"
                         </p>
                     </div>
@@ -569,12 +703,12 @@
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Type your math problem, EMI query, percentage, or formula..."
-                                className="w-full bg-transparent text-white placeholder-gray-500 px-6 py-5 outline-none resize-none text-lg md:text-xl min-h-[120px]"
+                                className="w-full bg-transparent text-white placeholder-gray-500 px-4 sm:px-6 py-4 sm:py-5 outline-none resize-none text-base sm:text-lg md:text-xl min-h-[100px] sm:min-h-[120px]"
                                 disabled={isProcessing}
                             />
 
-                            <div className="flex items-center justify-between px-4 pb-3">
-                                <div className="flex gap-2 text-gray-400">
+                            <div className="flex flex-wrap items-center justify-between px-2 sm:px-4 pb-2 sm:pb-3 gap-3">
+                                <div className="flex gap-1 sm:gap-2 text-gray-400">
                                     <button className="p-2 rounded-full hover:bg-white/5 hover:text-white transition-colors cursor-not-allowed opacity-50" title="Voice coming soon">
                                         <Icon name="mic" size={20} />
                                     </button>
@@ -586,7 +720,7 @@
                                 <button
                                     onClick={handleSubmit}
                                     disabled={!query.trim() || isProcessing}
-                                    className={`px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2
+                                    className={`px-5 sm:px-6 py-2.5 rounded-full font-medium transition-all flex items-center justify-center gap-2 w-full sm:w-auto
                                         ${query.trim() && !isProcessing ? 'bg-white text-black hover:scale-105' : 'bg-white/10 text-white/50 cursor-not-allowed'}`}
                                 >
                                     {isProcessing ? 'Thinking...' : 'Calculate'}
@@ -596,15 +730,14 @@
                         </div>
                     </div>
 
-                    <div className="mt-8 flex flex-wrap gap-2 justify-center text-sm">
-                        <span className="text-gray-500 px-3 py-1">Examples:</span>
+                    <div className="mt-8 flex flex-wrap gap-2 justify-center text-xs sm:text-sm px-2">
+                        <span className="text-gray-500 px-2 sm:px-3 py-1">Examples:</span>
                         {[
                             "18% GST on ₹50,000",
                             "5000 ka 20 percent",
-                            "2 lakh loan 10% 5 years EMI",
-                            "12 feet by 15 feet room area"
+                            "2 lakh loan 10% 5 years EMI"
                         ].map((ex, i) => (
-                            <button key={i} onClick={() => insertExample(ex)} className="px-4 py-1.5 rounded-full border border-dark-border hover:border-brand-500/50 hover:text-brand-400 text-gray-300 transition-colors">
+                            <button key={i} onClick={() => insertExample(ex)} className="px-3 sm:px-4 py-1.5 rounded-full border border-dark-border hover:border-brand-500/50 hover:text-brand-400 text-gray-300 transition-colors whitespace-nowrap">
                                 {ex}
                             </button>
                         ))}
@@ -638,13 +771,12 @@
             const handleCopy = async () => {
                 const textToCopy = `AI Calculator\nQuery: ${query}\nResult: ${formattedResult}\nFormula: ${analysis.formula_display}\nExplanation: ${analysis.explanation_english}`;
                 try {
-                    // Use document.execCommand as primary to bypass iframe clipboard restrictions
                     const textArea = document.createElement("textarea");
                     textArea.value = textToCopy;
                     textArea.style.top = "0";
                     textArea.style.left = "0";
                     textArea.style.position = "fixed";
-                    textArea.style.opacity = "0"; // Make it invisible
+                    textArea.style.opacity = "0";
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
@@ -663,7 +795,6 @@
             };
 
             const handleShare = async () => {
-                // Ensure URL is valid for sharing (iframe about:srcdoc will fail)
                 const shareData = {
                     title: 'AI Calculator Result',
                     text: `AI Calculator\nQuery: ${query}\nResult: ${formattedResult}\nFormula: ${analysis.formula_display}`
@@ -678,13 +809,10 @@
                         await navigator.share(shareData);
                         setShareState({ status: 'success', text: 'Shared!' });
                     } else {
-                        // Graceful fallback to copy
                         await handleCopy();
                         setShareState({ status: 'success', text: 'Copied!' });
                     }
                 } catch (err) {
-                    console.error("Error sharing", err);
-                    // If sharing fails (e.g., user cancels or environment blocks it), fallback to copy
                     await handleCopy();
                     setShareState({ status: 'success', text: 'Copied!' });
                 } finally {
@@ -704,7 +832,6 @@
 
                 try {
                     setLoadingAudio({ ...loadingAudio, [lang]: true });
-                    // Stop any current playing audio
                     if (audioRef.current) audioRef.current.pause();
 
                     const audioUrl = await AIService.speakExplanation(text, lang);
@@ -725,49 +852,49 @@
             };
 
             return (
-                <div className="w-full max-w-3xl mx-auto mt-8 animate-fade-in-up">
-                    <div className="glass-panel rounded-3xl p-6 md:p-8 relative overflow-hidden border border-brand-500/30 shadow-[0_0_40px_-15px_rgba(45,212,191,0.2)]">
+                <div className="w-full max-w-3xl mx-auto mt-6 md:mt-8 animate-fade-in-up">
+                    <div className="glass-panel rounded-3xl p-5 md:p-8 relative overflow-hidden border border-brand-500/30 shadow-[0_0_40px_-15px_rgba(45,212,191,0.2)]">
 
                         {/* decorative element */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-brand-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <span className="inline-block px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold mb-3 tracking-wider uppercase">
+                        <div className="flex justify-between items-start mb-4 md:mb-6">
+                            <div className="pr-4">
+                                <span className="inline-block px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold mb-2 sm:mb-3 tracking-wider uppercase">
                                     {analysis.intent}
                                 </span>
-                                <h3 className="text-gray-400 text-lg mb-1 font-medium">Your Query:</h3>
-                                <p className="text-white text-xl">"{query}"</p>
+                                <h3 className="text-gray-400 text-sm sm:text-lg mb-1 font-medium">Your Query:</h3>
+                                <p className="text-white text-base sm:text-xl">"{query}"</p>
                             </div>
-                            <button onClick={onClear} className="text-gray-500 hover:text-white p-2">
+                            <button onClick={onClear} className="text-gray-500 hover:text-white p-1 sm:p-2 flex-shrink-0">
                                 <Icon name="x" size={24} />
                             </button>
                         </div>
 
-                        <div className="my-8 flex items-baseline gap-2 pb-6 border-b border-dark-border">
-                            <span className="text-6xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+                        <div className="my-6 md:my-8 flex items-baseline gap-2 pb-6 border-b border-dark-border w-full">
+                            <span className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 break-words w-full overflow-wrap-anywhere">
                                 {formattedResult}
                             </span>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                             <div className="space-y-4">
                                 <div>
-                                    <h4 className="text-brand-400 font-medium mb-2 flex items-center gap-2">
+                                    <h4 className="text-brand-400 font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
                                         <Icon name="function-square" size={16} /> Formula Used
                                     </h4>
-                                    <div className="bg-dark-surface p-3 rounded-xl border border-dark-border font-mono text-sm text-gray-300 overflow-x-auto">
+                                    <div className="bg-dark-surface p-3 rounded-xl border border-dark-border font-mono text-xs sm:text-sm text-gray-300 overflow-x-auto">
                                         {analysis.formula_display || analysis.executable_expression}
                                     </div>
                                 </div>
 
                                 {analysis.steps && analysis.steps.length > 0 && (
                                     <div>
-                                        <h4 className="text-gray-400 font-medium mb-2">Steps</h4>
+                                        <h4 className="text-gray-400 font-medium mb-2 text-sm sm:text-base">Steps</h4>
                                         <ul className="space-y-2">
                                             {analysis.steps.map((step, i) => (
-                                                <li key={i} className="flex gap-3 text-gray-300 text-sm">
-                                                    <span className="text-brand-600 font-bold">{i+1}.</span>
+                                                <li key={i} className="flex gap-2 sm:gap-3 text-gray-300 text-xs sm:text-sm">
+                                                    <span className="text-brand-600 font-bold flex-shrink-0">{i+1}.</span>
                                                     <span>{step}</span>
                                                 </li>
                                             ))}
@@ -776,10 +903,10 @@
                                 )}
                             </div>
 
-                            <div className="space-y-4 bg-dark-surface/50 p-5 rounded-2xl border border-dark-border/50">
+                            <div className="space-y-4 bg-dark-surface/50 p-4 sm:p-5 rounded-2xl border border-dark-border/50">
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider">Explanation (English)</h4>
+                                        <h4 className="text-gray-400 font-medium text-xs sm:text-sm uppercase tracking-wider">Explanation (English)</h4>
                                         <button
                                             onClick={() => playExplanation(analysis.explanation_english, 'en')}
                                             disabled={loadingAudio.en}
@@ -790,13 +917,13 @@
                                              audioPlaying.en ? <Icon name="volume-x" size={16} /> : <Icon name="volume-2" size={16} />}
                                         </button>
                                     </div>
-                                    <p className="text-gray-200 text-sm leading-relaxed">
+                                    <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
                                         {analysis.explanation_english}
                                     </p>
                                 </div>
                                 <div className="border-t border-dark-border/50 pt-4 mt-2">
                                     <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider">विवरण (Hindi)</h4>
+                                        <h4 className="text-gray-400 font-medium text-xs sm:text-sm uppercase tracking-wider">विवरण (Hindi)</h4>
                                         <button
                                             onClick={() => playExplanation(analysis.explanation_hindi, 'hi')}
                                             disabled={loadingAudio.hi}
@@ -807,14 +934,14 @@
                                              audioPlaying.hi ? <Icon name="volume-x" size={16} /> : <Icon name="volume-2" size={16} />}
                                         </button>
                                     </div>
-                                    <p className="text-gray-200 text-sm leading-relaxed">
+                                    <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
                                         {analysis.explanation_hindi}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-8 flex gap-3 pt-6 border-t border-dark-border">
+                        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 pt-6 border-t border-dark-border">
                             <button onClick={handleCopy} aria-label="Copy Result" className="flex-1 py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium flex justify-center items-center gap-2">
                                 <Icon name={isCopied ? "check" : "copy"} size={16} /> {isCopied ? "Copied!" : "Copy Result"}
                             </button>
@@ -825,7 +952,7 @@
 
                         {/* Follow-up Chat Section */}
                         <div className="mt-6 pt-6 border-t border-dark-border">
-                            <div className="flex gap-3 items-end">
+                            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
                                 <textarea
                                     ref={textareaRef}
                                     rows="1"
@@ -849,7 +976,7 @@
                                     onClick={handleFollowUp}
                                     disabled={!followUpQuery.trim() || isProcessing}
                                     aria-label="Send message"
-                                    className="h-[46px] px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+                                    className="h-[46px] px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center sm:min-w-[80px]"
                                 >
                                     {isProcessing ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Icon name="send" size={18} />}
                                 </button>
@@ -960,6 +1087,7 @@
             const [currentResult, setCurrentResult] = useState(null);
             const [authLoading, setAuthLoading] = useState(true);
             const [errorMsg, setErrorMsg] = useState(null);
+            const [showAuthModal, setShowAuthModal] = useState(false);
 
             useEffect(() => {
                 const { auth, signInAnonymously, signInWithCustomToken, initialAuthToken, onAuthStateChanged } = window.FirebaseServices;
@@ -990,16 +1118,8 @@
                 return () => unsubscribe();
             }, []);
 
-            const handleLogin = async () => {
-                 const { auth, signInAnonymously } = window.FirebaseServices;
-                 if(auth) {
-                     setAuthLoading(true);
-                     try {
-                         await signInAnonymously(auth);
-                     } catch(e) {
-                         console.error(e);
-                     }
-                 }
+            const handleLogin = () => {
+                 setShowAuthModal(true);
             };
 
             const handleLogout = async () => {
@@ -1087,11 +1207,14 @@
                         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/10 blur-[120px]"></div>
                     </div>
 
-                    <Header user={user} onLogin={handleLogin} onLogout={handleLogout} setView={setView} />
+                    <Header user={user} onLogin={handleLogin} onLogout={handleLogout} setView={setView} view={view} />
 
-                    <main className="flex-1 pt-24 px-4 pb-12 z-10">
+                    <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+                    <main className="flex-1 pt-20 sm:pt-24 px-4 pb-12 z-10">
+                        {}
                         {view === 'home' && (
-                            <div className="flex flex-col items-center justify-center min-h-[80vh]">
+                            <div className="w-full">
                                 {!currentResult ? (
                                     <SmartInputArea onCalculate={(q, img) => processCalculation(q, img)} isProcessing={isProcessing} />
                                 ) : (

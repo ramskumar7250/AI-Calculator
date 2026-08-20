@@ -1,961 +1,499 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Calculator - Every Calculation. One Intelligent Calculator.</title>
 
-    <title>AI Calculator</title>
-    <meta name="description"
-          content="AI Calculator - Solve calculations using AI or normal mathematical expressions." />
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+        darkMode: 'class',
+        theme: {
+        extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        colors: {
+        brand: { 50: '#f0fdfa', 100: '#ccfbf1', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 900: '#134e4a' },
+        dark: { bg: '#0a0a0a', surface: '#171717', border: '#262626' }
+        },
+        animation: {
+        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+        'spin-slow': 'spin 3s linear infinite',
+        }
+        }
+        }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: linear-gradient(135deg, #f5f7ff, #eef1ff);
-            color: #171717;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f5f5f5;
         }
 
-        .container {
-            width: min(100% - 30px, 900px);
-            margin: 0 auto;
-            padding: 35px 0 50px;
+        .glass-panel {
+            background: rgba(23, 23, 23, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .ai-gradient-text {
+            background: linear-gradient(to right, #2dd4bf, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 65px;
-            height: 65px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #6c4cff, #8b5cf6);
-            color: white;
-            font-size: 30px;
-            font-weight: bold;
-            box-shadow: 0 10px 30px rgba(108, 76, 255, 0.25);
-            margin-bottom: 15px;
+        ::-webkit-scrollbar {
+            width: 8px;
         }
 
-        h1 {
-            font-size: 36px;
-            margin-bottom: 8px;
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
         }
 
-        .subtitle {
-            color: #666;
-            font-size: 16px;
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 4px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            padding: 25px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e9e9ef;
-        }
-
-        label {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 150px;
-            resize: vertical;
-            border: 2px solid #e5e5ec;
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 17px;
-            outline: none;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-
-            textarea:focus {
-                border-color: #6c4cff;
-                box-shadow: 0 0 0 4px rgba(108, 76, 255, 0.1);
+            ::-webkit-scrollbar-thumb:hover {
+                background: #404040;
             }
 
-        .examples {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 14px 0 20px;
-        }
-
-        .example {
-            border: 1px solid #ddd;
-            background: #fafafa;
-            padding: 8px 12px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.2s;
-        }
-
-            .example:hover {
-                background: #eeeaff;
-                border-color: #6c4cff;
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
             }
 
-        .calculate-btn {
-            width: 100%;
-            border: none;
-            border-radius: 15px;
-            padding: 16px;
-            background: linear-gradient(135deg, #6c4cff, #8b5cf6);
-            color: white;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-            .calculate-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 10px 25px rgba(108, 76, 255, 0.25);
+            100% {
+                opacity: 1;
+                transform: translateY(0);
             }
-
-            .calculate-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-                transform: none;
-            }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            color: #6c4cff;
-            font-weight: 600;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #ddd;
-            border-top-color: #6c4cff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .error {
-            display: none;
-            margin-top: 20px;
-            background: #fff0f0;
-            color: #c62828;
-            border: 1px solid #ffcaca;
-            padding: 14px;
-            border-radius: 12px;
-        }
-
-        .result {
-            display: none;
-            margin-top: 25px;
-        }
-
-        .result-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .answer-box {
-            background: #f5f3ff;
-            border: 1px solid #ddd5ff;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .answer-label {
-            color: #6c4cff;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .answer {
-            font-size: 25px;
-            font-weight: 800;
-            word-break: break-word;
-        }
-
-        .steps-box {
-            background: #fafafa;
-            border: 1px solid #e5e5e5;
-            border-radius: 16px;
-            padding: 20px;
-        }
-
-            .steps-box h3 {
-                margin-bottom: 12px;
-                font-size: 17px;
-            }
-
-        .steps {
-            white-space: pre-wrap;
-            line-height: 1.7;
-            color: #444;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            border: 1px solid #ddd;
-            background: white;
-            padding: 11px 16px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-            .action-btn:hover {
-                background: #f5f3ff;
-                border-color: #6c4cff;
-            }
-
-        .followup {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-            .followup input {
-                flex: 1;
-                border: 1px solid #ddd;
-                border-radius: 10px;
-                padding: 12px;
-                font-size: 15px;
-                outline: none;
-            }
-
-                .followup input:focus {
-                    border-color: #6c4cff;
-                }
-
-            .followup button {
-                border: none;
-                background: #171717;
-                color: white;
-                border-radius: 10px;
-                padding: 12px 18px;
-                cursor: pointer;
-                font-weight: 600;
-            }
-
-        .status {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 13px;
-            color: #777;
-        }
-
-        .online {
-            color: #16803c;
-            font-weight: 700;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 25px;
-            color: #888;
-            font-size: 13px;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding-top: 20px;
-            }
-
-            h1 {
-                font-size: 29px;
-            }
-
-            .card {
-                padding: 18px;
-                border-radius: 18px;
-            }
-
-            textarea {
-                min-height: 130px;
-            }
-
-            .answer {
-                font-size: 21px;
-            }
-
-            .followup {
-                flex-direction: column;
-            }
-
-                .followup button {
-                    width: 100%;
-                }
         }
     </style>
 </head>
-
 <body>
-
-    <div class="container">
-
-        <header class="header">
-            <div class="logo">AI</div>
-            <h1>AI Calculator</h1>
-            <p class="subtitle">
-                Ask your calculation in English, Hindi or Hinglish
-            </p>
-        </header>
-
-        <main class="card">
-
-            <label for="question">
-                What do you want to calculate?
-            </label>
-
-            <textarea id="question"
-                      placeholder="Example: 25% of 800&#10;Example: 1500 ka 18% GST kitna hoga?&#10;Example: If I save ₹500 every month for 2 years, how much will I have?"></textarea>
-
-            <div class="examples">
-                <button class="example" onclick="setExample('25% of 800')">
-                    25% of 800
-                </button>
-
-                <button class="example" onclick="setExample('1500 ka 18% GST kitna hoga?')">
-                    GST Calculation
-                </button>
-
-                <button class="example" onclick="setExample('500 × 24')">
-                    500 × 24
-                </button>
-
-                <button class="example" onclick="setExample('10000 ka 15% kitna hai?')">
-                    Percentage
-                </button>
-            </div>
-
-            <button id="calculateBtn"
-                    class="calculate-btn"
-                    onclick="calculate()">
-                Calculate with AI
-            </button>
-
-            <div id="loading" class="loading">
-                <span class="spinner"></span>
-                Calculating...
-            </div>
-
-            <div id="error" class="error"></div>
-
-            <section id="result" class="result">
-
-                <div class="result-title">
-                    Result
-                </div>
-
-                <div class="answer-box">
-
-                    <div class="answer-label">
-                        Answer
-                    </div>
-
-                    <div id="answer" class="answer">
-                        —
-                    </div>
-
-                </div>
-
-                <div class="steps-box">
-
-                    <h3>Step-by-step explanation</h3>
-
-                    <div id="steps" class="steps">
-                        —
-                    </div>
-
-                </div>
-
-                <div class="actions">
-
-                    <button class="action-btn" onclick="copyResult()">
-                        📋 Copy
-                    </button>
-
-                    <button class="action-btn" onclick="shareResult()">
-                        🔗 Share
-                    </button>
-
-                    <button class="action-btn" onclick="clearResult()">
-                        ✕ Clear
-                    </button>
-
-                </div>
-
-                <div class="followup">
-
-                    <input id="followupInput"
-                           type="text"
-                           placeholder="Ask a follow-up question..." />
-
-                    <button onclick="sendFollowup()">
-                        Send
-                    </button>
-
-                </div>
-
-            </section>
-
-            <div class="status">
-                Backend:
-                <span id="backendStatus">Checking...</span>
-            </div>
-
-        </main>
-
-        <footer>
-            © 2026 AI Calculator
-        </footer>
-
-    </div>
-
-
-    <script>
-
-        // ==========================================
-        // YOUR DEPLOYED RENDER BACKEND
-        // ==========================================
-
-        const API_BASE =
-        "https://ai-calculator-jvuf.onrender.com";
-
-
-        // ==========================================
-        // ELEMENTS
-        // ==========================================
-
-        const questionInput =
-        document.getElementById("question");
-
-        const calculateBtn =
-        document.getElementById("calculateBtn");
-
-        const loading =
-        document.getElementById("loading");
-
-        const errorBox =
-        document.getElementById("error");
-
-        const resultBox =
-        document.getElementById("result");
-
-        const answerBox =
-        document.getElementById("answer");
-
-        const stepsBox =
-        document.getElementById("steps");
-
-        const backendStatus =
-        document.getElementById("backendStatus");
-
-
-        // ==========================================
-        // CHECK BACKEND
-        // ==========================================
-
-        async function checkBackend() {
-
-        try {
-
-        const response =
-        await fetch(`${API_BASE}/api/health`);
-
-        if (!response.ok) {
-        throw new Error("Backend unavailable");
-        }
-
-        const data =
-        await response.json();
-
-        if (data.status === "ok") {
-
-        backendStatus.textContent =
-        "Online ✓";
-
-        backendStatus.className =
-        "online";
-
-        } else {
-
-        backendStatus.textContent =
-        "Offline";
-
-        }
-
-        } catch (error) {
-
-        backendStatus.textContent =
-        "Offline";
-
-        }
-
-        }
-
-
-        // ==========================================
-        // SET EXAMPLE
-        // ==========================================
-
-        function setExample(text) {
-
-        questionInput.value = text;
-
-        questionInput.focus();
-
-        }
-
-
-        // ==========================================
-        // SHOW ERROR
-        // ==========================================
-
-        function showError(message) {
-
-        errorBox.textContent = message;
-
-        errorBox.style.display = "block";
-
-        }
-
-
-        // ==========================================
-        // HIDE ERROR
-        // ==========================================
-
-        function hideError() {
-
-        errorBox.style.display = "none";
-
-        }
-
-
-        // ==========================================
-        // CALCULATE
-        // ==========================================
-
-        async function calculate(customQuestion = null) {
-
-        const question =
-        customQuestion ||
-        questionInput.value.trim();
-
-        if (!question) {
-
-        showError(
-        "Please enter a calculation first."
-        );
-
-        questionInput.focus();
-
-        return;
-
-        }
-
-        hideError();
-
-        loading.style.display = "block";
-
-        calculateBtn.disabled = true;
-
-        resultBox.style.display = "none";
-
-
-        try {
-
-        const response =
-        await fetch(`${API_BASE}/api/calculate`, {
-
-        method: "POST",
-
-        headers: {
-        "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-        question: question
-        })
-
-        });
-
-
-        const data =
-        await response.json();
-
-
-        if (!response.ok) {
-
-        throw new Error(
-        data.error ||
-        data.message ||
-        "Calculation failed."
-        );
-
-        }
-
-
-        // ------------------------------------------
-        // Handle different possible response names
-        // ------------------------------------------
-
-        const answer =
-        data.answer ??
-        data.result ??
-        data.finalAnswer ??
-        data.output ??
-        "No answer returned.";
-
-
-        const steps =
-        data.steps ??
-        data.explanation ??
-        data.solution ??
-        data.details ??
-        "";
-
-
-        answerBox.textContent =
-        formatAnswer(answer);
-
-
-        stepsBox.textContent =
-        formatSteps(steps);
-
-
-        resultBox.style.display =
-        "block";
-
-
-        // Save latest result
-        window.latestResult = {
-
-        question: question,
-
-        answer: formatAnswer(answer),
-
-        steps: formatSteps(steps)
-
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ============================================================================
+        // PRODUCTION CONFIGURATION
+        // ============================================================================
+        // If your frontend and backend are hosted on different domains, set this:
+        // window.CONFIG_API_BASE_URL = "https://your-backend-api-domain.com";
+        window.CONFIG_API_BASE_URL = "";
+
+        const { useState, useEffect, useRef } = React;
+
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (iconRef.current && window.lucide && window.lucide.icons[name]) {
+                    iconRef.current.innerHTML = window.lucide.icons[name].toSvg({ width: size, height: size, class: className });
+                }
+            }, [name, size, className]);
+            return <span ref={iconRef} className="inline-flex items-center justify-center" />;
         };
 
+        // ============================================================================
+        // API SERVICE: Only talks to our secure Node.js backend
+        // ============================================================================
+        const hostname = window.location.hostname;
 
-        } catch (error) {
+        // Dynamically configure endpoint based on deployment environment
+        let API_BASE_URL = window.CONFIG_API_BASE_URL;
+        if (!API_BASE_URL) {
+            API_BASE_URL = (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '')
+                ? 'http://localhost:3000'
+                : ''; // Default to relative path for unified deployments
+        }
 
-        console.error(error);
+        const CALCULATE_ENDPOINT = `${API_BASE_URL}/api/calculate`;
 
-        showError(
-        error.message ||
-        "Something went wrong. Please try again."
+        const AIService = {
+            async analyzeCalculation(query, context = null) {
+                try {
+                    const response = await fetch(CALCULATE_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query, context })
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || `Server Error: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error("Frontend Request Error:", error);
+                    if (error.message.includes('Failed to fetch') || error.message.includes('Server Error: 404')) {
+                        throw new Error("DEV_ERROR: The backend server is not running. Please start the Node.js server on port 3000.");
+                    }
+                    throw error;
+                }
+            }
+        };
+
+        const Header = ({ setView }) => (
+            <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border">
+                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
+                            <Icon name="calculator" size={20} className="text-white" />
+                        </div>
+                        <span className="font-bold text-xl tracking-tight hidden sm:block">AI Calculator</span>
+                    </div>
+                </div>
+            </header>
         );
 
-        } finally {
-
-        loading.style.display = "none";
-
-        calculateBtn.disabled = false;
-
-        }
-
-        }
-
-
-        // ==========================================
-        // FORMAT ANSWER
-        // ==========================================
-
-        function formatAnswer(value) {
-
-        if (typeof value === "object") {
-
-        return JSON.stringify(
-        value,
-        null,
-        2
-        );
-
-        }
-
-        return String(value);
-
-        }
-
-
-        // ==========================================
-        // FORMAT STEPS
-        // ==========================================
-
-        function formatSteps(value) {
-
-        if (!value) {
-
-        return "No detailed explanation available.";
-
-        }
-
-        if (Array.isArray(value)) {
-
-        return value
-        .map((item, index) =>
-        `${index + 1}. ${item}`
-        )
-        .join("\n");
-
-        }
-
-        if (typeof value === "object") {
-
-        return JSON.stringify(
-        value,
-        null,
-        2
-        );
-
-        }
-
-        return String(value);
-
-        }
-
-
-        // ==========================================
-        // COPY RESULT
-        // ==========================================
-
-        async function copyResult() {
-
-        if (!window.latestResult) return;
-
-        const text =
-
-        `Question:\n${window.latestResult.question}\n\n` +
-
-        `Answer:\n${window.latestResult.answer}\n\n` +
-
-        `Explanation:\n${window.latestResult.steps}`;
-
-
-        try {
-
-        await navigator.clipboard.writeText(text);
-
-        alert("Result copied successfully ✓");
-
-        } catch (error) {
-
-        alert("Could not copy the result.");
-
-        }
-
-        }
-
-
-        // ==========================================
-        // SHARE RESULT
-        // ==========================================
-
-        async function shareResult() {
-
-        if (!window.latestResult) return;
-
-
-        const text =
-
-        `AI Calculator\n\n` +
-
-        `Question: ${window.latestResult.question}\n\n` +
-
-        `Answer: ${window.latestResult.answer}`;
-
-
-        if (navigator.share) {
-
-        try {
-
-        await navigator.share({
-
-        title: "AI Calculator Result",
-
-        text: text
-
-        });
-
-        } catch (error) {
-
-        // User cancelled share
-
-        }
-
-        } else {
-
-        try {
-
-        await navigator.clipboard.writeText(text);
-
-        alert(
-        "Sharing is not supported here. Result copied instead."
-        );
-
-        } catch (error) {
-
-        alert(text);
-
-        }
-
-        }
-
-        }
-
-
-        // ==========================================
-        // CLEAR RESULT
-        // ==========================================
-
-        function clearResult() {
-
-        questionInput.value = "";
-
-        answerBox.textContent = "—";
-
-        stepsBox.textContent = "—";
-
-        resultBox.style.display = "none";
-
-        hideError();
-
-        window.latestResult = null;
-
-        questionInput.focus();
-
-        }
-
-
-        // ==========================================
-        // FOLLOW-UP QUESTION
-        // ==========================================
-
-        async function sendFollowup() {
-
-        const followupInput =
-        document.getElementById("followupInput");
-
-        const followup =
-        followupInput.value.trim();
-
-
-        if (!followup) {
-
-        followupInput.focus();
-
-        return;
-
-        }
-
-
-        // Combine previous question + follow-up
-        const previousQuestion =
-        window.latestResult?.question || "";
-
-
-        const combinedQuestion =
-
-        `Previous question: ${previousQuestion}\n\n` +
-
-        `Previous answer: ${window.latestResult?.answer || ""}\n\n` +
-
-        `Follow-up question: ${followup}`;
-
-
-        followupInput.value = "";
-
-
-        await calculate(combinedQuestion);
-
-        }
-
-
-        // ==========================================
-        // ENTER KEY
-        // ==========================================
-
-        questionInput.addEventListener(
-        "keydown",
-        function(event) {
-
-        if (
-        event.key === "Enter" &&
-        (event.ctrlKey || event.metaKey)
-        ) {
-
-        calculate();
-
-        }
-
-        }
-        );
-
-
-        // Follow-up Enter
-        document
-        .getElementById("followupInput")
-        .addEventListener(
-        "keydown",
-        function(event) {
-
-        if (event.key === "Enter") {
-
-        sendFollowup();
-
-        }
-
-        }
-        );
-
-
-        // ==========================================
-        // START
-        // ==========================================
-
-        checkBackend();
-
+        const SmartInputArea = ({ onCalculate, isProcessing }) => {
+            const [query, setQuery] = useState('');
+
+            const handleSubmit = () => {
+                if (query.trim() && !isProcessing) onCalculate(query);
+            };
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                }
+            };
+
+            return (
+                <div className="w-full max-w-3xl mx-auto animate-[fadeInUp_0.5s_ease-out]">
+                    <div className="text-center mb-8">
+                        <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
+                            Every Calculation.<br/>
+                            <span className="ai-gradient-text">One Intelligent Calculator.</span>
+                        </h1>
+                        <p className="text-gray-400 text-lg md:text-xl">"हर सवाल का हिसाब, AI के साथ।"</p>
+                    </div>
+
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+                        <div className="relative glass-panel rounded-[2rem] p-2 flex flex-col transition-all border border-dark-border focus-within:border-brand-500/50">
+                            <textarea
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Type your math problem, EMI query, percentage, or formula..."
+                                className="w-full bg-transparent text-white placeholder-gray-500 px-6 py-5 outline-none resize-none text-lg md:text-xl min-h-[120px]"
+                                disabled={isProcessing}
+                            />
+
+                            <div className="flex items-center justify-end px-4 pb-3">
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={!query.trim() || isProcessing}
+                                    className={`px-6 py-2.5 rounded-full font-medium transition-all flex items-center gap-2 ${query.trim() && !isProcessing ? 'bg-white text-black hover:scale-105' : 'bg-white/10 text-white/50 cursor-not-allowed'}`}
+                                >
+                                    {isProcessing ? 'Thinking...' : 'Calculate'}
+                                    {!isProcessing && <Icon name="arrow-right" size={18} />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex flex-wrap gap-2 justify-center text-sm">
+                        <span className="text-gray-500 px-3 py-1">Examples:</span>
+                        {["18% GST on ₹50,000", "5000 ka 20 percent", "2 lakh loan 10% 5 years EMI", "12 feet by 15 feet room area"].map((ex, i) => (
+                            <button key={i} onClick={() => {setQuery(ex)}} className="px-4 py-1.5 rounded-full border border-dark-border hover:border-brand-500/50 hover:text-brand-400 text-gray-300 transition-colors">
+                                {ex}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ResultCard = ({ originalQuery, resultData, onClear, onFollowUp, isProcessing }) => {
+            if (!resultData) return null;
+
+            const { calculationType, result, formula, steps, explanationEnglish, explanationHindi, followUpContext } = resultData;
+
+            const [followUpQuery, setFollowUpQuery] = useState('');
+            const [isCopied, setIsCopied] = useState(false);
+            const [shareState, setShareState] = useState({ status: 'idle', text: 'Share' });
+            const textareaRef = useRef(null);
+
+            const handleFollowUp = () => {
+                if (followUpQuery.trim() && !isProcessing) {
+                    onFollowUp(followUpQuery, followUpContext);
+                    setFollowUpQuery('');
+                    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+                }
+            };
+
+            const handleCopy = async () => {
+                const textToCopy = `AI Calculator\nQuery: ${originalQuery}\nResult: ${result}\nFormula: ${formula}\nExplanation: ${explanationEnglish}`;
+                try {
+                    // Modern robust clipboard approach
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(textToCopy);
+                    } else {
+                        // Safe fallback for older browsers or iframes
+                        const textArea = document.createElement("textarea");
+                        textArea.value = textToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                    }
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000);
+                } catch (err) {
+                    console.error("Copy failed", err);
+                }
+            };
+
+            const handleShare = async () => {
+                const shareData = {
+                    title: 'AI Calculator Result',
+                    text: `AI Calculator\nQuery: ${originalQuery}\nResult: ${result}\nExplanation: ${explanationEnglish}`
+                };
+                try {
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                        setShareState({ status: 'success', text: 'Shared!' });
+                    } else {
+                        // Fallback if Web Share is unsupported
+                        await handleCopy();
+                        setShareState({ status: 'success', text: 'Result copied — you can share it anywhere!' });
+                    }
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        await handleCopy();
+                        setShareState({ status: 'success', text: 'Copied to share!' });
+                    }
+                } finally {
+                    setTimeout(() => setShareState({ status: 'idle', text: 'Share' }), 3000);
+                }
+            };
+
+            return (
+                <div className="w-full max-w-3xl mx-auto mt-8 animate-[fadeInUp_0.5s_ease-out]">
+                    <div className="glass-panel rounded-3xl p-6 md:p-8 relative overflow-hidden border border-brand-500/30">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                        <div className="flex justify-between items-start mb-6 relative z-10">
+                            <div>
+                                <span className="inline-block px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold mb-3 tracking-wider uppercase">
+                                    {calculationType}
+                                </span>
+                                <h3 className="text-gray-400 text-lg mb-1 font-medium">Your Query:</h3>
+                                <p className="text-white text-xl">"{originalQuery}"</p>
+                            </div>
+                            <button onClick={onClear} className="text-gray-500 hover:text-white p-2 transition-colors">
+                                <Icon name="x" size={24} />
+                            </button>
+                        </div>
+
+                        <div className="my-8 flex items-baseline gap-2 pb-6 border-b border-dark-border relative z-10">
+                            <span className="text-6xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+                                {result}
+                            </span>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8 relative z-10">
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="text-brand-400 font-medium mb-2 flex items-center gap-2">
+                                        <Icon name="function-square" size={16} /> Formula Used
+                                    </h4>
+                                    <div className="bg-dark-surface p-3 rounded-xl border border-dark-border font-mono text-sm text-gray-300">
+                                        {formula}
+                                    </div>
+                                </div>
+                                {steps && steps.length > 0 && (
+                                    <div>
+                                        <h4 className="text-gray-400 font-medium mb-2">Steps</h4>
+                                        <ul className="space-y-2">
+                                            {steps.map((step, i) => (
+                                                <li key={i} className="flex gap-3 text-gray-300 text-sm">
+                                                    <span className="text-brand-600 font-bold">{i+1}.</span>
+                                                    <span>{step}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-4 bg-dark-surface/50 p-5 rounded-2xl border border-dark-border/50">
+                                <div>
+                                    <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider mb-2">Explanation</h4>
+                                    <p className="text-gray-200 text-sm leading-relaxed">{explanationEnglish}</p>
+                                </div>
+                                <div className="border-t border-dark-border/50 pt-4 mt-2">
+                                    <h4 className="text-gray-400 font-medium text-sm uppercase tracking-wider mb-2">विवरण (Hindi)</h4>
+                                    <p className="text-gray-200 text-sm leading-relaxed">{explanationHindi}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-3 pt-6 border-t border-dark-border relative z-10">
+                            <button onClick={handleCopy} aria-label="Copy Result" className={`flex-1 py-3 rounded-xl border transition-colors text-sm font-medium flex justify-center items-center gap-2 ${isCopied ? 'bg-brand-500/20 border-brand-500/50 text-brand-400' : 'bg-dark-surface hover:bg-dark-border border-dark-border'}`}>
+                                <Icon name={isCopied ? "check" : "copy"} size={16} /> {isCopied ? "Copied!" : "Copy Result"}
+                            </button>
+                            <button onClick={handleShare} aria-label="Share Result" className={`flex-1 py-3 rounded-xl border transition-colors text-sm font-medium flex justify-center items-center gap-2 ${shareState.status === 'success' ? 'bg-brand-500/20 border-brand-500/50 text-brand-400' : 'bg-dark-surface hover:bg-dark-border border-dark-border'}`}>
+                                <Icon name={shareState.status === 'success' ? "check" : "share-2"} size={16} /> {shareState.text}
+                            </button>
+                        </div>
+
+                        <div className="mt-6 pt-6 border-t border-dark-border relative z-10">
+                            <div className="flex gap-3 items-end">
+                                <textarea
+                                    ref={textareaRef}
+                                    rows="1"
+                                    value={followUpQuery}
+                                    onChange={(e) => {
+                                        setFollowUpQuery(e.target.value);
+                                        e.target.style.height = 'auto';
+                                        e.target.style.height = (e.target.scrollHeight) + 'px';
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleFollowUp();
+                                        }
+                                    }}
+                                    placeholder="Ask a follow-up... (e.g., 'What if the interest is 12%?')"
+                                    className="flex-1 bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500/50 resize-none overflow-hidden max-h-32 min-h-[46px]"
+                                    disabled={isProcessing}
+                                    aria-label="Follow up query"
+                                />
+                                <button
+                                    onClick={handleFollowUp}
+                                    disabled={!followUpQuery.trim() || isProcessing}
+                                    aria-label="Send message"
+                                    className="h-[46px] px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+                                >
+                                    {isProcessing ? <div className="w-5 h-5 border-2 border-white/30 border-t-transparent rounded-full animate-spin"></div> : <Icon name="send" size={18} />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [currentQuery, setCurrentQuery] = useState("");
+            const [currentResult, setCurrentResult] = useState(null);
+            const [errorMsg, setErrorMsg] = useState(null);
+            const [devError, setDevError] = useState(false);
+
+            const processCalculation = async (queryText, context = null) => {
+                setIsProcessing(true);
+                setErrorMsg(null);
+                setDevError(false);
+
+                // If it's a new query, clear old result. Followups preserve it visually until done.
+                if (!context) {
+                    setCurrentResult(null);
+                    setCurrentQuery(queryText);
+                }
+
+                try {
+                    // Call the secure Node.js backend
+                    const resultData = await AIService.analyzeCalculation(queryText, context);
+                    setCurrentResult(resultData);
+                    setCurrentQuery(queryText);
+                } catch (error) {
+                    console.error("Processing failed:", error);
+                    const msg = error.message || "";
+                    if (msg.includes("DEV_ERROR")) {
+                        setDevError(true);
+                    } else {
+                        setErrorMsg(msg || "I couldn't understand that calculation. Try phrasing it as a math problem.");
+                    }
+                } finally {
+                    setIsProcessing(false);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-dark-bg text-gray-100 flex flex-col relative selection:bg-brand-500/30">
+                    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-900/20 blur-[120px]"></div>
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/10 blur-[120px]"></div>
+                    </div>
+
+                    <Header setView={setView} />
+
+                    <main className="flex-1 pt-24 px-4 pb-12 z-10">
+                        {view === 'home' && (
+                            <div className="flex flex-col items-center justify-center min-h-[80vh]">
+                                {!currentResult && !devError && (
+                                    <SmartInputArea onCalculate={(q) => processCalculation(q)} isProcessing={isProcessing} />
+                                )}
+
+                                {currentResult && !devError && (
+                                    <ResultCard
+                                        originalQuery={currentQuery}
+                                        resultData={currentResult}
+                                        onClear={() => { setCurrentResult(null); setCurrentQuery(""); }}
+                                        onFollowUp={(q, context) => processCalculation(q, context)}
+                                        isProcessing={isProcessing}
+                                    />
+                                )}
+
+                                {devError && (
+                                    <div className="mt-8 p-6 bg-red-900/20 border border-red-500/30 rounded-2xl text-left max-w-3xl mx-auto animate-[fadeInUp_0.5s_ease-out]">
+                                        <div className="flex items-center gap-3 text-red-400 font-bold mb-4 text-lg">
+                                            <Icon name="server-crash" size={24} />
+                                            Deployment Configuration Required
+                                        </div>
+                                        <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+                                            This UI is strictly configured for production architecture and prohibits client-side API keys.
+                                            Because you are currently viewing this in a static browser environment, the required Node.js backend is unreachable.
+                                        </p>
+                                        <div className="bg-dark-bg rounded-lg p-5 font-mono text-xs text-gray-400 border border-dark-border shadow-inner">
+                                            <p className="text-white mb-2 font-bold">To run this successfully on your local machine:</p>
+                                            1. Download the generated <span className="text-brand-400">package.json</span>, <span className="text-brand-400">server.js</span>, and <span className="text-brand-400">.env</span> files.<br/>
+                                            2. Add your Gemini API key to the <span className="text-brand-400">.env</span> file.<br/>
+                                            3. Run <span className="text-brand-400">npm install</span> to install Express and MathJS.<br/>
+                                            4. Run <span className="text-brand-400">npm start</span> to start the backend on port 3000.<br/>
+                                            5. Open this <span className="text-brand-400">index.html</span> file in your browser. The app will automatically connect to your secure backend.
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!devError && errorMsg && (
+                                    <div className="mt-8 p-5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-center max-w-lg mx-auto animate-[fadeInUp_0.5s_ease-out]">
+                                        <Icon name="alert-circle" size={24} className="mx-auto mb-2 opacity-80" />
+                                        <p>{errorMsg}</p>
+                                    </div>
+                                )}
+
+                                {isProcessing && !currentResult && (
+                                    <div className="mt-12 flex flex-col items-center text-brand-400 animate-[fadeInUp_0.5s_ease-out]">
+                                        <Icon name="loader-2" size={32} className="animate-spin-slow mb-4" />
+                                        <span>Calculating...</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
-
 </body>
 </html>

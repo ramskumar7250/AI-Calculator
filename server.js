@@ -171,5 +171,5 @@ app.post("/api/ask", calculateHandler);
 // ===============================
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`AI Calculator backend running on port ${PORT}`);
-  console.log("Model: gemini-2.5-flash");
+  console.log("Model: gemini-3.6-flash");
 });

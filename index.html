@@ -722,25 +722,41 @@
 
                         {/* Desktop Navigation - Center Aligned */}
                         <nav className="hidden md:flex flex-1 justify-center items-center gap-8 text-sm font-medium text-gray-400">
-                            <button onClick={() => setView('home')} className={`hover:text-white transition-colors ${view === 'home' ? 'text-white' : ''}`}>Home</button>
+                            <button onClick={() => setView('home')} className={`hover:text-white transition-colors flex items-center gap-2 ${view === 'home' ? 'text-brand-400 font-semibold' : ''}`}>
+                                <Icon name="home" size={16} /> Home
+                            </button>
                             {user && (
                                 <>
-                                    <button onClick={() => setView('library')} className={`hover:text-white transition-colors ${view === 'library' ? 'text-white' : ''}`}>Library</button>
-                                    <button onClick={() => setView('history')} className={`hover:text-white transition-colors ${view === 'history' ? 'text-white' : ''}`}>History</button>
+                                    <button onClick={() => setView('library')} className={`hover:text-white transition-colors flex items-center gap-2 ${view === 'library' ? 'text-brand-400 font-semibold' : ''}`}>
+                                        <Icon name="grid" size={16} /> Library
+                                    </button>
+                                    <button onClick={() => setView('history')} className={`hover:text-white transition-colors flex items-center gap-2 ${view === 'history' ? 'text-brand-400 font-semibold' : ''}`}>
+                                        <Icon name="history" size={16} /> History
+                                    </button>
                                 </>
                             )}
                         </nav>
 
                         <div className="flex items-center gap-3">
                             {user ? (
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xs text-gray-400 hidden sm:block mr-2">ID: {user.uid.substring(0,6)}</span>
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className="hidden sm:flex items-center text-xs text-gray-400 bg-dark-surface/50 px-3 py-1.5 rounded-full border border-dark-border">
+                                        <Icon name="user" size={14} className="mr-1.5" />
+                                        {user.uid.substring(0,6)}
+                                    </div>
+
                                     {/* Desktop Logout - Hidden on Mobile */}
-                                    <button onClick={() => { onLogout(); setView('home'); }} className="hidden md:block text-xs sm:text-sm px-4 py-2 rounded-full border border-dark-border hover:bg-dark-border transition-colors">
+                                    <button onClick={() => { onLogout(); setView('home'); }} className="hidden md:flex items-center gap-2 text-sm px-4 py-2 rounded-full border border-dark-border hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all">
+                                        <Icon name="log-out" size={16} />
                                         Logout
                                     </button>
-                                    {/* Mobile Hamburger Menu - Visible only on Mobile when Authenticated */}
-                                    <button className="md:hidden p-2 text-gray-300 hover:text-white transition-colors rounded-lg bg-dark-surface/50 border border-dark-border" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Toggle Menu">
+
+                                    {/* Premium Mobile Hamburger Menu Button - Fixed explicit sizing for perfect rendering */}
+                                    <button
+                                        className="md:hidden flex items-center justify-center w-10 h-10 text-gray-300 hover:text-white transition-all rounded-xl bg-dark-surface border border-dark-border shadow-sm active:scale-95"
+                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                        aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
+                                    >
                                         <Icon name={isMobileMenuOpen ? "x" : "menu"} size={22} />
                                     </button>
                                 </div>
@@ -754,19 +770,19 @@
 
                     {/* Premium Mobile Menu Dropdown */}
                     {isMobileMenuOpen && user && (
-                        <div className="md:hidden absolute top-16 left-0 right-0 glass-panel border-b border-dark-border shadow-2xl bg-dark-bg/95 backdrop-blur-xl animate-fade-in-up">
-                            <nav className="flex flex-col px-6 py-6 space-y-2">
-                                <button onClick={() => { setView('home'); setIsMobileMenuOpen(false); }} className={`text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'home' ? 'bg-brand-500/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-dark-surface'}`}>
-                                    <Icon name="home" size={20} className={view === 'home' ? 'text-brand-400' : ''} /> Home
+                        <div className="md:hidden absolute top-16 left-0 right-0 w-full glass-panel border-b border-dark-border shadow-2xl bg-[#0a0a0a]/98 backdrop-blur-2xl animate-fade-in-up z-50">
+                            <nav className="flex flex-col p-4 space-y-2">
+                                <button onClick={() => { setView('home'); setIsMobileMenuOpen(false); }} className={`w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'home' ? 'bg-brand-500/10 text-brand-400 font-semibold border border-brand-500/20' : 'text-gray-300 hover:text-white hover:bg-dark-surface border border-transparent'}`}>
+                                    <Icon name="home" size={20} className={view === 'home' ? 'text-brand-400' : 'text-gray-500'} /> Home
                                 </button>
-                                <button onClick={() => { setView('library'); setIsMobileMenuOpen(false); }} className={`text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'library' ? 'bg-brand-500/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-dark-surface'}`}>
-                                    <Icon name="grid" size={20} className={view === 'library' ? 'text-brand-400' : ''} /> Library
+                                <button onClick={() => { setView('library'); setIsMobileMenuOpen(false); }} className={`w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'library' ? 'bg-brand-500/10 text-brand-400 font-semibold border border-brand-500/20' : 'text-gray-300 hover:text-white hover:bg-dark-surface border border-transparent'}`}>
+                                    <Icon name="grid" size={20} className={view === 'library' ? 'text-brand-400' : 'text-gray-500'} /> Library
                                 </button>
-                                <button onClick={() => { setView('history'); setIsMobileMenuOpen(false); }} className={`text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'history' ? 'bg-brand-500/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-dark-surface'}`}>
-                                    <Icon name="history" size={20} className={view === 'history' ? 'text-brand-400' : ''} /> History
+                                <button onClick={() => { setView('history'); setIsMobileMenuOpen(false); }} className={`w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'history' ? 'bg-brand-500/10 text-brand-400 font-semibold border border-brand-500/20' : 'text-gray-300 hover:text-white hover:bg-dark-surface border border-transparent'}`}>
+                                    <Icon name="history" size={20} className={view === 'history' ? 'text-brand-400' : 'text-gray-500'} /> History
                                 </button>
-                                <div className="h-px bg-dark-border my-4 mx-4"></div>
-                                <button onClick={() => { onLogout(); setIsMobileMenuOpen(false); setView('home'); }} className="text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all">
+                                <div className="h-px bg-dark-border my-2 mx-2"></div>
+                                <button onClick={() => { onLogout(); setIsMobileMenuOpen(false); setView('home'); }} className="w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all border border-transparent">
                                     <Icon name="log-out" size={20} /> Logout
                                 </button>
                             </nav>

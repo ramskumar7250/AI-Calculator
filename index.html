@@ -693,11 +693,25 @@
 
         const Header = ({ user, onLogin, onLogout, setView, view }) => {
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const menuRef = useRef(null);
+
+            // Close mobile menu when clicking outside
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (menuRef.current && !menuRef.current.contains(event.target)) {
+                        setIsMobileMenuOpen(false);
+                    }
+                };
+                if (isMobileMenuOpen) {
+                    document.addEventListener('mousedown', handleClickOutside);
+                }
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, [isMobileMenuOpen]);
 
             return (
-                <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border">
+                <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border" ref={menuRef}>
                     <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setView('home'); setIsMobileMenuOpen(false); }}>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center">
                                 <Icon name="sparkles" size={18} className="text-white" />
                             </div>
@@ -706,39 +720,55 @@
                             </span>
                         </div>
 
-                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+                        {/* Desktop Navigation - Center Aligned */}
+                        <nav className="hidden md:flex flex-1 justify-center items-center gap-8 text-sm font-medium text-gray-400">
                             <button onClick={() => setView('home')} className={`hover:text-white transition-colors ${view === 'home' ? 'text-white' : ''}`}>Home</button>
-                            <button onClick={() => setView('library')} className={`hover:text-white transition-colors ${view === 'library' ? 'text-white' : ''}`}>Library</button>
-                            {user && <button onClick={() => setView('history')} className={`hover:text-white transition-colors ${view === 'history' ? 'text-white' : ''}`}>History</button>}
+                            {user && (
+                                <>
+                                    <button onClick={() => setView('library')} className={`hover:text-white transition-colors ${view === 'library' ? 'text-white' : ''}`}>Library</button>
+                                    <button onClick={() => setView('history')} className={`hover:text-white transition-colors ${view === 'history' ? 'text-white' : ''}`}>History</button>
+                                </>
+                            )}
                         </nav>
 
-                        <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex items-center gap-3">
                             {user ? (
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                    <span className="text-xs text-gray-400 hidden sm:block">ID: {user.uid.substring(0,6)}...</span>
-                                    <button onClick={onLogout} className="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full border border-dark-border hover:bg-dark-border transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs text-gray-400 hidden sm:block mr-2">ID: {user.uid.substring(0,6)}</span>
+                                    {/* Desktop Logout - Hidden on Mobile */}
+                                    <button onClick={() => { onLogout(); setView('home'); }} className="hidden md:block text-xs sm:text-sm px-4 py-2 rounded-full border border-dark-border hover:bg-dark-border transition-colors">
                                         Logout
+                                    </button>
+                                    {/* Mobile Hamburger Menu - Visible only on Mobile when Authenticated */}
+                                    <button className="md:hidden p-2 text-gray-300 hover:text-white transition-colors rounded-lg bg-dark-surface/50 border border-dark-border" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Toggle Menu">
+                                        <Icon name={isMobileMenuOpen ? "x" : "menu"} size={22} />
                                     </button>
                                 </div>
                             ) : (
-                                <button onClick={onLogin} className="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors font-medium flex items-center gap-1 sm:gap-2">
+                                <button onClick={onLogin} className="text-sm px-5 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors font-medium flex items-center gap-2 shadow-lg shadow-white/5">
                                     <Icon name="user" size={16} /> <span>Sign In</span>
                                 </button>
                             )}
-
-                            <button className="md:hidden p-2 text-gray-400 hover:text-white ml-1" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                                <Icon name={isMobileMenuOpen ? "x" : "menu"} size={24} />
-                            </button>
                         </div>
                     </div>
 
-                    {/* Mobile Menu Dropdown */}
-                    {isMobileMenuOpen && (
-                        <div className="md:hidden glass-panel border-b border-dark-border animate-fade-in-up">
-                            <nav className="flex flex-col px-4 py-4 space-y-4 text-sm font-medium text-gray-400">
-                                <button onClick={() => { setView('home'); setIsMobileMenuOpen(false); }} className={`text-left hover:text-white ${view === 'home' ? 'text-white' : ''}`}>Home</button>
-                                <button onClick={() => { setView('library'); setIsMobileMenuOpen(false); }} className={`text-left hover:text-white ${view === 'library' ? 'text-white' : ''}`}>Library</button>
-                                {user && <button onClick={() => { setView('history'); setIsMobileMenuOpen(false); }} className={`text-left hover:text-white ${view === 'history' ? 'text-white' : ''}`}>History</button>}
+                    {/* Premium Mobile Menu Dropdown */}
+                    {isMobileMenuOpen && user && (
+                        <div className="md:hidden absolute top-16 left-0 right-0 glass-panel border-b border-dark-border shadow-2xl bg-dark-bg/95 backdrop-blur-xl animate-fade-in-up">
+                            <nav className="flex flex-col px-6 py-6 space-y-2">
+                                <button onClick={() => { setView('home'); setIsMobileMenuOpen(false); }} className={`text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'home' ? 'bg-brand-500/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-dark-surface'}`}>
+                                    <Icon name="home" size={20} className={view === 'home' ? 'text-brand-400' : ''} /> Home
+                                </button>
+                                <button onClick={() => { setView('library'); setIsMobileMenuOpen(false); }} className={`text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'library' ? 'bg-brand-500/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-dark-surface'}`}>
+                                    <Icon name="grid" size={20} className={view === 'library' ? 'text-brand-400' : ''} /> Library
+                                </button>
+                                <button onClick={() => { setView('history'); setIsMobileMenuOpen(false); }} className={`text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'history' ? 'bg-brand-500/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-dark-surface'}`}>
+                                    <Icon name="history" size={20} className={view === 'history' ? 'text-brand-400' : ''} /> History
+                                </button>
+                                <div className="h-px bg-dark-border my-4 mx-4"></div>
+                                <button onClick={() => { onLogout(); setIsMobileMenuOpen(false); setView('home'); }} className="text-left text-lg py-3 flex items-center gap-4 rounded-xl px-4 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all">
+                                    <Icon name="log-out" size={20} /> Logout
+                                </button>
                             </nav>
                         </div>
                     )}

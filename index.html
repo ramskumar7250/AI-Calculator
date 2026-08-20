@@ -751,13 +751,17 @@
                                         Logout
                                     </button>
 
-                                    {/* Premium Mobile Hamburger Menu Button - Fixed explicit sizing for perfect rendering */}
+                                    {}
                                     <button
                                         className="md:hidden flex items-center justify-center w-10 h-10 text-gray-300 hover:text-white transition-all rounded-xl bg-dark-surface border border-dark-border shadow-sm active:scale-95"
                                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                        aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
+                                        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
                                     >
-                                        <Icon name={isMobileMenuOpen ? "x" : "menu"} size={22} />
+                                        <div className="w-5 h-3.5 flex flex-col justify-between items-center relative">
+                                            <span className={`block w-full h-[2px] bg-current rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? 'translate-y-[6px] rotate-45' : ''}`}></span>
+                                            <span className={`block w-full h-[2px] bg-current rounded-full transition-all duration-300 ease-out ${isMobileMenuOpen ? 'opacity-0 scale-75' : 'opacity-100'}`}></span>
+                                            <span className={`block w-full h-[2px] bg-current rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? '-translate-y-[6px] -rotate-45' : ''}`}></span>
+                                        </div>
                                     </button>
                                 </div>
                             ) : (

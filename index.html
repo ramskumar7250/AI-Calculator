@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Calculator — Calculate anything. Ask AI. ← ⭐</title>
+    <title>AI Calculator — Every Calculation. One Intelligent Calculator.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -66,6 +66,10 @@
             font-family: inherit;
         }
 
+        input {
+            font-family: inherit;
+        }
+
         .wrap {
             max-width: 1000px;
             margin: 0 auto;
@@ -97,6 +101,7 @@
             gap: 10px;
             font-weight: 700;
             font-size: 16.5px;
+            flex-shrink: 0;
         }
 
             .logo .mark {
@@ -117,12 +122,12 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         nav.desktop-nav {
             display: flex;
-            gap: 26px;
+            gap: 24px;
             font-size: 13.5px;
         }
 
@@ -172,6 +177,123 @@
                 opacity: 0.5;
                 box-shadow: 0 0 0 6px rgba(14,107,79,0);
             }
+        }
+
+        /* AUTH AREA (desktop) */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-link {
+            background: none;
+            border: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink-soft);
+            cursor: pointer;
+            padding: 8px 4px;
+        }
+
+            .auth-link:hover {
+                color: var(--ink);
+            }
+
+        .auth-primary {
+            background: var(--ink);
+            color: var(--bg);
+            border: none;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 9px 16px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+            .auth-primary:hover {
+                background: #0A1917;
+            }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 5px 14px 5px 6px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(155deg,var(--brass) 0%, var(--brass-deep) 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .user-chip span {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            min-width: 150px;
+            padding: 6px;
+            display: none;
+            z-index: 50;
+        }
+
+            .user-dropdown.open {
+                display: block;
+            }
+
+            .user-dropdown button {
+                width: 100%;
+                text-align: left;
+                background: none;
+                border: none;
+                padding: 10px 12px;
+                font-size: 13.5px;
+                border-radius: 8px;
+                cursor: pointer;
+                color: var(--ink);
+            }
+
+                .user-dropdown button:hover {
+                    background: var(--bg-2);
+                }
+
+        /* Mobile header buttons */
+        .mobile-signin-btn {
+            display: none;
+            background: var(--ink);
+            color: var(--bg);
+            border: none;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 9px 15px;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         .menu-btn {
@@ -232,11 +354,26 @@
             cursor: pointer;
             border-radius: 9px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
             .mobile-menu button:active {
                 background: var(--bg-2);
             }
+
+        .mobile-menu .mm-divider {
+            height: 1px;
+            background: var(--line-soft);
+            margin: 6px 4px;
+        }
+
+        .mobile-menu .mm-user {
+            padding: 10px 12px 6px;
+            font-size: 12px;
+            color: var(--ink-faint);
+        }
 
         /* HERO */
         .hero {
@@ -274,8 +411,8 @@
                 color: var(--brass-deep);
             }
 
-        .hero .tagline-hi {
-            font-size: 18px;
+        .hero .tagline {
+            font-size: 17.5px;
             color: var(--ink-soft);
             margin: 0 0 26px;
             font-weight: 500;
@@ -326,7 +463,7 @@
             outline: none;
             resize: none;
             font-size: 17px;
-            font-family: 'Noto Sans Devanagari','Inter',sans-serif;
+            font-family: 'Inter','Noto Sans Devanagari',sans-serif;
             line-height: 1.55;
             min-height: 56px;
             background: transparent;
@@ -773,11 +910,22 @@
 
         footer {
             border-top: 1px solid var(--line);
-            padding: 28px 0 44px;
-            color: var(--ink-faint);
-            font-size: 13px;
+            padding: 30px 0 44px;
             text-align: center;
         }
+
+            footer .foot-main {
+                font-family: 'Fraunces',serif;
+                font-size: 17px;
+                font-weight: 600;
+                color: var(--ink);
+                margin-bottom: 4px;
+            }
+
+            footer .foot-sub {
+                color: var(--ink-faint);
+                font-size: 12.5px;
+            }
 
         /* TOAST */
         #toast {
@@ -815,13 +963,255 @@
                 color: #8FE3C0;
             }
 
+        /* MODALS */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(10,20,18,0.45);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 90;
+            padding: 20px;
+        }
+
+            .modal-backdrop.open {
+                display: flex;
+                animation: fadeBg 0.2s ease;
+            }
+
+        @keyframes fadeBg {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-card {
+            background: var(--panel);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 400px;
+            padding: 28px 26px;
+            animation: modalPop 0.25s cubic-bezier(.2,.8,.2,1);
+            max-height: 86vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-card.wide {
+            max-width: 520px;
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ink-faint);
+            padding: 4px;
+        }
+
+            .modal-close svg {
+                width: 20px;
+                height: 20px;
+            }
+
+        .modal-sub {
+            color: var(--ink-soft);
+            font-size: 13.5px;
+            margin-bottom: 22px;
+        }
+
+        .field-label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--ink-soft);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .field-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14.5px;
+            margin-bottom: 16px;
+            outline: none;
+            transition: 0.15s;
+            background: var(--bg);
+        }
+
+            .field-input:focus {
+                border-color: var(--brass);
+                background: #fff;
+            }
+
+        .modal-submit {
+            width: 100%;
+            background: var(--ink);
+            color: var(--bg);
+            border: none;
+            border-radius: 11px;
+            padding: 13px;
+            font-weight: 600;
+            font-size: 14.5px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+            .modal-submit:hover {
+                background: #0A1917;
+            }
+
+        .modal-switch {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--ink-soft);
+        }
+
+            .modal-switch button {
+                background: none;
+                border: none;
+                color: var(--emerald);
+                font-weight: 700;
+                cursor: pointer;
+                font-size: 13px;
+                padding: 0;
+            }
+
+        .modal-note {
+            font-size: 11.5px;
+            color: var(--ink-faint);
+            margin-top: 14px;
+            text-align: center;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .history-item {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 13px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+            .history-item .htype {
+                font-size: 10.5px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--emerald);
+                font-weight: 700;
+                margin-bottom: 3px;
+            }
+
+            .history-item .hq {
+                font-size: 13.5px;
+                color: var(--ink-soft);
+                margin-bottom: 4px;
+                line-height: 1.4;
+            }
+
+            .history-item .hans {
+                font-family: 'Space Mono',monospace;
+                font-size: 14.5px;
+                font-weight: 700;
+                color: var(--ink);
+            }
+
+            .history-item .htime {
+                font-size: 11px;
+                color: var(--ink-faint);
+                margin-top: 4px;
+            }
+
+        .history-del {
+            background: none;
+            border: none;
+            color: var(--ink-faint);
+            cursor: pointer;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+
+            .history-del:hover {
+                color: var(--rust);
+            }
+
+            .history-del svg {
+                width: 15px;
+                height: 15px;
+            }
+
+        .history-empty {
+            text-align: center;
+            padding: 30px 10px;
+            color: var(--ink-faint);
+            font-size: 14px;
+        }
+
+        .history-clear {
+            margin-top: 16px;
+            width: 100%;
+            background: none;
+            border: 1px solid var(--line);
+            color: var(--ink-soft);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .history-clear:hover {
+                border-color: var(--rust);
+                color: var(--rust);
+            }
+
         @media(max-width:600px) {
             .hero h1 {
                 font-size: 27px;
             }
 
-            .hero .tagline-hi {
-                font-size: 15.5px;
+            .hero .tagline {
+                font-size: 15px;
             }
 
             .receipt-head .rans {
@@ -832,8 +1222,12 @@
                 display: none;
             }
 
-            .menu-btn {
-                display: flex;
+            .auth-buttons {
+                display: none;
+            }
+
+            .user-chip span {
+                display: none;
             }
 
             .pulse-badge {
@@ -850,6 +1244,12 @@
                 padding-right: 18px;
             }
         }
+
+        @media(min-width:601px) {
+            .mobile-signin-btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -860,40 +1260,60 @@
             <div class="header-right">
                 <nav class="desktop-nav">
                     <button onclick="scrollToCalculators()">Calculators</button>
-                    <button onclick="showHistoryInfo()">History</button>
-                    <button onclick="showPricingInfo()">Pricing</button>
+                    <button onclick="openHistoryModal()">History</button>
                 </nav>
-                <div class="pulse-badge"><span class="pulse-dot"></span>Live demo</div>
-                <button class="menu-btn" id="menuBtn" onclick="toggleMenu()" aria-label="Menu">
+                <div class="pulse-badge"><span class="pulse-dot"></span>AI Online</div>
+
+                <!-- Desktop: logged-out -->
+                <div class="auth-buttons" id="authButtons">
+                    <button class="auth-link" onclick="openAuthModal('signup')">Sign Up</button>
+                    <button class="auth-primary" onclick="openAuthModal('signin')">Sign In</button>
+                </div>
+                <!-- Desktop: logged-in -->
+                <div class="user-chip" id="userChip" style="display:none" onclick="toggleUserDropdown(event)">
+                    <div class="avatar" id="avatarInitial">A</div>
+                    <span id="userName">User</span>
+                    <div class="user-dropdown" id="userDropdown">
+                        <button onclick="signOut()">Sign out</button>
+                    </div>
+                </div>
+
+                <!-- Mobile: logged-out -->
+                <button class="mobile-signin-btn" id="mobileSignInBtn" onclick="openAuthModal('signin')">Sign In</button>
+                <!-- Mobile: logged-in -->
+                <button class="menu-btn" id="menuBtn" onclick="toggleMenu()" aria-label="Menu" style="display:none">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                 </button>
             </div>
         </div>
         <div class="mobile-menu" id="mobileMenu">
+            <div class="mm-user" id="mmUser"></div>
             <button onclick="scrollToCalculators()">📊 Calculators</button>
-            <button onclick="showHistoryInfo()">🕓 History</button>
+            <button onclick="openHistoryModal()">🕓 History</button>
+            <div class="mm-divider"></div>
+            <button onclick="signOut()">🚪 Sign out</button>
         </div>
     </header>
 
     <div class="wrap">
         <section class="hero">
-            <div class="eyebrow"><span class="ln"></span>Working demo · Local Engine Version</div>
+            <div class="eyebrow"><span class="ln"></span>No need to pick a calculator — just ask</div>
             <h1>Every calculation.<br>One <em>intelligent</em> calculator.</h1>
-            <p class="tagline-hi hi">Calculate anything. Ask AI. ← ⭐</p>
+            <p class="tagline">Ask in English, Hindi, or Hinglish — get an instant, step-by-step answer.</p>
 
             <div class="panel">
                 <div class="panel-row">
                     <div class="ai-cue">
                         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2 2M16.4 16.4l2 2M5.6 18.4l2-2M16.4 7.6l2-2" /><circle cx="12" cy="12" r="3.2" /></svg>
                     </div>
-                    <textarea id="q" placeholder="Ask anything… e.g. ₹50,000 × 12%"></textarea>
+                    <textarea id="q" placeholder="Type your question... Example: What is 12% of ₹50,000?"></textarea>
                 </div>
                 <div class="panel-actions">
                     <div class="chip-btns">
-                        <button class="icon-btn" title="Voice input (demo)" onclick="voiceDemo()">
+                        <button class="icon-btn" title="Voice input" onclick="voiceDemo()">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" /><path d="M19 11a7 7 0 01-14 0M12 18v3" /></svg>
                         </button>
-                        <button class="icon-btn" title="Scan problem (demo)" onclick="scanDemo()">
+                        <button class="icon-btn" title="Scan problem" onclick="scanDemo()">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M20 8V6a2 2 0 00-2-2h-2M20 16v2a2 2 0 01-2 2h-2" /><circle cx="12" cy="12" r="3" /></svg>
                         </button>
                     </div>
@@ -919,11 +1339,45 @@
     </div>
 
     <footer>
-        AI Calculator demo — prototype build. <br />
-        (Since external API calls from the browser are blocked for security, this demo uses a robust local pattern-matcher for the provided examples).
+        <div class="foot-main">AI-powered calculations.</div>
+        <div class="foot-sub">Simple questions. Smart answers.</div>
     </footer>
 
     <div id="toast"></div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-backdrop" id="authBackdrop" onclick="if(event.target===this) closeAuthModal()">
+        <div class="modal-card">
+            <div class="modal-head">
+                <div class="modal-title" id="authTitle">Create your account</div>
+                <button class="modal-close" onclick="closeAuthModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="modal-sub" id="authSub">Save your calculations and pick up where you left off.</div>
+            <label class="field-label">Name</label>
+            <input class="field-input" id="authName" type="text" placeholder="Your name">
+            <label class="field-label">Email</label>
+            <input class="field-input" id="authEmail" type="email" placeholder="you@example.com">
+            <button class="modal-submit" id="authSubmitBtn" onclick="submitAuth()">Create account</button>
+            <div class="modal-switch" id="authSwitch"></div>
+            <div class="modal-note">Saved securely on this device.</div>
+        </div>
+    </div>
+
+    <!-- HISTORY MODAL -->
+    <div class="modal-backdrop" id="historyBackdrop" onclick="if(event.target===this) closeHistoryModal()">
+        <div class="modal-card wide">
+            <div class="modal-head">
+                <div class="modal-title">Your History</div>
+                <button class="modal-close" onclick="closeHistoryModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="modal-sub">Every calculation you've run, saved on this device.</div>
+            <div id="historyContent"></div>
+        </div>
+    </div>
 
     <script>
         const ICONS = {
@@ -937,35 +1391,44 @@
         scale: `<path d="M12 3v18M7 7l-4 8a4 4 0 008 0l-4-8zM17 7l-4 8a4 4 0 008 0l-4-8zM5 7h14"/>`,
         heart: `<path d="M20.8 8.6a5.5 5.5 0 00-9.3-3.9L12 5.2l-.5-.5A5.5 5.5 0 002.2 8.6c0 3.5 3.4 6.4 8.6 11.1l1.2 1.1 1.2-1.1c5.2-4.7 8.6-7.6 8.6-11.1z"/>`,
         cal: `<path d="M3 10h18M7 3v4M17 3v4M4 6h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/>`,
-        convert: `<path d="M7 16V4M7 4L4 7M7 4l3 3M17 8v12M17 20l3-3M17 20l-3-3"/>`
+        convert: `<path d="M7 16V4M7 4L4 7M7 4l3 3M17 8v12M17 20l3-3M17 20l-3-3"/>`,
+        briefcase: `<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>`,
+        stats: `<path d="M4 19h16M7 19V9M12 19V5M17 19v-7"/>`
         };
         function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;}
 
-        // short mobile-friendly labels mapped to the full natural-language question
         const EXAMPLES = [
-        {label:"18% GST", query:"₹5000 का 18% कितना होगा?"},
-        {label:"Profit/Loss", query:"10000 me maal kharida aur 12500 me becha, profit kitna hua?"},
-        {label:"EMI Loan", query:"2 lakh loan 10% interest par 5 saal, EMI kitna hoga?"},
-        {label:"Room Area", query:"12 feet lamba aur 10 feet chauda room ka area"},
-        {label:"GST Total", query:"50000 par 18% GST जोड़कर total kitna"},
-        {label:"BMI Check", query:"weight 68 kg height 172 cm BMI"}
+        {label:"18% GST", query:"What is 18% of ₹5000?"},
+        {label:"Profit/Loss", query:"Bought goods for 10000, sold for 12500. What's the profit?"},
+        {label:"EMI Loan", query:"2 lakh loan at 10% interest for 5 years, what's the EMI?"},
+        {label:"Room Area", query:"A room is 12 feet by 10 feet, what's the area?"},
+        {label:"GST Total", query:"Add 18% GST to 50000, what's the total?"},
+        {label:"BMI Check", query:"weight 68 kg height 172 cm, what's my BMI?"}
         ];
 
         const CATEGORIES = [
-        {name:"Percentage", ex:"500 ka 20%", icon:"percent"},
+        {name:"Percentage", ex:"20% of 500", icon:"percent"},
         {name:"Profit & Loss", ex:"cost 800 sell 950, profit?", icon:"coins"},
-        {name:"EMI / Loan", ex:"1 lakh loan 9% 3 saal EMI", icon:"bank"},
-        {name:"Simple Interest", ex:"10000 par 6% 2 saal SI", icon:"chart"},
-        {name:"Compound Interest", ex:"10000 par 8% 3 saal CI", icon:"chart"},
-        {name:"GST", ex:"2000 par 12% GST", icon:"tag"},
-        {name:"Discount", ex:"1200 par 25% discount", icon:"tag"},
+        {name:"EMI / Loan", ex:"1 lakh loan at 9% for 3 years EMI", icon:"bank"},
+        {name:"Simple Interest", ex:"6% simple interest on 10000 for 2 years", icon:"chart"},
+        {name:"Compound Interest", ex:"8% compound interest on 10000 for 3 years", icon:"chart"},
+        {name:"GST", ex:"12% GST on 2000", icon:"tag"},
+        {name:"CGST / SGST", ex:"split 18% GST on 4000 into CGST and SGST", icon:"tag"},
+        {name:"Discount", ex:"25% discount on 1200", icon:"tag"},
         {name:"Area — Rectangle", ex:"15ft x 20ft area", icon:"ruler"},
         {name:"Area — Circle", ex:"radius 7cm circle area", icon:"circle"},
-        {name:"Ratio", ex:"45 aur 60 ka ratio", icon:"scale"},
-        {name:"Average", ex:"70,85,90 ka average", icon:"chart"},
+        {name:"Ratio", ex:"ratio of 45 and 60", icon:"scale"},
+        {name:"Average", ex:"average of 70, 85, 90", icon:"chart"},
+        {name:"Statistics", ex:"mean median mode of 4, 8, 8, 15, 21", icon:"stats"},
         {name:"BMI", ex:"70kg 175cm BMI", icon:"heart"},
-        {name:"Age", ex:"15 aug 1998 se aaj tak age", icon:"cal"},
-        {name:"Unit Convert", ex:"5 km ko miles me convert karo", icon:"convert"}
+        {name:"Age", ex:"age from 15 Aug 1998 to today", icon:"cal"},
+        {name:"Date Difference", ex:"days between 1 Jan 2026 and 15 Mar 2026", icon:"cal"},
+        {name:"Marks Percentage", ex:"scored 432 out of 500, what percentage?", icon:"percent"},
+        {name:"Commission", ex:"5% commission on a sale of 40000", icon:"coins"},
+        {name:"Salary Convert", ex:"monthly salary 45000, what's the annual?", icon:"briefcase"},
+        {name:"Break-Even Point", ex:"fixed cost 50000, price 200 per unit, cost 120 per unit, break-even?", icon:"scale"},
+        {name:"Unit Convert", ex:"convert 5 km to miles", icon:"convert"},
+        {name:"Time Convert", ex:"convert 3 hours to minutes", icon:"convert"}
         ];
 
         function esc(s){ return s.replace(/'/g,"\\'"); }
@@ -983,11 +1446,169 @@
         }
         renderChips();
 
-        /* ---------- Toast (replaces alert(), which mobile browsers/webviews often block or hide) ---------- */
+        /* ============ Local storage layer (falls back to in-memory if unavailable) ============ */
+        const memStore = {};
+        const LS_OK = (function(){ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })();
+        function lsGet(key){
+        if(LS_OK){ try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
+        return memStore[key] !== undefined ? memStore[key] : null;
+        }
+        function lsSet(key, val){
+        if(LS_OK){ try{ localStorage.setItem(key, JSON.stringify(val)); return; }catch(e){} }
+        memStore[key] = val;
+        }
+
+        /* ============ Auth state ============ */
+        let users = lsGet('aic_users') || {};
+        let sessionEmail = lsGet('aic_session');
+        let currentUser = (sessionEmail && users[sessionEmail]) ? users[sessionEmail] : null;
+        let authMode = 'signup';
+
+        function initials(name){
+        return (name||'?').trim().split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+        }
+
+        function updateHeaderAuthUI(){
+        const authButtons = document.getElementById('authButtons');
+        const userChip = document.getElementById('userChip');
+        const mobileSignIn = document.getElementById('mobileSignInBtn');
+        const menuBtn = document.getElementById('menuBtn');
+        const mmUser = document.getElementById('mmUser');
+
+        if(currentUser){
+        authButtons.style.display = 'none';
+        userChip.style.display = 'flex';
+        document.getElementById('avatarInitial').textContent = initials(currentUser.name);
+        document.getElementById('userName').textContent = currentUser.name;
+        mobileSignIn.style.display = 'none';
+        menuBtn.style.display = 'flex';
+        mmUser.textContent = 'Signed in as ' + currentUser.name;
+        } else {
+        authButtons.style.display = 'flex';
+        userChip.style.display = 'none';
+        mobileSignIn.style.display = 'inline-flex';
+        menuBtn.style.display = 'none';
+        document.getElementById('mobileMenu').classList.remove('open');
+        }
+        }
+        updateHeaderAuthUI();
+
+        function toggleUserDropdown(e){
+        e.stopPropagation();
+        document.getElementById('userDropdown').classList.toggle('open');
+        }
+        document.addEventListener('click', ()=> document.getElementById('userDropdown').classList.remove('open'));
+
+        function openAuthModal(mode){
+        authMode = mode;
+        document.getElementById('authTitle').textContent = mode==='signup' ? 'Create your account' : 'Welcome back';
+        document.getElementById('authSub').textContent = mode==='signup' ? 'Save your calculations and pick up where you left off.' : 'Sign in to see your saved calculations.';
+        document.getElementById('authSubmitBtn').textContent = mode==='signup' ? 'Create account' : 'Sign in';
+        document.getElementById('authSwitch').innerHTML = mode==='signup'
+        ? `Already have an account? <button onclick="openAuthModal('signin')">Sign in</button>`
+        : `New here? <button onclick="openAuthModal('signup')">Create an account</button>`;
+        document.getElementById('authBackdrop').classList.add('open');
+        closeMenu();
+        }
+        function closeAuthModal(){
+        document.getElementById('authBackdrop').classList.remove('open');
+        }
+        function submitAuth(){
+        const name = document.getElementById('authName').value.trim();
+        const email = document.getElementById('authEmail').value.trim().toLowerCase();
+        if(!email || !email.includes('@')){ showToast('Please enter a valid email address'); return; }
+        if(!users[email]){
+        users[email] = { name: name || email.split('@')[0], email };
+        } else if(name){
+        users[email].name = name;
+        }
+        lsSet('aic_users', users);
+        lsSet('aic_session', email);
+        currentUser = users[email];
+        closeAuthModal();
+        updateHeaderAuthUI();
+        showToast(`Welcome, ${currentUser.name.split(' ')[0]} ✓`, 'check');
+        document.getElementById('authName').value = '';
+        document.getElementById('authEmail').value = '';
+        }
+        function signOut(){
+        lsSet('aic_session', null);
+        currentUser = null;
+        closeMenu();
+        updateHeaderAuthUI();
+        showToast('Signed out');
+        }
+
+        /* ============ History ============ */
+        function historyKey(){ return 'aic_history_' + (currentUser ? currentUser.email : 'guest'); }
+        function loadHistory(){ return lsGet(historyKey()) || []; }
+        function saveHistoryEntry(entry){
+        if(!currentUser) return;
+        const h = loadHistory();
+        h.unshift(entry);
+        if(h.length > 60) h.length = 60;
+        lsSet(historyKey(), h);
+        }
+        function deleteHistoryEntry(id){
+        const h = loadHistory().filter(e=>e.id !== id);
+        lsSet(historyKey(), h);
+        renderHistoryContent();
+        }
+        function clearHistory(){
+        lsSet(historyKey(), []);
+        renderHistoryContent();
+        }
+        function timeAgo(ts){
+        const s = Math.floor((Date.now()-ts)/1000);
+        if(s<60) return 'just now';
+        if(s<3600) return Math.floor(s/60)+'m ago';
+        if(s<86400) return Math.floor(s/3600)+'h ago';
+        return Math.floor(s/86400)+'d ago';
+        }
+        function renderHistoryContent(){
+        const el = document.getElementById('historyContent');
+        if(!currentUser){
+        el.innerHTML = `<div class="history-empty">Sign in to save and view your calculation history.</div>`;
+        return;
+        }
+        const items = loadHistory();
+        if(!items.length){
+        el.innerHTML = `<div class="history-empty">No calculations yet — try asking something!</div>`;
+        return;
+        }
+        el.innerHTML = `<div class="history-list">${items.map(e=>`
+        <div class="history-item">
+        <div>
+        <div class="htype">${e.type}</div>
+        <div class="hq">${e.query}</div>
+        <div class="hans">${e.answer}</div>
+        <div class="htime">${timeAgo(e.ts)}</div>
+        </div>
+        <button class="history-del" onclick="deleteHistoryEntry('${e.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6"/></svg>
+        </button>
+        </div>`).join('')}</div>
+        <button class="history-clear" onclick="clearHistory()">Clear all history</button>`;
+        }
+        function openHistoryModal(){
+        closeMenu();
+        if(!currentUser){
+        openAuthModal('signin');
+        showToast('Sign in to view your history');
+        return;
+        }
+        renderHistoryContent();
+        document.getElementById('historyBackdrop').classList.add('open');
+        }
+        function closeHistoryModal(){
+        document.getElementById('historyBackdrop').classList.remove('open');
+        }
+
+        /* ---------- Toast ---------- */
         let toastTimer = null;
-        function showToast(msg, icon){
+        function showToast(msg, iconType){
         const t = document.getElementById('toast');
-        const iconSvg = icon === 'check'
+        const iconSvg = iconType === 'check'
         ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`
         : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>`;
         t.innerHTML = iconSvg + `<span>${msg}</span>`;
@@ -997,93 +1618,78 @@
         }
 
         /* ---------- Mobile menu ---------- */
-        function toggleMenu(){
-        document.getElementById('mobileMenu').classList.toggle('open');
-        }
-        function closeMenu(){
-        document.getElementById('mobileMenu').classList.remove('open');
-        }
+        function toggleMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
+        function closeMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
 
-        /* ---------- Nav actions ---------- */
         function scrollToCalculators(){
         closeMenu();
         document.getElementById('catGrid').scrollIntoView({behavior:'smooth', block:'start'});
-        }
-        function showHistoryInfo(){
-        closeMenu();
-        showToast('History feature account/login बनने पर आएगा — अभी demo में उपलब्ध नहीं');
-        }
-        function showPricingInfo(){
-        closeMenu();
-        showToast('Pricing plans जल्द जुड़ेंगे — अभी सब features free demo में हैं');
         }
 
         function fillQ(text){
         document.getElementById('q').value = text;
         runCalculation();
         }
-        function voiceDemo(){
-        showToast('🎤 Voice input production version में speech-to-text से जुड़ेगा');
-        }
-        function scanDemo(){
-        showToast('📷 Camera scan production version में OCR से जुड़ेगा');
-        }
+        function voiceDemo(){ showToast('🎤 Voice input is coming soon'); }
+        function scanDemo(){ showToast('📷 Camera scan is coming soon'); }
 
-        // Local regex-based classification fallback to ensure the demo works without API keys.
+        const SYSTEM_PROMPT = `You are the natural-language understanding layer for a calculator app used by people typing in English, Hindi, or Hinglish.
+
+        Your ONLY job: read the user's question and output ONE JSON object identifying the calculation type and extracting the numeric inputs. You do NOT calculate anything yourself. Output ONLY the JSON object, nothing else — no markdown fences, no explanation text.
+
+        Pick "calculation_type" from exactly this list, and fill "values" with exactly these keys (numbers only, no currency symbols/commas/units in the values):
+
+        - percentage_of: {base, percent}
+        - percentage_change: {from, to}
+        - profit_loss: {cost_price, selling_price}
+        - discount: {price, discount_percent}
+        - gst: {amount, rate, mode}   // mode is "exclusive" (add GST) or "inclusive" (extract GST from total)
+        - cgst_sgst: {amount, rate}   // rate is the TOTAL GST rate to be split equally into CGST + SGST
+        - simple_interest: {principal, rate, time_years}
+        - compound_interest: {principal, rate, time_years, frequency}  // frequency = times compounded per year, default 1
+        - emi: {principal, rate_annual, tenure_months}
+        - area_rectangle: {length, width}
+        - area_square: {side}
+        - area_circle: {radius}
+        - area_triangle: {base, height}
+        - ratio: {a, b}
+        - average: {numbers}   // array
+        - statistics: {numbers}   // array — returns mean, median, mode, range
+        - bmi: {weight_kg, height_cm}
+        - age: {dob, ref_date}  // ISO date strings YYYY-MM-DD. ref_date optional, omit to use today.
+        - date_difference: {date1, date2}  // ISO date strings YYYY-MM-DD
+        - marks_percentage: {obtained, total_marks}
+        - commission: {sale_amount, commission_percent}
+        - salary_convert: {value, from}  // from is "monthly" or "annual"
+        - break_even: {fixed_cost, price_per_unit, variable_cost_per_unit}
+        - unit_convert: {value, from_unit, to_unit, category}  // category one of: length, weight, volume, temperature, time
+        - unknown  // if you genuinely cannot classify it
+
+        Convert units the user gives (feet/lakh/crore/kg etc.) into the plain numeric value the schema expects, e.g. "2 lakh" -> 200000, "12 feet" -> 12 (unit stays feet, don't convert to meters for area).
+
+        Also detect "detected_language": "hi" if the question is written in Hindi (Devanagari script), "en" if it's in plain English, or "hinglish" if it's Hindi words written in Roman/Latin script or mixed English+Hindi (e.g. "10000 ka 20% kitna hoga"). This matters because the app must reply to the user in the same language they asked in.
+
+        If required numbers are missing for the type you picked, still return that calculation_type, fill in what you have, and add a "missing" array of short field-description strings, written in the SAME language as detected_language (Hindi question -> Hindi missing-field text, English question -> English missing-field text, Hinglish question -> Hinglish text), asking for what's needed.
+
+        Respond with strictly valid JSON in this shape:
+        {"calculation_type": "...", "values": {...}, "missing": [], "detected_language": "hi" | "hinglish" | "en"}`;
+
         async function classifyQuestion(question){
-        await sleep(600); // Simulate network delay
-        const q = question.toLowerCase();
-
-        // Extract numbers
-        const nums = (q.match(/[\d.]+/g) || []).map(Number);
-
-        // Basic Regex Pattern Matching for demo
-        if(q.includes('gst')){
-        return { calculation_type: "gst", values: { amount: nums[0] || 50000, rate: nums[1] || 18, mode: q.includes('jodkar') || q.includes('add') ? "exclusive" : "exclusive" }, missing: [] };
-        }
-        if(q.includes('profit') || q.includes('loss') || (q.includes('kharida') && q.includes('becha'))){
-        return { calculation_type: "profit_loss", values: { cost_price: nums[0] || 10000, selling_price: nums[1] || 12500 }, missing: [] };
-        }
-        if(q.includes('emi') || q.includes('loan')){
-        let principal = nums[0] || 2;
-        if(q.includes('lakh')) principal *= 100000;
-        return { calculation_type: "emi", values: { principal: principal, rate_annual: nums[1] || 10, tenure_months: (nums[2] || 5) * 12 }, missing: [] };
-        }
-        if(q.includes('si') || q.includes('simple interest')){
-        return { calculation_type: "simple_interest", values: { principal: nums[0] || 10000, rate: nums[1] || 6, time_years: nums[2] || 2 }, missing: [] };
-        }
-        if(q.includes('ci') || q.includes('compound interest')){
-        return { calculation_type: "compound_interest", values: { principal: nums[0] || 10000, rate: nums[1] || 8, time_years: nums[2] || 3 }, missing: [] };
-        }
-        if(q.includes('discount')){
-        return { calculation_type: "discount", values: { price: nums[0] || 1200, discount_percent: nums[1] || 25 }, missing: [] };
-        }
-        if(q.includes('area') && q.includes('circle')){
-        return { calculation_type: "area_circle", values: { radius: nums[0] || 7 }, missing: [] };
-        }
-        if((q.includes('area') || q.includes('room')) && nums.length >= 2){
-        return { calculation_type: "area_rectangle", values: { length: nums[0] || 12, width: nums[1] || 10 }, missing: [] };
-        }
-        if(q.includes('ratio')){
-        return { calculation_type: "ratio", values: { a: nums[0] || 45, b: nums[1] || 60 }, missing: [] };
-        }
-        if(q.includes('average')){
-        return { calculation_type: "average", values: { numbers: nums.length ? nums : [70,85,90] }, missing: [] };
-        }
-        if(q.includes('bmi')){
-        return { calculation_type: "bmi", values: { weight_kg: nums[0] || 68, height_cm: nums[1] || 172 }, missing: [] };
-        }
-        if(q.includes('convert') || q.includes('km')){
-        return { calculation_type: "unit_convert", values: { value: nums[0] || 5, from_unit: "km", to_unit: "mile", category: "length" }, missing: [] };
-        }
-        if(q.includes('age') && nums.length){
-        return { calculation_type: "age", values: { dob: "1998-08-15", ref_date: new Date().toISOString() }, missing: [] };
-        }
-        if((q.includes('ka') && q.includes('%')) || q.includes('percent')){
-        return { calculation_type: "percentage_of", values: { base: nums[0] || 5000, percent: nums[1] || 18 }, missing: [] };
-        }
-
-        return { calculation_type: "unknown", values: {}, missing: [] };
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: question }]
+        })
+        });
+        const data = await response.json();
+        const textBlock = (data.content || []).find(b => b.type === "text");
+        if(!textBlock) throw new Error("no response");
+        let clean = textBlock.text.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+        return JSON.parse(clean);
         }
 
         function fmtNum(n, decimals){
@@ -1098,33 +1704,36 @@
         return "₹" + Number(n).toLocaleString('en-IN', {maximumFractionDigits:2});
         }
 
-        // ---------- Deterministic calculation engine ----------
-        function compute(type, v){
+        // ---------- Deterministic calculation engine (language-aware explanations) ----------
+        function compute(type, v, lang){
+        const isHi = lang === "hi";
         switch(type){
+
         case "percentage_of": {
         const {base, percent} = v; const result = base * percent / 100;
         return { answer: fmtNum(result), formula: `${fmtNum(base)} × ${fmtNum(percent)} ÷ 100`,
         steps: [`Base value = ${fmtNum(base)}`, `Percent = ${fmtNum(percent)}%`, `${fmtNum(base)} × ${fmtNum(percent)} ÷ 100 = ${fmtNum(result)}`],
-        explanation: `${fmtNum(base)} का ${fmtNum(percent)}% होता है ${fmtNum(result)}।` };
+        explanation: isHi ? `${fmtNum(base)} का ${fmtNum(percent)}% होता है ${fmtNum(result)}।` : `${fmtNum(percent)}% of ${fmtNum(base)} is ${fmtNum(result)}.` };
         }
         case "percentage_change": {
         const {from, to} = v; const diff = to - from; const pct = (diff/from)*100;
-        const dir = diff>=0 ? "increase / बढ़ोतरी" : "decrease / कमी";
         return { answer: `${fmtNum(Math.abs(pct))}% ${diff>=0?'increase':'decrease'}`, formula: `((${fmtNum(to)} − ${fmtNum(from)}) ÷ ${fmtNum(from)}) × 100`,
         steps: [`From = ${fmtNum(from)}, To = ${fmtNum(to)}`, `Difference = ${fmtNum(to)} − ${fmtNum(from)} = ${fmtNum(diff)}`, `Percent change = ${fmtNum(diff)} ÷ ${fmtNum(from)} × 100 = ${fmtNum(pct)}%`],
-        explanation: `यह एक ${dir} है, कुल ${fmtNum(Math.abs(pct))}%।` };
+        explanation: isHi ? `यह एक ${diff>=0?'बढ़ोतरी':'कमी'} है, कुल ${fmtNum(Math.abs(pct))}%।` : `That's a ${fmtNum(Math.abs(pct))}% ${diff>=0?'increase':'decrease'}.` };
         }
         case "profit_loss": {
         const {cost_price, selling_price} = v; const diff = selling_price - cost_price; const pct = (diff/cost_price)*100; const isProfit = diff >= 0;
         return { answer: `${isProfit?'Profit':'Loss'}: ${inr(Math.abs(diff))} (${fmtNum(Math.abs(pct))}%)`, formula: `Selling Price − Cost Price = ${isProfit?'Profit':'Loss'}`,
         steps: [`Cost Price = ${inr(cost_price)}`, `Selling Price = ${inr(selling_price)}`, `${inr(selling_price)} − ${inr(cost_price)} = ${inr(diff)}`, `${isProfit?'Profit':'Loss'} % = ${inr(Math.abs(diff))} ÷ ${inr(cost_price)} × 100 = ${fmtNum(Math.abs(pct))}%`],
-        explanation: isProfit ? `आपको ${inr(diff)} का profit हुआ (${fmtNum(pct)}%)।` : `आपको ${inr(Math.abs(diff))} का loss हुआ (${fmtNum(Math.abs(pct))}%)।` };
+        explanation: isHi
+        ? (isProfit ? `आपको ${inr(diff)} का profit हुआ (${fmtNum(pct)}%)।` : `आपको ${inr(Math.abs(diff))} का loss हुआ (${fmtNum(Math.abs(pct))}%)।`)
+        : (isProfit ? `You made a profit of ${inr(diff)} (${fmtNum(pct)}%).` : `You made a loss of ${inr(Math.abs(diff))} (${fmtNum(Math.abs(pct))}%).`) };
         }
         case "discount": {
         const {price, discount_percent} = v; const discountAmt = price * discount_percent/100; const final = price - discountAmt;
         return { answer: inr(final), formula: `${inr(price)} − (${inr(price)} × ${fmtNum(discount_percent)}%)`,
         steps: [`Marked price = ${inr(price)}`, `Discount = ${fmtNum(discount_percent)}% of ${inr(price)} = ${inr(discountAmt)}`, `Final price = ${inr(price)} − ${inr(discountAmt)} = ${inr(final)}`],
-        explanation: `${fmtNum(discount_percent)}% discount के बाद आपको ${inr(final)} देने होंगे (बचत: ${inr(discountAmt)})।` };
+        explanation: isHi ? `${fmtNum(discount_percent)}% discount के बाद आपको ${inr(final)} देने होंगे (बचत: ${inr(discountAmt)})।` : `After a ${fmtNum(discount_percent)}% discount, you'll pay ${inr(final)} (you save ${inr(discountAmt)}).` };
         }
         case "gst": {
         const {amount, rate, mode} = v;
@@ -1132,26 +1741,32 @@
         const base = amount / (1 + rate/100); const gstAmt = amount - base;
         return { answer: inr(amount), formula: `Base = Total ÷ (1 + GST% ÷ 100)`,
         steps:[`Total (GST included) = ${inr(amount)}`, `Base amount = ${inr(amount)} ÷ (1 + ${fmtNum(rate)}/100) = ${inr(base)}`, `GST amount = ${inr(amount)} − ${inr(base)} = ${inr(gstAmt)}`],
-        explanation: `₹${fmtNum(amount)} में से GST निकाल के base price ${inr(base)} है, और GST का हिस्सा ${inr(gstAmt)} है।` };
+        explanation: isHi ? `₹${fmtNum(amount)} में से GST निकाल के base price ${inr(base)} है, और GST का हिस्सा ${inr(gstAmt)} है।` : `Out of ${inr(amount)}, the base price is ${inr(base)} and the GST portion is ${inr(gstAmt)}.` };
         } else {
         const gstAmt = amount * rate/100; const total = amount + gstAmt;
         return { answer: inr(total), formula: `${inr(amount)} + (${inr(amount)} × ${fmtNum(rate)}% GST)`,
         steps:[`Base amount = ${inr(amount)}`, `GST = ${fmtNum(rate)}% of ${inr(amount)} = ${inr(gstAmt)}`, `Final total = ${inr(amount)} + ${inr(gstAmt)} = ${inr(total)}`],
-        explanation: `${inr(amount)} पर ${fmtNum(rate)}% GST जोड़कर total ${inr(total)} होगा।` };
+        explanation: isHi ? `${inr(amount)} पर ${fmtNum(rate)}% GST जोड़कर total ${inr(total)} होगा।` : `Adding ${fmtNum(rate)}% GST to ${inr(amount)} gives a total of ${inr(total)}.` };
         }
+        }
+        case "cgst_sgst": {
+        const {amount, rate} = v; const half = rate/2; const cgst = amount*half/100; const sgst = amount*half/100; const total = amount + cgst + sgst;
+        return { answer: `CGST ${inr(cgst)} + SGST ${inr(sgst)}`, formula: `CGST = SGST = Amount × (Rate ÷ 2) ÷ 100`,
+        steps: [`Amount = ${inr(amount)}`, `Total GST rate = ${fmtNum(rate)}% → split into ${fmtNum(half)}% + ${fmtNum(half)}%`, `CGST = ${inr(amount)} × ${fmtNum(half)}% = ${inr(cgst)}`, `SGST = ${inr(amount)} × ${fmtNum(half)}% = ${inr(sgst)}`, `Total payable = ${inr(amount)} + ${inr(cgst)} + ${inr(sgst)} = ${inr(total)}`],
+        explanation: isHi ? `${inr(amount)} पर CGST ${inr(cgst)} और SGST ${inr(sgst)} लगेगा, total ${inr(total)} होगा।` : `On ${inr(amount)}, CGST is ${inr(cgst)} and SGST is ${inr(sgst)}, making a total of ${inr(total)}.` };
         }
         case "simple_interest": {
         const {principal, rate, time_years} = v; const si = principal * rate * time_years / 100; const total = principal + si;
         return { answer: inr(si) + " interest", formula: `SI = P × R × T ÷ 100`,
         steps: [`P (Principal) = ${inr(principal)}`, `R (Rate) = ${fmtNum(rate)}% per year`, `T (Time) = ${fmtNum(time_years)} years`, `SI = ${inr(principal)} × ${fmtNum(rate)} × ${fmtNum(time_years)} ÷ 100 = ${inr(si)}`, `Total repayment = ${inr(principal)} + ${inr(si)} = ${inr(total)}`],
-        explanation: `${fmtNum(time_years)} साल में simple interest ${inr(si)} बनेगा, कुल राशि ${inr(total)} होगी।` };
+        explanation: isHi ? `${fmtNum(time_years)} साल में simple interest ${inr(si)} बनेगा, कुल राशि ${inr(total)} होगी।` : `Over ${fmtNum(time_years)} years the simple interest is ${inr(si)}, for a total of ${inr(total)}.` };
         }
         case "compound_interest": {
         const {principal, rate, time_years} = v; const n = v.frequency || 1;
         const amount = principal * Math.pow(1 + (rate/100)/n, n*time_years); const ci = amount - principal;
         return { answer: inr(ci) + " interest", formula: `A = P × (1 + r/n)^(n×t)`,
         steps: [`P = ${inr(principal)}, R = ${fmtNum(rate)}%, T = ${fmtNum(time_years)} yrs, compounded ${n}×/year`, `A = ${inr(principal)} × (1 + ${fmtNum(rate)}/100/${n})^(${n}×${fmtNum(time_years)})`, `A = ${inr(amount)}`, `Compound Interest = A − P = ${inr(amount)} − ${inr(principal)} = ${inr(ci)}`],
-        explanation: `${fmtNum(time_years)} साल बाद कुल राशि ${inr(amount)} होगी, यानी ब्याज ${inr(ci)} जुड़ेगा।` };
+        explanation: isHi ? `${fmtNum(time_years)} साल बाद कुल राशि ${inr(amount)} होगी, यानी ब्याज ${inr(ci)} जुड़ेगा।` : `After ${fmtNum(time_years)} years the total amount will be ${inr(amount)}, meaning ${inr(ci)} in interest.` };
         }
         case "emi": {
         const {principal, rate_annual, tenure_months} = v; const r = rate_annual/12/100; const n = tenure_months;
@@ -1159,46 +1774,64 @@
         const totalPay = emi*n; const totalInt = totalPay - principal;
         return { answer: inr(emi) + " / month", formula: `EMI = P×r×(1+r)^n ÷ ((1+r)^n − 1)`,
         steps: [`P (Loan) = ${inr(principal)}`, `r (monthly rate) = ${fmtNum(rate_annual)}% ÷ 12 = ${fmtNum(r*100,4)}%`, `n (months) = ${n}`, `Monthly EMI = ${inr(emi)}`, `Total repayment = ${inr(emi)} × ${n} = ${inr(totalPay)}`, `Total interest paid = ${inr(totalPay)} − ${inr(principal)} = ${inr(totalInt)}`],
-        explanation: `आपकी monthly EMI ${inr(emi)} होगी, ${n} महीनों में कुल ${inr(totalPay)} चुकाना होगा (ब्याज: ${inr(totalInt)})।` };
+        explanation: isHi ? `आपकी monthly EMI ${inr(emi)} होगी, ${n} महीनों में कुल ${inr(totalPay)} चुकाना होगा (ब्याज: ${inr(totalInt)})।` : `Your monthly EMI will be ${inr(emi)}. Over ${n} months you'll repay ${inr(totalPay)} in total (interest: ${inr(totalInt)}).` };
         }
         case "area_rectangle": {
         const {length, width} = v; const area = length*width; const perimeter = 2*(length+width);
         return { answer: `${fmtNum(area)} sq units`, formula: `Area = Length × Width`,
         steps: [`Length = ${fmtNum(length)}, Width = ${fmtNum(width)}`, `Area = ${fmtNum(length)} × ${fmtNum(width)} = ${fmtNum(area)} sq units`, `Perimeter = 2 × (${fmtNum(length)} + ${fmtNum(width)}) = ${fmtNum(perimeter)} units`],
-        explanation: `Room/plot का area ${fmtNum(area)} square units है (जिस unit में length-width दिए थे, उसी में)।` };
+        explanation: isHi ? `Room/plot का area ${fmtNum(area)} square units है (जिस unit में length-width दिए थे, उसी में)।` : `The area is ${fmtNum(area)} square units (in whichever unit you gave the length and width).` };
         }
         case "area_square": {
         const {side} = v; const area = side*side;
         return { answer: `${fmtNum(area)} sq units`, formula: `Area = Side²`,
-        steps: [`Side = ${fmtNum(side)}`, `Area = ${fmtNum(side)}² = ${fmtNum(area)} sq units`], explanation: `Square का area ${fmtNum(area)} square units है।` };
+        steps: [`Side = ${fmtNum(side)}`, `Area = ${fmtNum(side)}² = ${fmtNum(area)} sq units`],
+        explanation: isHi ? `Square का area ${fmtNum(area)} square units है।` : `The area of the square is ${fmtNum(area)} square units.` };
         }
         case "area_circle": {
         const {radius} = v; const area = Math.PI*radius*radius; const circumference = 2*Math.PI*radius;
         return { answer: `${fmtNum(area)} sq units`, formula: `Area = π × r²`,
         steps: [`Radius = ${fmtNum(radius)}`, `Area = π × ${fmtNum(radius)}² = ${fmtNum(area)} sq units`, `Circumference = 2 × π × ${fmtNum(radius)} = ${fmtNum(circumference)} units`],
-        explanation: `Circle का area ${fmtNum(area)} square units है।` };
+        explanation: isHi ? `Circle का area ${fmtNum(area)} square units है।` : `The area of the circle is ${fmtNum(area)} square units.` };
         }
         case "area_triangle": {
         const {base, height} = v; const area = 0.5*base*height;
         return { answer: `${fmtNum(area)} sq units`, formula: `Area = ½ × Base × Height`,
-        steps: [`Base = ${fmtNum(base)}, Height = ${fmtNum(height)}`, `Area = 0.5 × ${fmtNum(base)} × ${fmtNum(height)} = ${fmtNum(area)} sq units`], explanation: `Triangle का area ${fmtNum(area)} square units है।` };
+        steps: [`Base = ${fmtNum(base)}, Height = ${fmtNum(height)}`, `Area = 0.5 × ${fmtNum(base)} × ${fmtNum(height)} = ${fmtNum(area)} sq units`],
+        explanation: isHi ? `Triangle का area ${fmtNum(area)} square units है।` : `The area of the triangle is ${fmtNum(area)} square units.` };
         }
         case "ratio": {
         const {a,b} = v; const gcd = (x,y)=> y===0?x:gcd(y,x%y); const g = gcd(Math.round(a),Math.round(b)) || 1;
-        return { answer: `${a/g} : ${b/g}`, formula: `GCD से simplify`,
-        steps: [`${fmtNum(a)} : ${fmtNum(b)}`, `GCD (${fmtNum(a)}, ${fmtNum(b)}) = ${g}`, `Simplified ratio = ${a/g} : ${b/g}`], explanation: `${fmtNum(a)} और ${fmtNum(b)} का सरल ratio ${a/g}:${b/g} है।` };
+        return { answer: `${a/g} : ${b/g}`, formula: `Simplify using GCD`,
+        steps: [`${fmtNum(a)} : ${fmtNum(b)}`, `GCD (${fmtNum(a)}, ${fmtNum(b)}) = ${g}`, `Simplified ratio = ${a/g} : ${b/g}`],
+        explanation: isHi ? `${fmtNum(a)} और ${fmtNum(b)} का सरल ratio ${a/g}:${b/g} है।` : `The simplified ratio of ${fmtNum(a)} and ${fmtNum(b)} is ${a/g}:${b/g}.` };
         }
         case "average": {
         const nums = v.numbers; const sum = nums.reduce((s,n)=>s+n,0); const avg = sum/nums.length;
         return { answer: fmtNum(avg), formula: `Average = Sum ÷ Count`,
-        steps: [`Numbers: ${nums.join(', ')}`, `Sum = ${fmtNum(sum)}`, `Count = ${nums.length}`, `Average = ${fmtNum(sum)} ÷ ${nums.length} = ${fmtNum(avg)}`], explanation: `दिए गए numbers का average ${fmtNum(avg)} है।` };
+        steps: [`Numbers: ${nums.join(', ')}`, `Sum = ${fmtNum(sum)}`, `Count = ${nums.length}`, `Average = ${fmtNum(sum)} ÷ ${nums.length} = ${fmtNum(avg)}`],
+        explanation: isHi ? `दिए गए numbers का average ${fmtNum(avg)} है।` : `The average of these numbers is ${fmtNum(avg)}.` };
+        }
+        case "statistics": {
+        const nums = v.numbers.slice().sort((a,b)=>a-b);
+        const sum = nums.reduce((s,n)=>s+n,0); const mean = sum/nums.length;
+        const mid = Math.floor(nums.length/2);
+        const median = nums.length%2 ? nums[mid] : (nums[mid-1]+nums[mid])/2;
+        const freq = {}; nums.forEach(n=> freq[n]=(freq[n]||0)+1);
+        const maxFreq = Math.max(...Object.values(freq));
+        const modes = Object.keys(freq).filter(k=>freq[k]===maxFreq).map(Number);
+        const modeStr = maxFreq===1 ? (isHi?"कोई नहीं":"none") : modes.join(', ');
+        const range = nums[nums.length-1] - nums[0];
+        return { answer: `Mean ${fmtNum(mean)}`, formula: `Mean, Median, Mode, Range`,
+        steps: [`Sorted: ${nums.join(', ')}`, `Mean = ${fmtNum(sum)} ÷ ${nums.length} = ${fmtNum(mean)}`, `Median = ${fmtNum(median)}`, `Mode = ${modeStr}`, `Range = ${fmtNum(nums[nums.length-1])} − ${fmtNum(nums[0])} = ${fmtNum(range)}`],
+        explanation: isHi ? `Mean ${fmtNum(mean)}, Median ${fmtNum(median)}, Mode ${modeStr}, Range ${fmtNum(range)} है।` : `Mean is ${fmtNum(mean)}, median is ${fmtNum(median)}, mode is ${modeStr}, and range is ${fmtNum(range)}.` };
         }
         case "bmi": {
         const {weight_kg, height_cm} = v; const h = height_cm/100; const bmi = weight_kg/(h*h);
         let cat = "Normal"; if(bmi<18.5) cat="Underweight"; else if(bmi>=25 && bmi<30) cat="Overweight"; else if(bmi>=30) cat="Obese";
         return { answer: `${fmtNum(bmi,1)} (${cat})`, formula: `BMI = weight(kg) ÷ height(m)²`,
         steps: [`Weight = ${fmtNum(weight_kg)} kg`, `Height = ${fmtNum(height_cm)} cm = ${fmtNum(h,2)} m`, `BMI = ${fmtNum(weight_kg)} ÷ (${fmtNum(h,2)})² = ${fmtNum(bmi,1)}`],
-        explanation: `⚠️ This is an estimate, not medical advice. Your BMI is ${fmtNum(bmi,1)}, which falls within the "${cat}" range.` };
+        explanation: isHi ? `⚠️ यह estimate है, medical advice नहीं। आपका BMI ${fmtNum(bmi,1)} है, जो "${cat}" range में आता है।` : `⚠️ This is an estimate, not medical advice. Your BMI is ${fmtNum(bmi,1)}, which falls in the "${cat}" range.` };
         }
         case "age": {
         const dob = new Date(v.dob); const ref = v.ref_date ? new Date(v.ref_date) : new Date();
@@ -1206,13 +1839,57 @@
         if(days<0){months--; const prevMonth=new Date(ref.getFullYear(),ref.getMonth(),0); days+=prevMonth.getDate();}
         if(months<0){years--; months+=12;}
         return { answer: `${years} years, ${months} months, ${days} days`, formula: `Reference date − Date of birth`,
-        steps: [`DOB = ${dob.toDateString()}`, `As of = ${ref.toDateString()}`, `Age = ${years} years, ${months} months, ${days} days`], explanation: `आपकी उम्र ${years} साल, ${months} महीने और ${days} दिन है।` };
+        steps: [`DOB = ${dob.toDateString()}`, `As of = ${ref.toDateString()}`, `Age = ${years} years, ${months} months, ${days} days`],
+        explanation: isHi ? `आपकी उम्र ${years} साल, ${months} महीने और ${days} दिन है।` : `Your age is ${years} years, ${months} months, and ${days} days.` };
+        }
+        case "date_difference": {
+        const d1 = new Date(v.date1); const d2 = new Date(v.date2);
+        const diffDays = Math.round(Math.abs(d2-d1)/86400000);
+        const weeks = Math.floor(diffDays/7);
+        return { answer: `${diffDays} days`, formula: `|Date2 − Date1|`,
+        steps: [`Date 1 = ${d1.toDateString()}`, `Date 2 = ${d2.toDateString()}`, `Difference = ${diffDays} days (${weeks} weeks)`],
+        explanation: isHi ? `दोनों तारीखों के बीच ${diffDays} दिन (लगभग ${weeks} हफ्ते) हैं।` : `There are ${diffDays} days (about ${weeks} weeks) between these two dates.` };
+        }
+        case "marks_percentage": {
+        const {obtained, total_marks} = v; const pct = obtained/total_marks*100;
+        return { answer: `${fmtNum(pct)}%`, formula: `(Obtained ÷ Total) × 100`,
+        steps: [`Obtained = ${fmtNum(obtained)}`, `Total = ${fmtNum(total_marks)}`, `${fmtNum(obtained)} ÷ ${fmtNum(total_marks)} × 100 = ${fmtNum(pct)}%`],
+        explanation: isHi ? `आपके marks ${fmtNum(pct)}% बने।` : `Your score is ${fmtNum(pct)}%.` };
+        }
+        case "commission": {
+        const {sale_amount, commission_percent} = v; const comm = sale_amount*commission_percent/100; const net = sale_amount - comm;
+        return { answer: inr(comm), formula: `Commission = Sale × Rate ÷ 100`,
+        steps: [`Sale amount = ${inr(sale_amount)}`, `Commission rate = ${fmtNum(commission_percent)}%`, `Commission = ${inr(sale_amount)} × ${fmtNum(commission_percent)}% = ${inr(comm)}`, `Net after commission = ${inr(net)}`],
+        explanation: isHi ? `Commission ${inr(comm)} बनता है, net amount ${inr(net)} बचेगा।` : `The commission comes to ${inr(comm)}, leaving ${inr(net)} net.` };
+        }
+        case "salary_convert": {
+        const {value, from} = v;
+        if(from === "monthly"){
+        const annual = value*12;
+        return { answer: inr(annual) + " / year", formula: `Annual = Monthly × 12`,
+        steps: [`Monthly salary = ${inr(value)}`, `Annual = ${inr(value)} × 12 = ${inr(annual)}`],
+        explanation: isHi ? `Monthly ${inr(value)} ka annual salary ${inr(annual)} hota hai।` : `A monthly salary of ${inr(value)} equals ${inr(annual)} annually.` };
+        } else {
+        const monthly = value/12;
+        return { answer: inr(monthly) + " / month", formula: `Monthly = Annual ÷ 12`,
+        steps: [`Annual salary = ${inr(value)}`, `Monthly = ${inr(value)} ÷ 12 = ${inr(monthly)}`],
+        explanation: isHi ? `Annual ${inr(value)} ka monthly salary ${inr(monthly)} hota hai।` : `An annual salary of ${inr(value)} equals ${inr(monthly)} per month.` };
+        }
+        }
+        case "break_even": {
+        const {fixed_cost, price_per_unit, variable_cost_per_unit} = v;
+        const contribution = price_per_unit - variable_cost_per_unit;
+        const units = fixed_cost/contribution;
+        return { answer: `${fmtNum(units,0)} units`, formula: `Break-Even = Fixed Cost ÷ (Price − Variable Cost)`,
+        steps: [`Fixed cost = ${inr(fixed_cost)}`, `Price per unit = ${inr(price_per_unit)}`, `Variable cost per unit = ${inr(variable_cost_per_unit)}`, `Contribution per unit = ${inr(contribution)}`, `Break-even = ${inr(fixed_cost)} ÷ ${inr(contribution)} = ${fmtNum(units,0)} units`],
+        explanation: isHi ? `Break-even point ${fmtNum(units,0)} units par aayega — usse pehle loss, uske baad profit।` : `The break-even point is ${fmtNum(units,0)} units — below that it's a loss, above it's profit.` };
         }
         case "unit_convert": {
         const {value, from_unit, to_unit, category} = v;
         const tables = { length: {m:1, km:1000, cm:0.01, mm:0.001, ft:0.3048, feet:0.3048, inch:0.0254, yard:0.9144, mile:1609.34},
         weight: {kg:1, g:0.001, mg:0.000001, tonne:1000, lb:0.453592, pound:0.453592, oz:0.0283495},
-        volume: {l:1, litre:1, ml:0.001, gallon:3.78541} };
+        volume: {l:1, litre:1, ml:0.001, gallon:3.78541},
+        time: {sec:1, second:1, min:60, minute:60, hr:3600, hour:3600, day:86400} };
         let result;
         if(category==="temperature"){
         const toC = (val,u)=> u==='f' ? (val-32)*5/9 : u==='k' ? val-273.15 : val;
@@ -1224,7 +1901,8 @@
         result = value * fu / tu;
         }
         return { answer: `${fmtNum(result)} ${to_unit}`, formula: `Convert via base unit`,
-        steps: [`${fmtNum(value)} ${from_unit} → ${to_unit}`, `Result = ${fmtNum(result)} ${to_unit}`], explanation: `${fmtNum(value)} ${from_unit} बराबर है ${fmtNum(result)} ${to_unit} के।` };
+        steps: [`${fmtNum(value)} ${from_unit} → ${to_unit}`, `Result = ${fmtNum(result)} ${to_unit}`],
+        explanation: isHi ? `${fmtNum(value)} ${from_unit} बराबर है ${fmtNum(result)} ${to_unit} के।` : `${fmtNum(value)} ${from_unit} equals ${fmtNum(result)} ${to_unit}.` };
         }
         default: return null;
         }
@@ -1232,9 +1910,11 @@
 
         function typeLabel(t){
         const labels = { percentage_of:"Percentage", percentage_change:"Percentage Change", profit_loss:"Profit & Loss", discount:"Discount", gst:"GST",
-        simple_interest:"Simple Interest", compound_interest:"Compound Interest", emi:"EMI / Loan", area_rectangle:"Area — Rectangle",
-        area_square:"Area — Square", area_circle:"Area — Circle", area_triangle:"Area — Triangle", ratio:"Ratio", average:"Average",
-        bmi:"BMI", age:"Age", unit_convert:"Unit Conversion" };
+        cgst_sgst:"CGST / SGST", simple_interest:"Simple Interest", compound_interest:"Compound Interest", emi:"EMI / Loan",
+        area_rectangle:"Area — Rectangle", area_square:"Area — Square", area_circle:"Area — Circle", area_triangle:"Area — Triangle",
+        ratio:"Ratio", average:"Average", statistics:"Statistics", bmi:"BMI", age:"Age", date_difference:"Date Difference",
+        marks_percentage:"Marks Percentage", commission:"Commission", salary_convert:"Salary Convert", break_even:"Break-Even Point",
+        unit_convert:"Unit Conversion" };
         return labels[t] || t;
         }
         function valuesPreview(values){
@@ -1264,7 +1944,7 @@
         const zone = document.getElementById('result-zone');
         const think = document.getElementById('think-zone');
         const btn = document.getElementById('calcBtn');
-        if(!q){ zone.innerHTML = `<div class="error-box">Start by asking a question.</div>`; return; }
+        if(!q){ zone.innerHTML = `<div class="error-box">Please type your question first.</div>`; return; }
 
         btn.disabled = true;
         zone.innerHTML = '';
@@ -1276,7 +1956,7 @@
         if(parsed.calculation_type === "unknown"){
         await playTicker([`reading your question…`, `<b>could not classify this question</b>`]);
         think.innerHTML = '';
-        zone.innerHTML = `<div class="error-box">Couldn’t understand. Try with numbers — e.g. ‘20% of 5000’ or ‘800 → 950 profit?".</div>`;
+        zone.innerHTML = `<div class="error-box">Couldn't classify this question yet. Please try again with clear numbers — e.g. "20% of 5000" or "cost 800 sell 950 profit".</div>`;
         btn.disabled = false; return;
         }
 
@@ -1290,7 +1970,7 @@
         lines.push(`<b>missing info, asking user…</b>`);
         await playTicker(lines);
         think.innerHTML = '';
-        zone.innerHTML = `<div class="missing-box"><b>More information needed:</b><br>${parsed.missing.join('<br>')}</div>`;
+        zone.innerHTML = `<div class="missing-box"><b>One more detail needed:</b><br>${parsed.missing.join('<br>')}</div>`;
         btn.disabled = false; return;
         }
 
@@ -1298,11 +1978,15 @@
         lines.push(`<b>verified ✓</b>`);
         await playTicker(lines);
 
-        const out = compute(parsed.calculation_type, parsed.values);
+        const out = compute(parsed.calculation_type, parsed.values, parsed.detected_language);
         think.innerHTML = '';
         if(!out){
-        zone.innerHTML = `<div class="error-box">यह calculation type अभी demo में नहीं जुड़ा है।</div>`;
+        zone.innerHTML = `<div class="error-box">This calculation type isn't wired up yet.</div>`;
         btn.disabled = false; return;
+        }
+
+        if(currentUser){
+        saveHistoryEntry({ id: 'h'+Date.now(), type: typeLabel(parsed.calculation_type), query: q, answer: out.answer, ts: Date.now() });
         }
 
         zone.innerHTML = `
@@ -1335,7 +2019,7 @@
         document.getElementById('followupBtn').onclick = askFollowup;
         }catch(err){
         think.innerHTML = '';
-        zone.innerHTML = `<div class="error-box">Something went wrong. Please try again.<br><span style="font-size:12px;color:#999">${err.message}</span></div>`;
+        zone.innerHTML = `<div class="error-box">Something went wrong, please try again.<br><span style="font-size:12px;color:#999">${err.message}</span></div>`;
         }
         btn.disabled = false;
         }
@@ -1353,7 +2037,7 @@
         document.body.removeChild(ta);
         showToast('Result copied ✓', 'check');
         }catch(e2){
-        showToast('Copy failed — please select the result manually');
+        showToast("Couldn't copy automatically — please select the result manually");
         }
         }
         }
@@ -1362,14 +2046,13 @@
         const q = document.getElementById('q');
         q.scrollIntoView({behavior:'smooth', block:'center'});
         setTimeout(()=> q.focus(), 250);
-        showToast('Ask your follow-up question here…');
+        showToast('Type your follow-up question here');
         }
 
         document.getElementById('q').addEventListener('keydown', function(e){
         if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runCalculation(); }
         });
 
-        // close mobile menu if user taps outside it
         document.addEventListener('click', function(e){
         const menu = document.getElementById('mobileMenu');
         const btn = document.getElementById('menuBtn');

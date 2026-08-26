@@ -1,1458 +1,1383 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Calculator - Every Calculation. One Intelligent Calculator.</title>
-
-    <!-- React & ReactDOM -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-        darkMode: 'class',
-        theme: {
-        extend: {
-        fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        },
-        colors: {
-        brand: {
-        50: '#f0fdfa',
-        100: '#ccfbf1',
-        400: '#2dd4bf',
-        500: '#14b8a6',
-        600: '#0d9488',
-        900: '#134e4a',
-        },
-        dark: {
-        bg: '#0a0a0a',
-        surface: '#171717',
-        border: '#262626'
-        }
-        },
-        animation: {
-        'gradient-x': 'gradient-x 3s ease infinite',
-        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        },
-        keyframes: {
-        'gradient-x': {
-        '0%, 100%': {
-        'background-size': '200% 200%',
-        'background-position': 'left center'
-        },
-        '50%': {
-        'background-size': '200% 200%',
-        'background-position': 'right center'
-        },
-        },
-        fadeInUp: {
-        '0%': { opacity: '0', transform: 'translateY(20px)' },
-        '100%': { opacity: '1', transform: 'translateY(0)' },
-        }
-        }
-        }
-        }
-        }
-    </script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Math.js for Deterministic Calculation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-
+    <title>AI Calculator — हर सवाल का हिसाब, AI के साथ।</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #f5f5f5;
+        :root {
+            --bg: #F0F3EC;
+            --bg-2: #E6EAE0;
+            --panel: #FFFFFF;
+            --ink: #122420;
+            --ink-soft: #4E5F5A;
+            --ink-faint: #8A968F;
+            --brass: #C7893F;
+            --brass-deep: #A66F2C;
+            --emerald: #0E6B4F;
+            --emerald-soft: #E1F1E8;
+            --rust: #AE4E33;
+            --line: #D8DED2;
+            --line-soft: #E5EADF;
+            --shadow-sm: 0 1px 2px rgba(18,36,32,0.05);
+            --shadow-md: 0 10px 30px rgba(18,36,32,0.08), 0 2px 6px rgba(18,36,32,0.05);
+            --shadow-lg: 0 24px 60px rgba(18,36,32,0.14), 0 6px 16px rgba(18,36,32,0.06);
+            --radius: 18px;
         }
 
-        .glass-panel {
-            background: rgba(23, 23, 23, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .ai-gradient-text {
-            background: linear-gradient(to right, #2dd4bf, #3b82f6, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .ai-gradient-bg {
-            background: linear-gradient(135deg, rgba(45,212,191,0.1), rgba(59,130,246,0.1), rgba(168,85,247,0.1));
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #262626;
-            border-radius: 4px;
-        }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: #404040;
-            }
-
-        .loader {
-            width: 48px;
-            height: 48px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            display: inline-block;
-            position: relative;
+        * {
             box-sizing: border-box;
-            animation: rotation 1s linear infinite;
         }
 
-            .loader::after {
-                content: '';
-                box-sizing: border-box;
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            background-image: radial-gradient(circle at 15% 0%, rgba(199,137,63,0.07), transparent 45%), radial-gradient(circle at 100% 30%, rgba(14,107,79,0.06), transparent 40%);
+            color: var(--ink);
+            font-family: 'Inter','Noto Sans Devanagari',sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hi {
+            font-family: 'Noto Sans Devanagari','Inter',sans-serif;
+        }
+
+        h1, h2, h3, .display {
+            font-family: 'Fraunces','Noto Sans Devanagari',serif;
+            letter-spacing: -0.015em;
+        }
+
+        .mono {
+            font-family: 'Space Mono',monospace;
+        }
+
+        ::selection {
+            background: var(--brass);
+            color: #fff;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 22px;
+        }
+
+        /* HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(240,243,236,0.92);
+            backdrop-filter: blur(10px) saturate(1.2);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 22px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 16.5px;
+        }
+
+            .logo .mark {
+                width: 32px;
+                height: 32px;
+                border-radius: 9px;
+                background: linear-gradient(155deg,var(--ink) 0%, #0A1917 100%);
+                color: var(--bg);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Space Mono',monospace;
+                font-size: 12px;
+                font-weight: 700;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+            }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        nav.desktop-nav {
+            display: flex;
+            gap: 26px;
+            font-size: 13.5px;
+        }
+
+            nav.desktop-nav button {
+                background: none;
+                border: none;
+                color: var(--ink-soft);
+                font-size: 13.5px;
+                cursor: pointer;
+                padding: 0;
+                font-weight: 500;
+                transition: 0.15s;
+            }
+
+                nav.desktop-nav button:hover {
+                    color: var(--emerald);
+                }
+
+        .pulse-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            color: var(--emerald);
+            background: var(--emerald-soft);
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            animation: pulse 1.6s infinite;
+        }
+
+        @keyframes pulse {
+            0%,100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(14,107,79,0.4);
+            }
+
+            70% {
+                opacity: 0.5;
+                box-shadow: 0 0 0 6px rgba(14,107,79,0);
+            }
+        }
+
+        .menu-btn {
+            display: none;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+            .menu-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+            box-shadow: var(--shadow-md);
+            flex-direction: column;
+            padding: 8px;
+        }
+
+            .mobile-menu.open {
+                display: flex;
+                animation: menuDrop 0.2s ease;
+            }
+
+        @keyframes menuDrop {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mobile-menu button {
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 13px 12px;
+            font-size: 15px;
+            color: var(--ink);
+            cursor: pointer;
+            border-radius: 9px;
+            font-weight: 500;
+        }
+
+            .mobile-menu button:active {
+                background: var(--bg-2);
+            }
+
+        /* HERO */
+        .hero {
+            padding: 44px 0 24px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--brass-deep);
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+            .eyebrow .ln {
+                width: 22px;
+                height: 1px;
+                background: var(--brass-deep);
+            }
+
+        .hero h1 {
+            font-size: 38px;
+            line-height: 1.1;
+            margin: 0 0 12px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+            .hero h1 em {
+                font-style: normal;
+                color: var(--brass-deep);
+            }
+
+        .hero .tagline-hi {
+            font-size: 18px;
+            color: var(--ink-soft);
+            margin: 0 0 26px;
+            font-weight: 500;
+        }
+
+        /* INPUT PANEL */
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 8px;
+            transition: box-shadow 0.25s, border-color 0.25s;
+        }
+
+            .panel:focus-within {
+                box-shadow: var(--shadow-lg);
+                border-color: var(--brass);
+            }
+
+        .panel-row {
+            display: flex;
+            gap: 10px;
+            padding: 14px 16px 6px;
+        }
+
+        .ai-cue {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            background: linear-gradient(155deg,var(--emerald) 0%, #0A4F3A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .ai-cue svg {
+                width: 14px;
+                height: 14px;
+                stroke: #fff;
+            }
+
+        textarea#q {
+            flex: 1;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 17px;
+            font-family: 'Noto Sans Devanagari','Inter',sans-serif;
+            line-height: 1.55;
+            min-height: 56px;
+            background: transparent;
+            color: var(--ink);
+            font-weight: 500;
+            width: 100%;
+        }
+
+            textarea#q::placeholder {
+                color: var(--ink-faint);
+                font-weight: 400;
+            }
+
+        .panel-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px 12px;
+            border-top: 1px dashed var(--line-soft);
+            margin-top: 6px;
+        }
+
+        .chip-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            border: 1px solid var(--line);
+            background: var(--bg);
+            border-radius: 10px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--ink-soft);
+            transition: 0.15s;
+            flex-shrink: 0;
+        }
+
+            .icon-btn:hover {
+                border-color: var(--ink);
+                color: var(--ink);
+            }
+
+            .icon-btn:active {
+                transform: scale(0.94);
+                background: var(--emerald-soft);
+                color: var(--emerald);
+            }
+
+        .calc-btn {
+            background: var(--ink);
+            color: var(--bg);
+            border: none;
+            border-radius: 11px;
+            padding: 12px 22px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.18s;
+            box-shadow: 0 6px 16px rgba(18,36,32,0.18);
+            white-space: nowrap;
+        }
+
+            .calc-btn:hover {
+                background: #0A1917;
+                transform: translateY(-1px);
+            }
+
+            .calc-btn:active {
+                transform: translateY(0) scale(0.98);
+            }
+
+            .calc-btn:disabled {
+                opacity: 0.5;
+                cursor: default;
+                transform: none;
+            }
+
+            .calc-btn svg {
+                width: 15px;
+                height: 15px;
+                flex-shrink: 0;
+            }
+
+        .examples-label {
+            font-size: 11.5px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink-faint);
+            font-weight: 700;
+            margin: 20px 0 10px;
+        }
+
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .ex-chip {
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--ink-soft);
+            cursor: pointer;
+            transition: 0.15s;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+            .ex-chip:hover {
+                border-color: var(--emerald);
+                color: var(--emerald);
+                background: var(--emerald-soft);
+            }
+
+            .ex-chip:active {
+                transform: scale(0.96);
+            }
+
+        /* THINKING TICKER */
+        #think-zone {
+            margin-top: 20px;
+        }
+
+        .ticker {
+            background: var(--ink);
+            border-radius: 14px;
+            padding: 16px 18px;
+            font-family: 'Space Mono',monospace;
+            font-size: 12.5px;
+            color: #B9C7C0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .ticker-line {
+            display: flex;
+            gap: 10px;
+            padding: 4px 0;
+            opacity: 0;
+            animation: tickIn 0.35s ease forwards;
+        }
+
+            .ticker-line .arrow {
+                color: var(--brass);
+                flex-shrink: 0;
+            }
+
+            .ticker-line b {
+                color: #fff;
+                font-weight: 700;
+            }
+
+        @keyframes tickIn {
+            from {
+                opacity: 0;
+                transform: translateX(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* RESULT ZONE */
+        #result-zone {
+            margin: 20px 0 40px;
+        }
+
+        .receipt-wrap {
+            position: relative;
+            animation: dropIn 0.4s cubic-bezier(.2,.8,.2,1);
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .receipt {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .receipt-head {
+            background: linear-gradient(155deg,var(--ink) 0%, #0A1917 100%);
+            color: var(--bg);
+            padding: 24px 26px 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .receipt-head::after {
+                content: "";
                 position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                width: 56px;
-                height: 56px;
-                border-radius: 50%;
-                border: 3px solid transparent;
-                border-bottom-color: #2dd4bf;
+                top: -40%;
+                right: -10%;
+                width: 220px;
+                height: 220px;
+                background: radial-gradient(circle, rgba(199,137,63,0.18), transparent 70%);
             }
 
-        @keyframes rotation {
-            0% {
-                transform: rotate(0deg);
+            .receipt-head .rtype {
+                font-size: 11.5px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #8FA69C;
+                margin-bottom: 8px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
 
-            100% {
-                transform: rotate(360deg);
+                .receipt-head .rtype .dot-verify {
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: var(--emerald);
+                }
+
+            .receipt-head .rans {
+                font-family: 'Fraunces',serif;
+                font-size: 34px;
+                font-weight: 600;
+                position: relative;
+                z-index: 1;
+                word-break: break-word;
+            }
+
+        .receipt-body {
+            padding: 22px 26px;
+        }
+
+        .step-row {
+            display: flex;
+            gap: 14px;
+            padding: 11px 0;
+            border-bottom: 1px dashed var(--line-soft);
+            font-size: 14.5px;
+            align-items: baseline;
+        }
+
+            .step-row:last-child {
+                border-bottom: none;
+            }
+
+        .step-num {
+            font-family: 'Space Mono',monospace;
+            font-size: 11px;
+            color: var(--brass-deep);
+            min-width: 20px;
+            padding-top: 2px;
+            font-weight: 700;
+        }
+
+        .step-text {
+            color: var(--ink-soft);
+            flex: 1;
+            line-height: 1.5;
+        }
+
+            .step-text b {
+                color: var(--ink);
+                font-weight: 600;
+            }
+
+        .formula-box {
+            margin-top: 16px;
+            background: var(--bg-2);
+            border-radius: 11px;
+            padding: 15px 17px;
+            font-family: 'Space Mono',monospace;
+            font-size: 13.5px;
+            color: var(--ink);
+            border: 1px solid var(--line-soft);
+            overflow-x: auto;
+        }
+
+        .explain {
+            margin-top: 16px;
+            font-size: 14.5px;
+            color: var(--ink);
+            line-height: 1.65;
+            background: var(--emerald-soft);
+            border-left: 3px solid var(--emerald);
+            padding: 14px 16px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .receipt-actions {
+            display: flex;
+            gap: 8px;
+            padding: 16px 26px;
+            border-top: 1px solid var(--line);
+            flex-wrap: wrap;
+            background: var(--bg);
+        }
+
+        .mini-btn {
+            font-size: 13px;
+            padding: 9px 14px;
+            border-radius: 9px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--ink-soft);
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .mini-btn:hover {
+                border-color: var(--ink);
+                color: var(--ink);
+            }
+
+            .mini-btn:active {
+                transform: scale(0.96);
+                background: var(--bg-2);
+            }
+
+            .mini-btn svg {
+                width: 13px;
+                height: 13px;
+                flex-shrink: 0;
+            }
+
+        .tear {
+            height: 12px;
+            background: linear-gradient(-45deg, transparent 6px, var(--bg) 6px) 0 4px, linear-gradient(45deg, transparent 6px, var(--bg) 6px) 0 4px;
+            background-size: 16px 16px;
+            background-repeat: repeat-x;
+        }
+
+        .missing-box, .error-box {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            color: var(--ink);
+            font-size: 14.5px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--brass);
+        }
+
+        .error-box {
+            border-left-color: var(--rust);
+        }
+
+        .missing-box b {
+            color: var(--brass-deep);
+        }
+
+        /* CATEGORY GRID */
+        .section-title {
+            font-size: 21px;
+            margin: 0 0 4px;
+            font-weight: 600;
+        }
+
+        .section-sub {
+            color: var(--ink-soft);
+            font-size: 14px;
+            margin: 0 0 20px;
+        }
+
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(160px,1fr));
+            gap: 11px;
+            margin-bottom: 48px;
+            scroll-margin-top: 80px;
+        }
+
+        .cat-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            cursor: pointer;
+            transition: 0.18s;
+        }
+
+            .cat-card:hover {
+                border-color: var(--emerald);
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-sm);
+            }
+
+            .cat-card:active {
+                transform: translateY(0) scale(0.98);
+            }
+
+            .cat-card .cicon {
+                width: 30px;
+                height: 30px;
+                border-radius: 8px;
+                background: var(--bg-2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 10px;
+                color: var(--emerald);
+            }
+
+                .cat-card .cicon svg {
+                    width: 16px;
+                    height: 16px;
+                }
+
+            .cat-card .cname {
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 3px;
+            }
+
+            .cat-card .cex {
+                font-size: 12px;
+                color: var(--ink-soft);
+            }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 28px 0 44px;
+            color: var(--ink-faint);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* TOAST */
+        #toast {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--ink);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+            z-index: 100;
+            max-width: 90vw;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            #toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            #toast svg {
+                width: 15px;
+                height: 15px;
+                flex-shrink: 0;
+                color: #8FE3C0;
+            }
+
+        @media(max-width:600px) {
+            .hero h1 {
+                font-size: 27px;
+            }
+
+            .hero .tagline-hi {
+                font-size: 15.5px;
+            }
+
+            .receipt-head .rans {
+                font-size: 26px;
+            }
+
+            nav.desktop-nav {
+                display: none;
+            }
+
+            .menu-btn {
+                display: flex;
+            }
+
+            .pulse-badge {
+                display: none;
+            }
+
+            .ex-chip {
+                font-size: 12.5px;
+                padding: 7px 12px;
+            }
+
+            .receipt-body, .receipt-head, .receipt-actions {
+                padding-left: 18px;
+                padding-right: 18px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="module" data-plugins="transform-modules-umd">
-        // Global Environment Variables
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ai-calculator-default';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    <header>
+        <div class="header-inner">
+            <div class="logo"><span class="mark">AI</span> AI Calculator</div>
+            <div class="header-right">
+                <nav class="desktop-nav">
+                    <button onclick="scrollToCalculators()">Calculators</button>
+                    <button onclick="showHistoryInfo()">History</button>
+                    <button onclick="showPricingInfo()">Pricing</button>
+                </nav>
+                <div class="pulse-badge"><span class="pulse-dot"></span>Live demo</div>
+                <button class="menu-btn" id="menuBtn" onclick="toggleMenu()" aria-label="Menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                </button>
+            </div>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <button onclick="scrollToCalculators()">📊 Calculators</button>
+            <button onclick="showHistoryInfo()">🕓 History</button>
+            <button onclick="showPricingInfo()">💎 Pricing</button>
+        </div>
+    </header>
 
-        // This fully functional local backend replaces the broken Firebase config.
-        // It provides real user registration, login validation, and history storage out-of-the-box.
-        const initLocalBackend = () => {
-        if (!localStorage.getItem('ai_calc_users')) localStorage.setItem('ai_calc_users', JSON.stringify({}));
-        if (!localStorage.getItem('ai_calc_db')) localStorage.setItem('ai_calc_db', JSON.stringify({}));
-        };
-        initLocalBackend();
+    <div class="wrap">
+        <section class="hero">
+            <div class="eyebrow"><span class="ln"></span>Working demo · Local Engine Version</div>
+            <h1>Every calculation.<br>One <em>intelligent</em> calculator.</h1>
+            <p class="tagline-hi hi">हर सवाल का हिसाब, AI के साथ।</p>
 
-        const LocalAuth = {
-        createUserWithEmailAndPassword: async (auth, email, password) => {
-        const users = JSON.parse(localStorage.getItem('ai_calc_users'));
-        if (Object.values(users).some(u => u.email === email)) throw new Error("Email already in use.");
-        const uid = 'usr_' + Math.random().toString(36).substr(2, 9);
-        users[uid] = { uid, email, password };
-        localStorage.setItem('ai_calc_users', JSON.stringify(users));
-        localStorage.setItem('ai_calc_session', uid);
-        window.dispatchEvent(new Event('auth-state-change'));
-        return { user: users[uid] };
-        },
-        signInWithEmailAndPassword: async (auth, email, password) => {
-        const users = JSON.parse(localStorage.getItem('ai_calc_users'));
-        const user = Object.values(users).find(u => u.email === email && u.password === password);
-        if (!user) throw new Error("Invalid email or password.");
-        localStorage.setItem('ai_calc_session', user.uid);
-        window.dispatchEvent(new Event('auth-state-change'));
-        return { user };
-        },
-        signInAnonymously: async (auth) => {
-        const uid = 'anon_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('ai_calc_session', uid);
-        window.dispatchEvent(new Event('auth-state-change'));
-        return { user: { uid, isAnonymous: true } };
-        },
-        signOut: async (auth) => {
-        localStorage.removeItem('ai_calc_session');
-        window.dispatchEvent(new Event('auth-state-change'));
-        },
-        onAuthStateChanged: (auth, callback) => {
-        const checkState = () => {
-        const uid = localStorage.getItem('ai_calc_session');
-        if (uid) {
-        const users = JSON.parse(localStorage.getItem('ai_calc_users'));
-        callback(users[uid] || { uid, isAnonymous: true });
-        } else {
-        callback(null);
-        }
-        };
-        window.addEventListener('auth-state-change', checkState);
-        checkState();
-        return () => window.removeEventListener('auth-state-change', checkState);
-        },
-        signInWithCustomToken: async () => {}
-        };
-
-        const LocalDB = {
-        collection: (db, ...paths) => paths.join('/'),
-        addDoc: async (path, data) => {
-        const db = JSON.parse(localStorage.getItem('ai_calc_db'));
-        if (!db[path]) db[path] = {};
-        const id = 'doc_' + Math.random().toString(36).substr(2, 9);
-
-        const docData = { ...data };
-        if (docData.timestamp === 'SERVER_TIME') {
-        docData.timestamp = { toDate: () => new Date() };
-        }
-
-        db[path][id] = docData;
-        localStorage.setItem('ai_calc_db', JSON.stringify(db));
-        window.dispatchEvent(new Event('db-update-' + path));
-        return { id };
-        },
-        serverTimestamp: () => 'SERVER_TIME',
-        query: (path, ...args) => ({ path, args }),
-        orderBy: (field, direction) => ({ field, direction }),
-        onSnapshot: (queryObj, callback) => {
-        const path = queryObj.path;
-        const trigger = () => {
-        const db = JSON.parse(localStorage.getItem('ai_calc_db') || '{}');
-        const collectionData = db[path] || {};
-        let items = Object.keys(collectionData).map(id => ({
-        id,
-        data: () => collectionData[id]
-        }));
-
-        const sortConfig = queryObj.args.find(a => a.field);
-        if (sortConfig) {
-        items.sort((a, b) => {
-        const valA = a.data()[sortConfig.field]?.toDate ? a.data()[sortConfig.field].toDate().getTime() : 0;
-        const valB = b.data()[sortConfig.field]?.toDate ? b.data()[sortConfig.field].toDate().getTime() : 0;
-        return sortConfig.direction === 'desc' ? valB - valA : valA - valB;
-        });
-        }
-
-        callback({ forEach: (fn) => items.forEach(fn) });
-        };
-        window.addEventListener('db-update-' + path, trigger);
-        trigger();
-        return () => window.removeEventListener('db-update-' + path, trigger);
-        },
-        doc: () => {},
-        deleteDoc: () => {}
-        };
-
-        // Export the working local services back to the React app
-        window.FirebaseServices = {
-        db: true, // Mark as valid to pass the checks
-        auth: true,
-        initialAuthToken,
-        appId,
-        ...LocalAuth,
-        ...LocalDB
-        };
-    </script>
-
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo, useCallback } = React;
-
-        // The API key is securely injected by the platform runtime via a proxy. Leave as empty string.
-        const geminiApiKey = "";
-
-        // --- Audio Utils for TTS ---
-        const writeString = (view, offset, string) => {
-            for (let i = 0; i < string.length; i++) {
-                view.setUint8(offset + i, string.charCodeAt(i));
-            }
-        };
-
-        const base64ToArrayBuffer = (base64) => {
-            const binaryString = window.atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
-        };
-
-        const pcmToWav = (pcm16, sampleRate) => {
-            const numChannels = 1;
-            const byteRate = sampleRate * numChannels * 2;
-            const blockAlign = numChannels * 2;
-            const dataSize = pcm16.length * 2;
-            const buffer = new ArrayBuffer(44 + dataSize);
-            const view = new DataView(buffer);
-
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 36 + dataSize, true);
-            writeString(view, 8, 'WAVE');
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true); // PCM
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, byteRate, true);
-            view.setUint16(32, blockAlign, true);
-            view.setUint16(34, 16, true); // bits per sample
-            writeString(view, 36, 'data');
-            view.setUint32(40, dataSize, true);
-
-            let offset = 44;
-            for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true);
-            }
-
-            return new Blob([view], { type: 'audio/wav' });
-        };
-
-        // --- Icons Component Helper ---
-        const Icon = ({ name, size = 24, className = "" }) => {
-            const iconRef = useRef(null);
-            useEffect(() => {
-                if (iconRef.current && window.lucide && window.lucide.icons[name]) {
-                    iconRef.current.innerHTML = '';
-                    const iconElement = window.lucide.icons[name].toSvg({ width: size, height: size, class: className });
-                    iconRef.current.innerHTML = iconElement;
-                }
-            }, [name, size, className]);
-            return <span ref={iconRef} className="inline-flex items-center justify-center" />;
-        };
-
-        // --- Services ---
-        const aiSystemPrompt = `You are the brain of an intelligent AI Calculator. Your job is to understand natural language math, financial, and geometric problems in English, Hindi, or Hinglish.
-
-        If the user asks about currency conversion (e.g. USD to INR) or real-time financial data (current gold rate, stock price, etc.), you have access to Google Search. Use the live data to formulate the expression. For example, if 1 USD = 83.5 INR, and user asks for 500 USD in INR, output: "500 * 83.5".
-
-        You must extract the intent, the numbers, and construct a mathematical expression that can be evaluated safely using standard math operators (+, -, *, /, ^, %).
-        DO NOT calculate the final answer yourself unless absolutely necessary. Rely on the 'executable_expression' to be evaluated by a deterministic math engine later.
-
-        CRITICAL RULES for 'executable_expression':
-        - For percentage like "18% of 5000", output: "5000 * (18 / 100)"
-        - STRICT GST RULES:
-          - "18% GST on 50000" (User wants ONLY the tax amount) -> "50000 * 0.18"
-          - "50000 including 18% GST" (User wants to find base price or tax from a total) -> Base is "50000 / 1.18", Tax is "50000 - (50000 / 1.18)". Extract what is logical.
-          - "Add 18% GST to 50000" or "50000 me 18% GST jodkar" (User wants total inclusive of tax) -> "50000 + (50000 * 0.18)"
-        - For simple interest "loan 2 lakh, 10%, 5 years", output: "(200000 * 10 * 5) / 100"
-        - For area "12 by 15 room", output: "12 * 15"
-        - It must be a valid string that math.js can evaluate. Do NOT include currency symbols in the expression.
-        - If it requires complex custom logic (like EMI), try to formulate the standard math formula: P * r * (1 + r)^n / ((1 + r)^n - 1) where r is monthly rate. Example: 200000 loan, 10% annual, 5 years (60 months). Monthly rate = 10/(12*100) = 0.008333. Expression: "200000 * (10/1200) * ((1 + (10/1200))^60) / (((1 + (10/1200))^60) - 1)"
-        - If you absolutely cannot format it as an expression, format a fallback logic in steps.
-
-        Respond ONLY with a valid JSON object matching this schema:
-        {
-            "type": "OBJECT",
-            "properties": {
-                "intent": { "type": "STRING", "description": "Category e.g., 'Percentage', 'EMI', 'Area', 'Basic Math'" },
-                "title": { "type": "STRING", "description": "Short title for history e.g., '18% of ₹5000'" },
-                "executable_expression": { "type": "STRING", "description": "Strictly math operators and numbers. e.g. '5000 * 0.18'" },
-                "formula_display": { "type": "STRING", "description": "Human readable formula e.g. 'Amount × (Rate/100)'" },
-                "steps": { "type": "ARRAY", "items": { "type": "STRING" }, "description": "Step by step textual explanation of values." },
-                "explanation_hindi": { "type": "STRING", "description": "Explanation in simple Hindi/Hinglish" },
-                "explanation_english": { "type": "STRING", "description": "Explanation in English" },
-                "unit": { "type": "STRING", "description": "Output unit if any e.g. '₹', 'sq ft', 'years'. Put symbol if currency." },
-                "unit_position": { "type": "STRING", "description": "'prefix' or 'suffix'" }
-            }
-        }`;
-
-        const AIService = {
-            async analyzeCalculation(query, context = null) {
-                const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
-                const apiUrl = `${baseUrl}?key=${geminiApiKey}`;
-
-                let prompt = aiSystemPrompt;
-                if (context) {
-                    prompt += `\n\nPREVIOUS CALCULATION CONTEXT:\nUser previously asked: "${context.query}"\nPrevious Executable Expression: "${context.expression}"\nPrevious Result: ${context.result}\n\nINSTRUCTION FOR FOLLOW-UP: The user is asking a follow-up question. You MUST use the previous context (like principal, base amounts, tenure, etc.) and only change the variables the user mentions. Replace the updated variables and output a NEW complete 'executable_expression' that recalculates the entire problem with the new variables.`;
-                }
-
-                const payload = {
-                    contents: [{ parts: [{ text: `User Query: "${query}"` }] }],
-                    systemInstruction: { parts: [{ text: prompt }] },
-                    generationConfig: { responseMimeType: "application/json" }
-                };
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if(!response.ok) {
-                        const errorText = await response.text();
-                        console.error("Gemini API Error Response:", errorText);
-                        let errMsg = `API Error: ${response.status}`;
-                        try {
-                            const errData = JSON.parse(errorText);
-                            if (errData.error && errData.error.message) {
-                                errMsg = errData.error.message;
-                            }
-                        } catch(e) {}
-                        throw new Error(errMsg);
-                    }
-                    const data = await response.json();
-                    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (textResponse) {
-                        try {
-                            // Strip markdown code blocks if the AI accidentally includes them
-                            let cleanText = textResponse.trim();
-                            if (cleanText.startsWith('```')) {
-                                cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/```$/, '').trim();
-                            }
-                            return JSON.parse(cleanText);
-                        } catch (err) {
-                            console.error("JSON Parse Error. Raw AI Response:", textResponse);
-                            throw new Error("The AI returned a malformed calculation response.");
-                        }
-                    }
-                    throw new Error("Received an empty response from AI.");
-                } catch (error) {
-                    console.error("AI Analysis Error:", error);
-                    throw error;
-                }
-            },
-            async analyzeImage(base64Data, mimeType) {
-                const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
-                const apiUrl = `${baseUrl}?key=${geminiApiKey}`;
-
-                const prompt = aiSystemPrompt + `\n\nIMAGE TASK: Extract the main mathematical, financial, or logic problem from the image. If it's a receipt/bill, calculate what is logically required (e.g. total with tax). If it's a handwritten problem, solve it.`;
-
-                const payload = {
-                    contents: [
-                        {
-                            parts: [
-                                { text: "Solve the calculation problem shown in this image." },
-                                { inlineData: { mimeType: mimeType, data: base64Data } }
-                            ]
-                        }
-                    ],
-                    systemInstruction: { parts: [{ text: prompt }] },
-                    generationConfig: { responseMimeType: "application/json" }
-                };
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if(!response.ok) {
-                        const errorText = await response.text();
-                        console.error("Gemini Image API Error Response:", errorText);
-                        let errMsg = `API Error: ${response.status}`;
-                        try {
-                            const errData = JSON.parse(errorText);
-                            if (errData.error && errData.error.message) {
-                                errMsg = errData.error.message;
-                            }
-                        } catch(e) {}
-                        throw new Error(errMsg);
-                    }
-                    const data = await response.json();
-                    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (textResponse) {
-                        try {
-                            let cleanText = textResponse.trim();
-                            if (cleanText.startsWith('```')) {
-                                cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/```$/, '').trim();
-                            }
-                            return JSON.parse(cleanText);
-                        } catch (err) {
-                            console.error("JSON Parse Error. Raw AI Response:", textResponse);
-                            throw new Error("The AI returned a malformed image calculation response.");
-                        }
-                    }
-                    throw new Error("Received an empty response from AI.");
-                } catch (error) {
-                    console.error("AI Image Analysis Error:", error);
-                    throw error;
-                }
-            },
-            async speakExplanation(text, language = 'en') {
-                const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
-                const apiUrl = `${baseUrl}?key=${geminiApiKey}`;
-
-                const payload = {
-                    contents: [{
-                        parts: [{ text: text }]
-                    }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            voiceConfig: {
-                                prebuiltVoiceConfig: { voiceName: language === 'hi' ? "Aoede" : "Puck" }
-                            }
-                        }
-                    }
-                };
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if(!response.ok) {
-                        const errorText = await response.text();
-                        console.error("Gemini TTS API Error Response:", errorText);
-                        throw new Error(`TTS API Request Failed: ${response.status} - ${errorText}`);
-                    }
-                    const result = await response.json();
-
-                    const part = result?.candidates?.[0]?.content?.parts?.[0];
-                    const audioData = part?.inlineData?.data;
-                    const mimeType = part?.inlineData?.mimeType;
-
-                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                        const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
-                        const pcmData = base64ToArrayBuffer(audioData);
-                        const pcm16 = new Int16Array(pcmData);
-                        const wavBlob = pcmToWav(pcm16, sampleRate);
-                        return URL.createObjectURL(wavBlob);
-                    }
-                    throw new Error("Invalid audio response");
-                } catch (error) {
-                    console.error("TTS Error:", error);
-                    throw error;
-                }
-            }
-        };
-
-        const MathService = {
-            evaluate(expression) {
-                try {
-                    // Use math.js for deterministic, safe evaluation
-                    let result = math.evaluate(expression);
-
-                    // Format appropriately (avoid long decimals unless necessary)
-                    if (typeof result === 'number') {
-                        // Round to 4 decimal places max to avoid floating point weirdness
-                        result = Math.round(result * 10000) / 10000;
-                    }
-                    return result;
-                } catch (error) {
-                    console.error("Math Evaluation Error:", error, "Expression:", expression);
-                    return "Error calculating";
-                }
-            },
-            formatResult(value, unit, position) {
-                if (value === "Error calculating" || isNaN(value)) return value;
-
-                // Format numbers with commas (Indian numbering system preference if currency, otherwise standard)
-                let formattedStr = value.toString();
-                if (typeof value === 'number') {
-                     formattedStr = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(value);
-                }
-
-                if (!unit) return formattedStr;
-                if (position === 'prefix') return `${unit}${formattedStr}`;
-                return `${formattedStr} ${unit}`;
-            }
-        };
-
-        // --- Components ---
-
-        const AuthModal = ({ isOpen, onClose }) => {
-            if (!isOpen) return null;
-            const [isSignUp, setIsSignUp] = useState(false);
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState('');
-            const [loading, setLoading] = useState(false);
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                setError('');
-                setLoading(true);
-                const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.FirebaseServices;
-                try {
-                    if (!auth) throw new Error("Authentication service is unavailable.");
-                    if (isSignUp) {
-                        await createUserWithEmailAndPassword(auth, email, password);
-                    } else {
-                        await signInWithEmailAndPassword(auth, email, password);
-                    }
-                    onClose();
-                } catch (err) {
-                    setError(err.message.replace('Firebase: ', ''));
-                }
-                setLoading(false);
-            };
-
-            const handleGuest = async () => {
-                const { auth, signInAnonymously } = window.FirebaseServices;
-                if(auth) {
-                    setLoading(true);
-                    try {
-                        await signInAnonymously(auth);
-                        onClose();
-                    } catch(err) {
-                        setError(err.message);
-                    }
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in-up">
-                    <div className="glass-panel w-full max-w-md rounded-3xl p-8 relative border border-brand-500/30 shadow-[0_0_40px_-15px_rgba(45,212,191,0.2)]">
-                        <button onClick={onClose} className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors">
-                            <Icon name="x" size={24} />
+            <div class="panel">
+                <div class="panel-row">
+                    <div class="ai-cue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2 2M16.4 16.4l2 2M5.6 18.4l2-2M16.4 7.6l2-2" /><circle cx="12" cy="12" r="3.2" /></svg>
+                    </div>
+                    <textarea id="q" placeholder="अपना सवाल लिखें... उदाहरण: ₹50,000 का 12% कितना होगा?"></textarea>
+                </div>
+                <div class="panel-actions">
+                    <div class="chip-btns">
+                        <button class="icon-btn" title="Voice input (demo)" onclick="voiceDemo()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" /><path d="M19 11a7 7 0 01-14 0M12 18v3" /></svg>
                         </button>
-
-                        <h2 className="text-2xl font-bold mb-2 text-white">
-                            {isSignUp ? 'Create an Account' : 'Welcome Back'}
-                        </h2>
-                        <p className="text-gray-400 text-sm mb-6">
-                            {isSignUp ? 'Sign up to save your calculation history.' : 'Sign in to access your calculations.'}
-                        </p>
-
-                        {error && (
-                            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-400 mb-1 ml-1 uppercase tracking-wider">Email</label>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50"
-                                    placeholder="you@example.com"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-400 mb-1 ml-1 uppercase tracking-wider">Password</label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-500/50"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-medium transition-all disabled:opacity-50"
-                            >
-                                {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-                            </button>
-                        </form>
-
-                        <div className="mt-6 pt-6 border-t border-dark-border">
-                            <button
-                                onClick={handleGuest}
-                                disabled={loading}
-                                className="w-full py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium text-white mb-4"
-                            >
-                                Continue as Guest
-                            </button>
-
-                            <p className="text-center text-sm text-gray-400">
-                                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                                <button onClick={() => setIsSignUp(!isSignUp)} className="text-brand-400 hover:text-brand-300 font-medium">
-                                    {isSignUp ? 'Sign In' : 'Sign Up'}
-                                </button>
-                            </p>
-                        </div>
+                        <button class="icon-btn" title="Scan problem (demo)" onclick="scanDemo()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M20 8V6a2 2 0 00-2-2h-2M20 16v2a2 2 0 01-2 2h-2" /><circle cx="12" cy="12" r="3" /></svg>
+                        </button>
                     </div>
+                    <button class="calc-btn" id="calcBtn" onclick="runCalculation()">
+                        Calculate
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+                    </button>
                 </div>
-            );
+            </div>
+
+            <div class="examples-label">Popular</div>
+            <div class="examples" id="examples"></div>
+        </section>
+
+        <div id="think-zone"></div>
+        <div id="result-zone"></div>
+
+        <section>
+            <h2 class="section-title" id="catGrid">Try a category</h2>
+            <p class="section-sub">Tap a card to auto-fill an example question</p>
+            <div class="cat-grid" id="catGridInner"></div>
+        </section>
+    </div>
+
+    <footer>
+        AI Calculator demo — prototype build. <br />
+        (Since external API calls from the browser are blocked for security, this demo uses a robust local pattern-matcher for the provided examples).
+    </footer>
+
+    <div id="toast"></div>
+
+    <script>
+        const ICONS = {
+        percent: `<path d="M19 5L5 19M6.5 8.5a2 2 0 100-4 2 2 0 000 4zM17.5 20.5a2 2 0 100-4 2 2 0 000 4z"/>`,
+        coins: `<circle cx="9" cy="9" r="5"/><path d="M14.5 6.2A5 5 0 1117.8 14.5"/>`,
+        bank: `<path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6M8 21v-7M12 21v-7M16 21v-7"/>`,
+        chart: `<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>`,
+        tag: `<path d="M20.6 12.6L12 21.2a2 2 0 01-2.8 0l-6.4-6.4a2 2 0 010-2.8L11.4 3.4a2 2 0 011.4-.6H19a2 2 0 012 2v5.4a2 2 0 01-.6 1.4z"/><circle cx="15.5" cy="8.5" r="1.3"/>`,
+        ruler: `<path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v3M15 8v3M19 8v3"/>`,
+        circle: `<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/>`,
+        scale: `<path d="M12 3v18M7 7l-4 8a4 4 0 008 0l-4-8zM17 7l-4 8a4 4 0 008 0l-4-8zM5 7h14"/>`,
+        heart: `<path d="M20.8 8.6a5.5 5.5 0 00-9.3-3.9L12 5.2l-.5-.5A5.5 5.5 0 002.2 8.6c0 3.5 3.4 6.4 8.6 11.1l1.2 1.1 1.2-1.1c5.2-4.7 8.6-7.6 8.6-11.1z"/>`,
+        cal: `<path d="M3 10h18M7 3v4M17 3v4M4 6h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/>`,
+        convert: `<path d="M7 16V4M7 4L4 7M7 4l3 3M17 8v12M17 20l3-3M17 20l-3-3"/>`
         };
-
-        const Header = ({ user, onLogin, onLogout, setView, view }) => {
-            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-            const menuRef = useRef(null);
-
-            // Close mobile menu when clicking outside
-            useEffect(() => {
-                const handleClickOutside = (event) => {
-                    if (menuRef.current && !menuRef.current.contains(event.target)) {
-                        setIsMobileMenuOpen(false);
-                    }
-                };
-                if (isMobileMenuOpen) {
-                    document.addEventListener('mousedown', handleClickOutside);
-                }
-                return () => document.removeEventListener('mousedown', handleClickOutside);
-            }, [isMobileMenuOpen]);
-
-            return (
-                <header className="fixed top-0 w-full z-50 glass-panel border-b border-dark-border" ref={menuRef}>
-                    <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => { setView('home'); setIsMobileMenuOpen(false); }}>
-                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/20 flex-shrink-0 transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                                    <defs>
-                                        <linearGradient id="logo-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor="#2dd4bf" />
-                                            <stop offset="50%" stopColor="#3b82f6" />
-                                            <stop offset="100%" stopColor="#a855f7" />
-                                        </linearGradient>
-                                        <linearGradient id="glass-light" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
-                                            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
-                                        </linearGradient>
-                                        <filter id="inner-shadow" x="-10%" y="-10%" width="120%" height="120%">
-                                            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.4"/>
-                                        </filter>
-                                    </defs>
-                                    {/* Outer Base */}
-                                    <rect x="0" y="0" width="100" height="100" rx="24" fill="url(#logo-bg)" />
-                                    <rect x="1" y="1" width="98" height="98" rx="23" stroke="url(#glass-light)" strokeWidth="2" />
-
-                                    {/* Inner Calculator Body (Dark Glass) */}
-                                    <rect x="10" y="10" width="80" height="80" rx="16" fill="#171717" fillOpacity="0.75" filter="url(#inner-shadow)" />
-                                    <rect x="10" y="10" width="80" height="80" rx="16" stroke="url(#glass-light)" strokeWidth="1.5" />
-
-                                    {/* Display Screen */}
-                                    <rect x="18" y="18" width="64" height="20" rx="6" fill="#0a0a0a" fillOpacity="0.9" stroke="#ffffff" strokeOpacity="0.15" strokeWidth="1" />
-
-                                    {/* Display Content (Simulated calculation output in glowing teal) */}
-                                    <rect x="24" y="26" width="16" height="4" rx="2" fill="#2dd4bf" />
-                                    <rect x="44" y="26" width="8" height="4" rx="2" fill="#2dd4bf" fillOpacity="0.5" />
-                                    <rect x="56" y="26" width="18" height="4" rx="2" fill="#2dd4bf" fillOpacity="0.9" />
-
-                                    {/* + Button */}
-                                    <rect x="18" y="44" width="29" height="20" rx="6" fill="#ffffff" fillOpacity="0.12" stroke="#ffffff" strokeOpacity="0.2" strokeWidth="1" />
-                                    <path d="M32.5 49 V 59 M 27.5 54 H 37.5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-
-                                    {/* - Button */}
-                                    <rect x="53" y="44" width="29" height="20" rx="6" fill="#ffffff" fillOpacity="0.12" stroke="#ffffff" strokeOpacity="0.2" strokeWidth="1" />
-                                    <path d="M62.5 54 H 72.5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-
-                                    {/* × Button */}
-                                    <rect x="18" y="70" width="29" height="20" rx="6" fill="#ffffff" fillOpacity="0.12" stroke="#ffffff" strokeOpacity="0.2" strokeWidth="1" />
-                                    <path d="M28.5 76 L 36.5 84 M 36.5 76 L 28.5 84" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-
-                                    {/* ÷ Button (Highlighted accent button) */}
-                                    <rect x="53" y="70" width="29" height="20" rx="6" fill="url(#logo-bg)" fillOpacity="0.9" stroke="#ffffff" strokeOpacity="0.4" strokeWidth="1" />
-                                    <path d="M62.5 80 H 72.5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
-                                    <circle cx="67.5" cy="75.5" r="1.5" fill="#ffffff" />
-                                    <circle cx="67.5" cy="84.5" r="1.5" fill="#ffffff" />
-                                </svg>
-                            </div>
-                            <span className="font-bold text-lg sm:text-xl tracking-tight">
-                                AI Calculator
-                            </span>
-                        </div>
-
-                        {/* Desktop Navigation - Center Aligned */}
-                        <nav className="hidden md:flex flex-1 justify-center items-center gap-8 text-sm font-medium text-gray-400">
-                            <button onClick={() => setView('home')} className={`hover:text-white transition-colors flex items-center gap-2 ${view === 'home' ? 'text-brand-400 font-semibold' : ''}`}>
-                                <Icon name="home" size={16} /> Home
-                            </button>
-                            {user && (
-                                <>
-                                    <button onClick={() => setView('library')} className={`hover:text-white transition-colors flex items-center gap-2 ${view === 'library' ? 'text-brand-400 font-semibold' : ''}`}>
-                                        <Icon name="grid" size={16} /> Library
-                                    </button>
-                                    <button onClick={() => setView('history')} className={`hover:text-white transition-colors flex items-center gap-2 ${view === 'history' ? 'text-brand-400 font-semibold' : ''}`}>
-                                        <Icon name="history" size={16} /> History
-                                    </button>
-                                </>
-                            )}
-                        </nav>
-
-                        <div className="flex items-center gap-3">
-                            {user ? (
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                    <div className="hidden sm:flex items-center text-xs text-gray-400 bg-dark-surface/50 px-3 py-1.5 rounded-full border border-dark-border">
-                                        <Icon name="user" size={14} className="mr-1.5" />
-                                        {user.uid.substring(0,6)}
-                                    </div>
-
-                                    {/* Desktop Logout - Hidden on Mobile */}
-                                    <button onClick={() => { onLogout(); setView('home'); }} className="hidden md:flex items-center gap-2 text-sm px-4 py-2 rounded-full border border-dark-border hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all">
-                                        <Icon name="log-out" size={16} />
-                                        Logout
-                                    </button>
-
-                                    {}
-                                    <button
-                                        className="md:hidden flex items-center justify-center w-10 h-10 text-gray-300 hover:text-white transition-all rounded-xl bg-dark-surface border border-dark-border shadow-sm active:scale-95"
-                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                                    >
-                                        <div className="w-5 h-3.5 flex flex-col justify-between items-center relative">
-                                            <span className={`block w-full h-[2px] bg-current rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? 'translate-y-[6px] rotate-45' : ''}`}></span>
-                                            <span className={`block w-full h-[2px] bg-current rounded-full transition-all duration-300 ease-out ${isMobileMenuOpen ? 'opacity-0 scale-75' : 'opacity-100'}`}></span>
-                                            <span className={`block w-full h-[2px] bg-current rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? '-translate-y-[6px] -rotate-45' : ''}`}></span>
-                                        </div>
-                                    </button>
-                                </div>
-                            ) : (
-                                <button onClick={onLogin} className="text-sm px-5 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition-colors font-medium flex items-center gap-2 shadow-lg shadow-white/5">
-                                    <Icon name="user" size={16} /> <span>Sign In</span>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Premium Mobile Menu Dropdown */}
-                    {isMobileMenuOpen && user && (
-                        <div className="md:hidden absolute top-16 left-0 right-0 w-full glass-panel border-b border-dark-border shadow-2xl bg-[#0a0a0a]/98 backdrop-blur-2xl animate-fade-in-up z-50">
-                            <nav className="flex flex-col p-4 space-y-2">
-                                <button onClick={() => { setView('home'); setIsMobileMenuOpen(false); }} className={`w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'home' ? 'bg-brand-500/10 text-brand-400 font-semibold border border-brand-500/20' : 'text-gray-300 hover:text-white hover:bg-dark-surface border border-transparent'}`}>
-                                    <Icon name="home" size={20} className={view === 'home' ? 'text-brand-400' : 'text-gray-500'} /> Home
-                                </button>
-                                <button onClick={() => { setView('library'); setIsMobileMenuOpen(false); }} className={`w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'library' ? 'bg-brand-500/10 text-brand-400 font-semibold border border-brand-500/20' : 'text-gray-300 hover:text-white hover:bg-dark-surface border border-transparent'}`}>
-                                    <Icon name="grid" size={20} className={view === 'library' ? 'text-brand-400' : 'text-gray-500'} /> Library
-                                </button>
-                                <button onClick={() => { setView('history'); setIsMobileMenuOpen(false); }} className={`w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 transition-all ${view === 'history' ? 'bg-brand-500/10 text-brand-400 font-semibold border border-brand-500/20' : 'text-gray-300 hover:text-white hover:bg-dark-surface border border-transparent'}`}>
-                                    <Icon name="history" size={20} className={view === 'history' ? 'text-brand-400' : 'text-gray-500'} /> History
-                                </button>
-                                <div className="h-px bg-dark-border my-2 mx-2"></div>
-                                <button onClick={() => { onLogout(); setIsMobileMenuOpen(false); setView('home'); }} className="w-full text-left text-base py-3.5 flex items-center gap-4 rounded-xl px-4 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all border border-transparent">
-                                    <Icon name="log-out" size={20} /> Logout
-                                </button>
-                            </nav>
-                        </div>
-                    )}
-                </header>
-            );
-        };
-
-        const SmartInputArea = ({ onCalculate, isProcessing }) => {
-            const [query, setQuery] = useState('');
-            const textareaRef = useRef(null);
-            const fileInputRef = useRef(null);
-
-            const handleSubmit = () => {
-                if (query.trim() && !isProcessing) {
-                    onCalculate(query);
-                }
-            };
-
-            const handleKeyDown = (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit();
-                }
-            };
-
-            const insertExample = (text) => {
-                setQuery(text);
-                if (textareaRef.current) textareaRef.current.focus();
-            };
-
-            const handleImageUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const base64 = event.target.result.split(',')[1];
-                    onCalculate(null, { base64, mimeType: file.type });
-                };
-                reader.readAsDataURL(file);
-                e.target.value = ''; // Reset input
-            };
-
-            return (
-                <div className="w-full max-w-3xl mx-auto animate-fade-in-up">
-                    <div className="text-center mb-6 md:mb-8">
-                        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 md:mb-4 tracking-tight">
-                            Every Calculation.<br/>
-                            <span className="ai-gradient-text">One Intelligent Calculator.</span>
-                        </h1>
-                        <p className="text-gray-400 text-sm sm:text-base md:text-xl px-4">
-                            "हर सवाल का हिसाब, AI के साथ।"
-                        </p>
-                    </div>
-
-                    <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                        <div className="relative glass-panel rounded-[2rem] p-2 flex flex-col transition-all border border-dark-border focus-within:border-brand-500/50">
-                            <textarea
-                                ref={textareaRef}
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Type your math problem, EMI query, percentage, or formula..."
-                                className="w-full bg-transparent text-white placeholder-gray-500 px-4 sm:px-6 py-4 sm:py-5 outline-none resize-none text-base sm:text-lg md:text-xl min-h-[100px] sm:min-h-[120px]"
-                                disabled={isProcessing}
-                            />
-
-                            <div className="flex flex-wrap items-center justify-between px-2 sm:px-4 pb-2 sm:pb-3 gap-3">
-                                <div className="flex gap-1 sm:gap-2 text-gray-400">
-                                    <button className="p-2 rounded-full hover:bg-white/5 hover:text-white transition-colors cursor-not-allowed opacity-50" title="Voice coming soon">
-                                        <Icon name="mic" size={20} />
-                                    </button>
-                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-                                    <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-full hover:bg-white/5 hover:text-brand-400 transition-colors" title="Scan Problem with Image" disabled={isProcessing}>
-                                        <Icon name="camera" size={20} />
-                                    </button>
-                                </div>
-                                <button
-                                    onClick={handleSubmit}
-                                    disabled={!query.trim() || isProcessing}
-                                    className={`px-5 sm:px-6 py-2.5 rounded-full font-medium transition-all flex items-center justify-center gap-2 w-full sm:w-auto
-                                        ${query.trim() && !isProcessing ? 'bg-white text-black hover:scale-105' : 'bg-white/10 text-white/50 cursor-not-allowed'}`}
-                                >
-                                    {isProcessing ? 'Thinking...' : 'Calculate'}
-                                    {!isProcessing && <Icon name="arrow-right" size={18} />}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 flex flex-wrap gap-2 justify-center text-xs sm:text-sm px-2">
-                        <span className="text-gray-500 px-2 sm:px-3 py-1">Examples:</span>
-                        {[
-                            "18% GST on ₹50,000",
-                            "5000 ka 20 percent",
-                            "2 lakh loan 10% 5 years EMI"
-                        ].map((ex, i) => (
-                            <button key={i} onClick={() => insertExample(ex)} className="px-3 sm:px-4 py-1.5 rounded-full border border-dark-border hover:border-brand-500/50 hover:text-brand-400 text-gray-300 transition-colors whitespace-nowrap">
-                                {ex}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const ResultCard = ({ resultData, onClear, onFollowUp, isProcessing }) => {
-            if (!resultData) return null;
-
-            const { query, analysis, finalResult, formattedResult } = resultData;
-            const [followUpQuery, setFollowUpQuery] = useState('');
-            const [audioPlaying, setAudioPlaying] = useState({ en: false, hi: false });
-            const [loadingAudio, setLoadingAudio] = useState({ en: false, hi: false });
-            const [isCopied, setIsCopied] = useState(false);
-            const [shareState, setShareState] = useState({ status: 'idle', text: 'Share' });
-            const audioRef = useRef(null);
-            const textareaRef = useRef(null);
-
-            const handleFollowUp = () => {
-                if (followUpQuery.trim() && !isProcessing) {
-                    onFollowUp(followUpQuery);
-                    setFollowUpQuery('');
-                    if (textareaRef.current) {
-                        textareaRef.current.style.height = 'auto';
-                    }
-                }
-            };
-
-            const handleCopy = async () => {
-                const textToCopy = `AI Calculator\nQuery: ${query}\nResult: ${formattedResult}\nFormula: ${analysis.formula_display}\nExplanation: ${analysis.explanation_english}`;
-                try {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = textToCopy;
-                    textArea.style.top = "0";
-                    textArea.style.left = "0";
-                    textArea.style.position = "fixed";
-                    textArea.style.opacity = "0";
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        setIsCopied(true);
-                        setTimeout(() => setIsCopied(false), 2000);
-                    } catch (err) {
-                        console.error('Fallback: Oops, unable to copy', err);
-                    } finally {
-                        document.body.removeChild(textArea);
-                    }
-                } catch (err) {
-                    console.error("Failed to copy", err);
-                }
-            };
-
-            const handleShare = async () => {
-                const shareData = {
-                    title: 'AI Calculator Result',
-                    text: `AI Calculator\nQuery: ${query}\nResult: ${formattedResult}\nFormula: ${analysis.formula_display}`
-                };
-
-                if (window.location.href.startsWith('http')) {
-                    shareData.url = window.location.href;
-                }
-
-                try {
-                    if (navigator.share) {
-                        await navigator.share(shareData);
-                        setShareState({ status: 'success', text: 'Shared!' });
-                    } else {
-                        await handleCopy();
-                        setShareState({ status: 'success', text: 'Copied!' });
-                    }
-                } catch (err) {
-                    await handleCopy();
-                    setShareState({ status: 'success', text: 'Copied!' });
-                } finally {
-                    setTimeout(() => setShareState({ status: 'idle', text: 'Share' }), 2000);
-                }
-            };
-
-            const playExplanation = async (text, lang) => {
-                if (audioPlaying[lang]) {
-                    if (audioRef.current) {
-                        audioRef.current.pause();
-                        audioRef.current = null;
-                    }
-                    setAudioPlaying({ en: false, hi: false });
-                    return;
-                }
-
-                try {
-                    setLoadingAudio({ ...loadingAudio, [lang]: true });
-                    if (audioRef.current) audioRef.current.pause();
-
-                    const audioUrl = await AIService.speakExplanation(text, lang);
-                    const audio = new Audio(audioUrl);
-                    audioRef.current = audio;
-
-                    audio.onended = () => {
-                        setAudioPlaying({ en: false, hi: false });
-                    };
-
-                    await audio.play();
-                    setAudioPlaying({ en: false, hi: false, [lang]: true });
-                } catch (err) {
-                    console.error("Failed to play audio", err);
-                } finally {
-                    setLoadingAudio({ ...loadingAudio, [lang]: false });
-                }
-            };
-
-            return (
-                <div className="w-full max-w-3xl mx-auto mt-6 md:mt-8 animate-fade-in-up">
-                    <div className="glass-panel rounded-3xl p-5 md:p-8 relative overflow-hidden border border-brand-500/30 shadow-[0_0_40px_-15px_rgba(45,212,191,0.2)]">
-
-                        {/* decorative element */}
-                        <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-brand-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-
-                        <div className="flex justify-between items-start mb-4 md:mb-6">
-                            <div className="pr-4">
-                                <span className="inline-block px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold mb-2 sm:mb-3 tracking-wider uppercase">
-                                    {analysis.intent}
-                                </span>
-                                <h3 className="text-gray-400 text-sm sm:text-lg mb-1 font-medium">Your Query:</h3>
-                                <p className="text-white text-base sm:text-xl">"{query}"</p>
-                            </div>
-                            <button onClick={onClear} className="text-gray-500 hover:text-white p-1 sm:p-2 flex-shrink-0">
-                                <Icon name="x" size={24} />
-                            </button>
-                        </div>
-
-                        <div className="my-6 md:my-8 flex items-baseline gap-2 pb-6 border-b border-dark-border w-full">
-                            <span className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 break-words w-full overflow-wrap-anywhere">
-                                {formattedResult}
-                            </span>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-                            <div className="space-y-4">
-                                <div>
-                                    <h4 className="text-brand-400 font-medium mb-2 flex items-center gap-2 text-sm sm:text-base">
-                                        <Icon name="function-square" size={16} /> Formula Used
-                                    </h4>
-                                    <div className="bg-dark-surface p-3 rounded-xl border border-dark-border font-mono text-xs sm:text-sm text-gray-300 overflow-x-auto">
-                                        {analysis.formula_display || analysis.executable_expression}
-                                    </div>
-                                </div>
-
-                                {analysis.steps && analysis.steps.length > 0 && (
-                                    <div>
-                                        <h4 className="text-gray-400 font-medium mb-2 text-sm sm:text-base">Steps</h4>
-                                        <ul className="space-y-2">
-                                            {analysis.steps.map((step, i) => (
-                                                <li key={i} className="flex gap-2 sm:gap-3 text-gray-300 text-xs sm:text-sm">
-                                                    <span className="text-brand-600 font-bold flex-shrink-0">{i+1}.</span>
-                                                    <span>{step}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-4 bg-dark-surface/50 p-4 sm:p-5 rounded-2xl border border-dark-border/50">
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-gray-400 font-medium text-xs sm:text-sm uppercase tracking-wider">Explanation (English)</h4>
-                                        <button
-                                            onClick={() => playExplanation(analysis.explanation_english, 'en')}
-                                            disabled={loadingAudio.en}
-                                            className="text-gray-400 hover:text-brand-400 transition-colors p-1"
-                                            title="Listen to explanation"
-                                        >
-                                            {loadingAudio.en ? <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div> :
-                                             audioPlaying.en ? <Icon name="volume-x" size={16} /> : <Icon name="volume-2" size={16} />}
-                                        </button>
-                                    </div>
-                                    <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
-                                        {analysis.explanation_english}
-                                    </p>
-                                </div>
-                                <div className="border-t border-dark-border/50 pt-4 mt-2">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-gray-400 font-medium text-xs sm:text-sm uppercase tracking-wider">विवरण (Hindi)</h4>
-                                        <button
-                                            onClick={() => playExplanation(analysis.explanation_hindi, 'hi')}
-                                            disabled={loadingAudio.hi}
-                                            className="text-gray-400 hover:text-brand-400 transition-colors p-1"
-                                            title="विवरण सुनें"
-                                        >
-                                            {loadingAudio.hi ? <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div> :
-                                             audioPlaying.hi ? <Icon name="volume-x" size={16} /> : <Icon name="volume-2" size={16} />}
-                                        </button>
-                                    </div>
-                                    <p className="text-gray-200 text-xs sm:text-sm leading-relaxed">
-                                        {analysis.explanation_hindi}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 pt-6 border-t border-dark-border">
-                            <button onClick={handleCopy} aria-label="Copy Result" className="flex-1 py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium flex justify-center items-center gap-2">
-                                <Icon name={isCopied ? "check" : "copy"} size={16} /> {isCopied ? "Copied!" : "Copy Result"}
-                            </button>
-                            <button onClick={handleShare} aria-label="Share Result" className="flex-1 py-3 rounded-xl bg-dark-surface hover:bg-dark-border border border-dark-border transition-colors text-sm font-medium flex justify-center items-center gap-2">
-                                <Icon name={shareState.status === 'success' ? "check" : "share-2"} size={16} /> {shareState.text}
-                            </button>
-                        </div>
-
-                        {/* Follow-up Chat Section */}
-                        <div className="mt-6 pt-6 border-t border-dark-border">
-                            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
-                                <textarea
-                                    ref={textareaRef}
-                                    rows="1"
-                                    value={followUpQuery}
-                                    onChange={(e) => {
-                                        setFollowUpQuery(e.target.value);
-                                        e.target.style.height = 'auto';
-                                        e.target.style.height = (e.target.scrollHeight) + 'px';
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleFollowUp();
-                                        }
-                                    }}
-                                    placeholder="Ask a follow-up... (e.g., 'What if the interest is 12%?')"
-                                    className="flex-1 bg-dark-surface border border-dark-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500/50 resize-none overflow-hidden max-h-32 min-h-[46px]"
-                                    disabled={isProcessing}
-                                />
-                                <button
-                                    onClick={handleFollowUp}
-                                    disabled={!followUpQuery.trim() || isProcessing}
-                                    aria-label="Send message"
-                                    className="h-[46px] px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center sm:min-w-[80px]"
-                                >
-                                    {isProcessing ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Icon name="send" size={18} />}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const CategoryLibrary = () => {
-            const categories = [
-                { icon: 'percent', name: 'Percentage', desc: 'Find %, GST, discounts' },
-                { icon: 'landmark', name: 'Finance', desc: 'EMI, SIP, Compound Interest' },
-                { icon: 'ruler', name: 'Geometry', desc: 'Area, Volume, Perimeter' },
-                { icon: 'briefcase', name: 'Business', desc: 'Profit, Loss, Margins' },
-                { icon: 'scale', name: 'Unit Converter', desc: 'Length, Weight, Temp' },
-                { icon: 'calendar', name: 'Time & Date', desc: 'Age, Duration, Days' },
-            ];
-
-            return (
-                <div className="max-w-6xl mx-auto py-12 animate-fade-in-up">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">Calculator Library</h2>
-                        <p className="text-gray-400">Can't find the words? Browse our deterministic calculators.</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {categories.map((cat, i) => (
-                            <div key={i} className="glass-panel p-6 rounded-2xl hover:border-brand-500/50 transition-colors cursor-pointer group">
-                                <div className="w-12 h-12 rounded-xl bg-dark-surface flex items-center justify-center mb-4 group-hover:bg-brand-500/20 group-hover:text-brand-400 transition-colors">
-                                    <Icon name={cat.icon} size={24} />
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">{cat.name}</h3>
-                                <p className="text-sm text-gray-400">{cat.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-12 text-center text-gray-500 text-sm">
-                        Pro tip: You don't need to select a category. Just ask your question on the home page!
-                    </div>
-                </div>
-            );
-        };
-
-        const HistoryPanel = ({ user }) => {
-            const [history, setHistory] = useState([]);
-            const [loading, setLoading] = useState(true);
-
-            useEffect(() => {
-                if (!user || !window.FirebaseServices.db) return;
-
-                const { db, collection, query, orderBy, onSnapshot, appId } = window.FirebaseServices;
-                const historyRef = collection(db, 'artifacts', appId, 'users', user.uid, 'history');
-                const q = query(historyRef, orderBy('timestamp', 'desc'));
-
-                const unsubscribe = onSnapshot(q, (snapshot) => {
-                    const items = [];
-                    snapshot.forEach((doc) => {
-                        items.push({ id: doc.id, ...doc.data() });
-                    });
-                    setHistory(items);
-                    setLoading(false);
-                }, (error) => {
-                    console.error("History fetch error:", error);
-                    setLoading(false);
-                });
-
-                return () => unsubscribe();
-            }, [user]);
-
-            if (loading) return <div className="text-center py-20 text-gray-400">Loading history...</div>;
-
-            return (
-                <div className="max-w-4xl mx-auto py-12 animate-fade-in-up">
-                    <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
-                        <Icon name="history" size={28} className="text-brand-400" /> Your Calculations
-                    </h2>
-
-                    {history.length === 0 ? (
-                        <div className="text-center py-20 bg-dark-surface rounded-2xl border border-dark-border">
-                            <Icon name="inbox" size={48} className="mx-auto mb-4 text-gray-600" />
-                            <p className="text-gray-400">No calculations saved yet.</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {history.map(item => (
-                                <div key={item.id} className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between group">
-                                    <div>
-                                        <div className="text-xs text-brand-400 font-semibold mb-1 uppercase tracking-wider">{item.category}</div>
-                                        <h3 className="text-lg text-white font-medium mb-1">{item.query}</h3>
-                                        <p className="text-sm text-gray-400">Result: <span className="text-gray-200">{item.result}</span></p>
-                                    </div>
-                                    <div className="text-sm text-gray-500 whitespace-nowrap">
-                                        {item.timestamp ? new Date(item.timestamp.toDate()).toLocaleDateString() : 'Just now'}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const App = () => {
-            const [user, setUser] = useState(null);
-            const [view, setView] = useState('home'); // home, library, history
-            const [isProcessing, setIsProcessing] = useState(false);
-            const [currentResult, setCurrentResult] = useState(null);
-            const [authLoading, setAuthLoading] = useState(true);
-            const [errorMsg, setErrorMsg] = useState(null);
-            const [showAuthModal, setShowAuthModal] = useState(false);
-
-            useEffect(() => {
-                const { auth, signInAnonymously, signInWithCustomToken, initialAuthToken, onAuthStateChanged } = window.FirebaseServices;
-                if (!auth) {
-                    setAuthLoading(false);
-                    return;
-                }
-
-                const initAuth = async () => {
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Auth error:", error);
-                    }
-                };
-
-                initAuth();
-
-                const unsubscribe = onAuthStateChanged(auth, (u) => {
-                    setUser(u);
-                    setAuthLoading(false);
-                });
-
-                return () => unsubscribe();
-            }, []);
-
-            const handleLogin = () => {
-                 setShowAuthModal(true);
-            };
-
-            const handleLogout = async () => {
-                const { auth, signOut } = window.FirebaseServices;
-                if(auth) await signOut(auth);
-            };
-
-            const saveToHistory = async (query, analysis, formattedResult) => {
-                if (!user || !window.FirebaseServices.db) return;
-                const { db, collection, addDoc, serverTimestamp, appId } = window.FirebaseServices;
-
-                try {
-                    const historyRef = collection(db, 'artifacts', appId, 'users', user.uid, 'history');
-                    await addDoc(historyRef, {
-                        query: query,
-                        category: analysis.intent,
-                        result: formattedResult,
-                        expression: analysis.executable_expression,
-                        timestamp: serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error("Failed to save history:", error);
-                }
-            };
-
-            const processCalculation = async (queryText, imagePayload = null, context = null) => {
-                setIsProcessing(true);
-                setErrorMsg(null);
-
-                if (!context) {
-                    setCurrentResult(null);
-                }
-
-                try {
-                    let analysis;
-                    let displayQuery = queryText;
-
-                    if (imagePayload) {
-                        analysis = await AIService.analyzeImage(imagePayload.base64, imagePayload.mimeType);
-                        displayQuery = analysis.title || "Image Calculation";
-                    } else {
-                        analysis = await AIService.analyzeCalculation(queryText, context);
-                    }
-
-                    console.log("AI Analysis:", analysis);
-
-                    // 2. Perform deterministic calculation locally based on AI's expression extraction
-                    const rawResult = MathService.evaluate(analysis.executable_expression);
-
-                    // 3. Format result
-                    const formattedResult = MathService.formatResult(rawResult, analysis.unit, analysis.unit_position);
-
-                    const resultData = {
-                        query: displayQuery,
-                        analysis,
-                        finalResult: rawResult,
-                        formattedResult
-                    };
-
-                    setCurrentResult(resultData);
-
-                    // 4. Save to history
-                    if(rawResult !== "Error calculating") {
-                        saveToHistory(displayQuery, analysis, formattedResult);
-                    }
-
-                } catch (error) {
-                    console.error("Processing failed:", error);
-                    // Pass the exact error message to the UI instead of a generic one
-                    setErrorMsg(error.message || "I couldn't understand that calculation. Try phrasing it as a math problem.");
-                } finally {
-                    setIsProcessing(false);
-                }
-            };
-
-            if (authLoading) {
-                return <div className="min-h-screen flex items-center justify-center bg-dark-bg"><span className="loader"></span></div>;
-            }
-
-            return (
-                <div className="min-h-screen bg-dark-bg text-gray-100 flex flex-col relative selection:bg-brand-500/30">
-                    {/* Background decoration */}
-                    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-                        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-900/20 blur-[120px]"></div>
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/10 blur-[120px]"></div>
-                    </div>
-
-                    <Header user={user} onLogin={handleLogin} onLogout={handleLogout} setView={setView} view={view} />
-
-                    <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-
-                    <main className="flex-1 pt-20 sm:pt-24 px-4 pb-12 z-10">
-                        {}
-                        {view === 'home' && (
-                            <div className="w-full">
-                                {!currentResult ? (
-                                    <SmartInputArea onCalculate={(q, img) => processCalculation(q, img)} isProcessing={isProcessing} />
-                                ) : (
-                                    <ResultCard
-                                        resultData={currentResult}
-                                        onClear={() => setCurrentResult(null)}
-                                        onFollowUp={(followUpQuery) => processCalculation(followUpQuery, null, {
-                                            query: currentResult.query,
-                                            result: currentResult.formattedResult,
-                                            expression: currentResult.analysis.executable_expression
-                                        })}
-                                        isProcessing={isProcessing}
-                                    />
-                                )}
-
-                                {errorMsg && (
-                                    <div className="mt-8 p-5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-center max-w-lg mx-auto animate-fade-in-up">
-                                        <Icon name="alert-circle" size={24} className="mx-auto mb-2 opacity-80" />
-                                        <p>{errorMsg}</p>
-                                    </div>
-                                )}
-
-                                {isProcessing && (
-                                    <div className="mt-12 flex flex-col items-center text-brand-400 animate-pulse">
-                                        <div className="loader mb-4"></div>
-                                        <span>AI is decoding your calculation...</span>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {view === 'library' && <CategoryLibrary />}
-
-                        {view === 'history' && <HistoryPanel user={user} />}
-                    </main>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;}
+
+        // short mobile-friendly labels mapped to the full natural-language question
+        const EXAMPLES = [
+        {label:"18% GST", query:"₹5000 का 18% कितना होगा?"},
+        {label:"Profit/Loss", query:"10000 me maal kharida aur 12500 me becha, profit kitna hua?"},
+        {label:"EMI Loan", query:"2 lakh loan 10% interest par 5 saal, EMI kitna hoga?"},
+        {label:"Room Area", query:"12 feet lamba aur 10 feet chauda room ka area"},
+        {label:"GST Total", query:"50000 par 18% GST जोड़कर total kitna"},
+        {label:"BMI Check", query:"weight 68 kg height 172 cm BMI"}
+        ];
+
+        const CATEGORIES = [
+        {name:"Percentage", ex:"500 ka 20%", icon:"percent"},
+        {name:"Profit & Loss", ex:"cost 800 sell 950, profit?", icon:"coins"},
+        {name:"EMI / Loan", ex:"1 lakh loan 9% 3 saal EMI", icon:"bank"},
+        {name:"Simple Interest", ex:"10000 par 6% 2 saal SI", icon:"chart"},
+        {name:"Compound Interest", ex:"10000 par 8% 3 saal CI", icon:"chart"},
+        {name:"GST", ex:"2000 par 12% GST", icon:"tag"},
+        {name:"Discount", ex:"1200 par 25% discount", icon:"tag"},
+        {name:"Area — Rectangle", ex:"15ft x 20ft area", icon:"ruler"},
+        {name:"Area — Circle", ex:"radius 7cm circle area", icon:"circle"},
+        {name:"Ratio", ex:"45 aur 60 ka ratio", icon:"scale"},
+        {name:"Average", ex:"70,85,90 ka average", icon:"chart"},
+        {name:"BMI", ex:"70kg 175cm BMI", icon:"heart"},
+        {name:"Age", ex:"15 aug 1998 se aaj tak age", icon:"cal"},
+        {name:"Unit Convert", ex:"5 km ko miles me convert karo", icon:"convert"}
+        ];
+
+        function esc(s){ return s.replace(/'/g,"\\'"); }
+
+        function renderChips(){
+        const ec = document.getElementById('examples');
+        ec.innerHTML = EXAMPLES.map(e=>`<div class="ex-chip" onclick="fillQ('${esc(e.query)}')">${e.label}</div>`).join('');
+        const cg = document.getElementById('catGridInner');
+        cg.innerHTML = CATEGORIES.map(c=>`
+        <div class="cat-card" onclick="fillQ('${esc(c.ex)}')">
+        <div class="cicon">${icon(c.icon)}</div>
+        <div class="cname">${c.name}</div>
+        <div class="cex">${c.ex}</div>
+        </div>`).join('');
+        }
+        renderChips();
+
+        /* ---------- Toast (replaces alert(), which mobile browsers/webviews often block or hide) ---------- */
+        let toastTimer = null;
+        function showToast(msg, icon){
+        const t = document.getElementById('toast');
+        const iconSvg = icon === 'check'
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>`;
+        t.innerHTML = iconSvg + `<span>${msg}</span>`;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=> t.classList.remove('show'), 2600);
+        }
+
+        /* ---------- Mobile menu ---------- */
+        function toggleMenu(){
+        document.getElementById('mobileMenu').classList.toggle('open');
+        }
+        function closeMenu(){
+        document.getElementById('mobileMenu').classList.remove('open');
+        }
+
+        /* ---------- Nav actions ---------- */
+        function scrollToCalculators(){
+        closeMenu();
+        document.getElementById('catGrid').scrollIntoView({behavior:'smooth', block:'start'});
+        }
+        function showHistoryInfo(){
+        closeMenu();
+        showToast('History feature account/login बनने पर आएगा — अभी demo में उपलब्ध नहीं');
+        }
+        function showPricingInfo(){
+        closeMenu();
+        showToast('Pricing plans जल्द जुड़ेंगे — अभी सब features free demo में हैं');
+        }
+
+        function fillQ(text){
+        document.getElementById('q').value = text;
+        runCalculation();
+        }
+        function voiceDemo(){
+        showToast('🎤 Voice input production version में speech-to-text से जुड़ेगा');
+        }
+        function scanDemo(){
+        showToast('📷 Camera scan production version में OCR से जुड़ेगा');
+        }
+
+        // Local regex-based classification fallback to ensure the demo works without API keys.
+        async function classifyQuestion(question){
+        await sleep(600); // Simulate network delay
+        const q = question.toLowerCase();
+
+        // Extract numbers
+        const nums = (q.match(/[\d.]+/g) || []).map(Number);
+
+        // Basic Regex Pattern Matching for demo
+        if(q.includes('gst')){
+        return { calculation_type: "gst", values: { amount: nums[0] || 50000, rate: nums[1] || 18, mode: q.includes('jodkar') || q.includes('add') ? "exclusive" : "exclusive" }, missing: [] };
+        }
+        if(q.includes('profit') || q.includes('loss') || (q.includes('kharida') && q.includes('becha'))){
+        return { calculation_type: "profit_loss", values: { cost_price: nums[0] || 10000, selling_price: nums[1] || 12500 }, missing: [] };
+        }
+        if(q.includes('emi') || q.includes('loan')){
+        let principal = nums[0] || 2;
+        if(q.includes('lakh')) principal *= 100000;
+        return { calculation_type: "emi", values: { principal: principal, rate_annual: nums[1] || 10, tenure_months: (nums[2] || 5) * 12 }, missing: [] };
+        }
+        if(q.includes('si') || q.includes('simple interest')){
+        return { calculation_type: "simple_interest", values: { principal: nums[0] || 10000, rate: nums[1] || 6, time_years: nums[2] || 2 }, missing: [] };
+        }
+        if(q.includes('ci') || q.includes('compound interest')){
+        return { calculation_type: "compound_interest", values: { principal: nums[0] || 10000, rate: nums[1] || 8, time_years: nums[2] || 3 }, missing: [] };
+        }
+        if(q.includes('discount')){
+        return { calculation_type: "discount", values: { price: nums[0] || 1200, discount_percent: nums[1] || 25 }, missing: [] };
+        }
+        if(q.includes('area') && q.includes('circle')){
+        return { calculation_type: "area_circle", values: { radius: nums[0] || 7 }, missing: [] };
+        }
+        if((q.includes('area') || q.includes('room')) && nums.length >= 2){
+        return { calculation_type: "area_rectangle", values: { length: nums[0] || 12, width: nums[1] || 10 }, missing: [] };
+        }
+        if(q.includes('ratio')){
+        return { calculation_type: "ratio", values: { a: nums[0] || 45, b: nums[1] || 60 }, missing: [] };
+        }
+        if(q.includes('average')){
+        return { calculation_type: "average", values: { numbers: nums.length ? nums : [70,85,90] }, missing: [] };
+        }
+        if(q.includes('bmi')){
+        return { calculation_type: "bmi", values: { weight_kg: nums[0] || 68, height_cm: nums[1] || 172 }, missing: [] };
+        }
+        if(q.includes('convert') || q.includes('km')){
+        return { calculation_type: "unit_convert", values: { value: nums[0] || 5, from_unit: "km", to_unit: "mile", category: "length" }, missing: [] };
+        }
+        if(q.includes('age') && nums.length){
+        return { calculation_type: "age", values: { dob: "1998-08-15", ref_date: new Date().toISOString() }, missing: [] };
+        }
+        if((q.includes('ka') && q.includes('%')) || q.includes('percent')){
+        return { calculation_type: "percentage_of", values: { base: nums[0] || 5000, percent: nums[1] || 18 }, missing: [] };
+        }
+
+        return { calculation_type: "unknown", values: {}, missing: [] };
+        }
+
+        function fmtNum(n, decimals){
+        if(n===undefined||n===null||isNaN(n)) return "—";
+        const d = decimals===undefined ? 2 : decimals;
+        let s = Number(n).toFixed(d);
+        if(s.indexOf('.')>-1) s = s.replace(/0+$/,'').replace(/\.$/,'');
+        return s;
+        }
+        function inr(n){
+        if(n===undefined||n===null||isNaN(n)) return "—";
+        return "₹" + Number(n).toLocaleString('en-IN', {maximumFractionDigits:2});
+        }
+
+        // ---------- Deterministic calculation engine ----------
+        function compute(type, v){
+        switch(type){
+        case "percentage_of": {
+        const {base, percent} = v; const result = base * percent / 100;
+        return { answer: fmtNum(result), formula: `${fmtNum(base)} × ${fmtNum(percent)} ÷ 100`,
+        steps: [`Base value = ${fmtNum(base)}`, `Percent = ${fmtNum(percent)}%`, `${fmtNum(base)} × ${fmtNum(percent)} ÷ 100 = ${fmtNum(result)}`],
+        explanation: `${fmtNum(base)} का ${fmtNum(percent)}% होता है ${fmtNum(result)}।` };
+        }
+        case "percentage_change": {
+        const {from, to} = v; const diff = to - from; const pct = (diff/from)*100;
+        const dir = diff>=0 ? "increase / बढ़ोतरी" : "decrease / कमी";
+        return { answer: `${fmtNum(Math.abs(pct))}% ${diff>=0?'increase':'decrease'}`, formula: `((${fmtNum(to)} − ${fmtNum(from)}) ÷ ${fmtNum(from)}) × 100`,
+        steps: [`From = ${fmtNum(from)}, To = ${fmtNum(to)}`, `Difference = ${fmtNum(to)} − ${fmtNum(from)} = ${fmtNum(diff)}`, `Percent change = ${fmtNum(diff)} ÷ ${fmtNum(from)} × 100 = ${fmtNum(pct)}%`],
+        explanation: `यह एक ${dir} है, कुल ${fmtNum(Math.abs(pct))}%।` };
+        }
+        case "profit_loss": {
+        const {cost_price, selling_price} = v; const diff = selling_price - cost_price; const pct = (diff/cost_price)*100; const isProfit = diff >= 0;
+        return { answer: `${isProfit?'Profit':'Loss'}: ${inr(Math.abs(diff))} (${fmtNum(Math.abs(pct))}%)`, formula: `Selling Price − Cost Price = ${isProfit?'Profit':'Loss'}`,
+        steps: [`Cost Price = ${inr(cost_price)}`, `Selling Price = ${inr(selling_price)}`, `${inr(selling_price)} − ${inr(cost_price)} = ${inr(diff)}`, `${isProfit?'Profit':'Loss'} % = ${inr(Math.abs(diff))} ÷ ${inr(cost_price)} × 100 = ${fmtNum(Math.abs(pct))}%`],
+        explanation: isProfit ? `आपको ${inr(diff)} का profit हुआ (${fmtNum(pct)}%)।` : `आपको ${inr(Math.abs(diff))} का loss हुआ (${fmtNum(Math.abs(pct))}%)।` };
+        }
+        case "discount": {
+        const {price, discount_percent} = v; const discountAmt = price * discount_percent/100; const final = price - discountAmt;
+        return { answer: inr(final), formula: `${inr(price)} − (${inr(price)} × ${fmtNum(discount_percent)}%)`,
+        steps: [`Marked price = ${inr(price)}`, `Discount = ${fmtNum(discount_percent)}% of ${inr(price)} = ${inr(discountAmt)}`, `Final price = ${inr(price)} − ${inr(discountAmt)} = ${inr(final)}`],
+        explanation: `${fmtNum(discount_percent)}% discount के बाद आपको ${inr(final)} देने होंगे (बचत: ${inr(discountAmt)})।` };
+        }
+        case "gst": {
+        const {amount, rate, mode} = v;
+        if(mode === "inclusive"){
+        const base = amount / (1 + rate/100); const gstAmt = amount - base;
+        return { answer: inr(amount), formula: `Base = Total ÷ (1 + GST% ÷ 100)`,
+        steps:[`Total (GST included) = ${inr(amount)}`, `Base amount = ${inr(amount)} ÷ (1 + ${fmtNum(rate)}/100) = ${inr(base)}`, `GST amount = ${inr(amount)} − ${inr(base)} = ${inr(gstAmt)}`],
+        explanation: `₹${fmtNum(amount)} में से GST निकाल के base price ${inr(base)} है, और GST का हिस्सा ${inr(gstAmt)} है।` };
+        } else {
+        const gstAmt = amount * rate/100; const total = amount + gstAmt;
+        return { answer: inr(total), formula: `${inr(amount)} + (${inr(amount)} × ${fmtNum(rate)}% GST)`,
+        steps:[`Base amount = ${inr(amount)}`, `GST = ${fmtNum(rate)}% of ${inr(amount)} = ${inr(gstAmt)}`, `Final total = ${inr(amount)} + ${inr(gstAmt)} = ${inr(total)}`],
+        explanation: `${inr(amount)} पर ${fmtNum(rate)}% GST जोड़कर total ${inr(total)} होगा।` };
+        }
+        }
+        case "simple_interest": {
+        const {principal, rate, time_years} = v; const si = principal * rate * time_years / 100; const total = principal + si;
+        return { answer: inr(si) + " interest", formula: `SI = P × R × T ÷ 100`,
+        steps: [`P (Principal) = ${inr(principal)}`, `R (Rate) = ${fmtNum(rate)}% per year`, `T (Time) = ${fmtNum(time_years)} years`, `SI = ${inr(principal)} × ${fmtNum(rate)} × ${fmtNum(time_years)} ÷ 100 = ${inr(si)}`, `Total repayment = ${inr(principal)} + ${inr(si)} = ${inr(total)}`],
+        explanation: `${fmtNum(time_years)} साल में simple interest ${inr(si)} बनेगा, कुल राशि ${inr(total)} होगी।` };
+        }
+        case "compound_interest": {
+        const {principal, rate, time_years} = v; const n = v.frequency || 1;
+        const amount = principal * Math.pow(1 + (rate/100)/n, n*time_years); const ci = amount - principal;
+        return { answer: inr(ci) + " interest", formula: `A = P × (1 + r/n)^(n×t)`,
+        steps: [`P = ${inr(principal)}, R = ${fmtNum(rate)}%, T = ${fmtNum(time_years)} yrs, compounded ${n}×/year`, `A = ${inr(principal)} × (1 + ${fmtNum(rate)}/100/${n})^(${n}×${fmtNum(time_years)})`, `A = ${inr(amount)}`, `Compound Interest = A − P = ${inr(amount)} − ${inr(principal)} = ${inr(ci)}`],
+        explanation: `${fmtNum(time_years)} साल बाद कुल राशि ${inr(amount)} होगी, यानी ब्याज ${inr(ci)} जुड़ेगा।` };
+        }
+        case "emi": {
+        const {principal, rate_annual, tenure_months} = v; const r = rate_annual/12/100; const n = tenure_months;
+        const emi = r === 0 ? principal/n : (principal * r * Math.pow(1+r,n)) / (Math.pow(1+r,n)-1);
+        const totalPay = emi*n; const totalInt = totalPay - principal;
+        return { answer: inr(emi) + " / month", formula: `EMI = P×r×(1+r)^n ÷ ((1+r)^n − 1)`,
+        steps: [`P (Loan) = ${inr(principal)}`, `r (monthly rate) = ${fmtNum(rate_annual)}% ÷ 12 = ${fmtNum(r*100,4)}%`, `n (months) = ${n}`, `Monthly EMI = ${inr(emi)}`, `Total repayment = ${inr(emi)} × ${n} = ${inr(totalPay)}`, `Total interest paid = ${inr(totalPay)} − ${inr(principal)} = ${inr(totalInt)}`],
+        explanation: `आपकी monthly EMI ${inr(emi)} होगी, ${n} महीनों में कुल ${inr(totalPay)} चुकाना होगा (ब्याज: ${inr(totalInt)})।` };
+        }
+        case "area_rectangle": {
+        const {length, width} = v; const area = length*width; const perimeter = 2*(length+width);
+        return { answer: `${fmtNum(area)} sq units`, formula: `Area = Length × Width`,
+        steps: [`Length = ${fmtNum(length)}, Width = ${fmtNum(width)}`, `Area = ${fmtNum(length)} × ${fmtNum(width)} = ${fmtNum(area)} sq units`, `Perimeter = 2 × (${fmtNum(length)} + ${fmtNum(width)}) = ${fmtNum(perimeter)} units`],
+        explanation: `Room/plot का area ${fmtNum(area)} square units है (जिस unit में length-width दिए थे, उसी में)।` };
+        }
+        case "area_square": {
+        const {side} = v; const area = side*side;
+        return { answer: `${fmtNum(area)} sq units`, formula: `Area = Side²`,
+        steps: [`Side = ${fmtNum(side)}`, `Area = ${fmtNum(side)}² = ${fmtNum(area)} sq units`], explanation: `Square का area ${fmtNum(area)} square units है।` };
+        }
+        case "area_circle": {
+        const {radius} = v; const area = Math.PI*radius*radius; const circumference = 2*Math.PI*radius;
+        return { answer: `${fmtNum(area)} sq units`, formula: `Area = π × r²`,
+        steps: [`Radius = ${fmtNum(radius)}`, `Area = π × ${fmtNum(radius)}² = ${fmtNum(area)} sq units`, `Circumference = 2 × π × ${fmtNum(radius)} = ${fmtNum(circumference)} units`],
+        explanation: `Circle का area ${fmtNum(area)} square units है।` };
+        }
+        case "area_triangle": {
+        const {base, height} = v; const area = 0.5*base*height;
+        return { answer: `${fmtNum(area)} sq units`, formula: `Area = ½ × Base × Height`,
+        steps: [`Base = ${fmtNum(base)}, Height = ${fmtNum(height)}`, `Area = 0.5 × ${fmtNum(base)} × ${fmtNum(height)} = ${fmtNum(area)} sq units`], explanation: `Triangle का area ${fmtNum(area)} square units है।` };
+        }
+        case "ratio": {
+        const {a,b} = v; const gcd = (x,y)=> y===0?x:gcd(y,x%y); const g = gcd(Math.round(a),Math.round(b)) || 1;
+        return { answer: `${a/g} : ${b/g}`, formula: `GCD से simplify`,
+        steps: [`${fmtNum(a)} : ${fmtNum(b)}`, `GCD (${fmtNum(a)}, ${fmtNum(b)}) = ${g}`, `Simplified ratio = ${a/g} : ${b/g}`], explanation: `${fmtNum(a)} और ${fmtNum(b)} का सरल ratio ${a/g}:${b/g} है।` };
+        }
+        case "average": {
+        const nums = v.numbers; const sum = nums.reduce((s,n)=>s+n,0); const avg = sum/nums.length;
+        return { answer: fmtNum(avg), formula: `Average = Sum ÷ Count`,
+        steps: [`Numbers: ${nums.join(', ')}`, `Sum = ${fmtNum(sum)}`, `Count = ${nums.length}`, `Average = ${fmtNum(sum)} ÷ ${nums.length} = ${fmtNum(avg)}`], explanation: `दिए गए numbers का average ${fmtNum(avg)} है।` };
+        }
+        case "bmi": {
+        const {weight_kg, height_cm} = v; const h = height_cm/100; const bmi = weight_kg/(h*h);
+        let cat = "Normal"; if(bmi<18.5) cat="Underweight"; else if(bmi>=25 && bmi<30) cat="Overweight"; else if(bmi>=30) cat="Obese";
+        return { answer: `${fmtNum(bmi,1)} (${cat})`, formula: `BMI = weight(kg) ÷ height(m)²`,
+        steps: [`Weight = ${fmtNum(weight_kg)} kg`, `Height = ${fmtNum(height_cm)} cm = ${fmtNum(h,2)} m`, `BMI = ${fmtNum(weight_kg)} ÷ (${fmtNum(h,2)})² = ${fmtNum(bmi,1)}`],
+        explanation: `⚠️ यह estimate है, medical advice नहीं। आपका BMI ${fmtNum(bmi,1)} है, जो "${cat}" range में आता है।` };
+        }
+        case "age": {
+        const dob = new Date(v.dob); const ref = v.ref_date ? new Date(v.ref_date) : new Date();
+        let years = ref.getFullYear()-dob.getFullYear(); let months = ref.getMonth()-dob.getMonth(); let days = ref.getDate()-dob.getDate();
+        if(days<0){months--; const prevMonth=new Date(ref.getFullYear(),ref.getMonth(),0); days+=prevMonth.getDate();}
+        if(months<0){years--; months+=12;}
+        return { answer: `${years} years, ${months} months, ${days} days`, formula: `Reference date − Date of birth`,
+        steps: [`DOB = ${dob.toDateString()}`, `As of = ${ref.toDateString()}`, `Age = ${years} years, ${months} months, ${days} days`], explanation: `आपकी उम्र ${years} साल, ${months} महीने और ${days} दिन है।` };
+        }
+        case "unit_convert": {
+        const {value, from_unit, to_unit, category} = v;
+        const tables = { length: {m:1, km:1000, cm:0.01, mm:0.001, ft:0.3048, feet:0.3048, inch:0.0254, yard:0.9144, mile:1609.34},
+        weight: {kg:1, g:0.001, mg:0.000001, tonne:1000, lb:0.453592, pound:0.453592, oz:0.0283495},
+        volume: {l:1, litre:1, ml:0.001, gallon:3.78541} };
+        let result;
+        if(category==="temperature"){
+        const toC = (val,u)=> u==='f' ? (val-32)*5/9 : u==='k' ? val-273.15 : val;
+        const fromC = (c,u)=> u==='f' ? c*9/5+32 : u==='k' ? c+273.15 : c;
+        result = fromC(toC(value, from_unit.toLowerCase()), to_unit.toLowerCase());
+        } else {
+        const table = tables[category] || tables.length;
+        const fu = table[from_unit.toLowerCase()] ?? 1; const tu = table[to_unit.toLowerCase()] ?? 1;
+        result = value * fu / tu;
+        }
+        return { answer: `${fmtNum(result)} ${to_unit}`, formula: `Convert via base unit`,
+        steps: [`${fmtNum(value)} ${from_unit} → ${to_unit}`, `Result = ${fmtNum(result)} ${to_unit}`], explanation: `${fmtNum(value)} ${from_unit} बराबर है ${fmtNum(result)} ${to_unit} के।` };
+        }
+        default: return null;
+        }
+        }
+
+        function typeLabel(t){
+        const labels = { percentage_of:"Percentage", percentage_change:"Percentage Change", profit_loss:"Profit & Loss", discount:"Discount", gst:"GST",
+        simple_interest:"Simple Interest", compound_interest:"Compound Interest", emi:"EMI / Loan", area_rectangle:"Area — Rectangle",
+        area_square:"Area — Square", area_circle:"Area — Circle", area_triangle:"Area — Triangle", ratio:"Ratio", average:"Average",
+        bmi:"BMI", age:"Age", unit_convert:"Unit Conversion" };
+        return labels[t] || t;
+        }
+        function valuesPreview(values){
+        return Object.entries(values || {}).map(([k,val])=>{
+        const display = Array.isArray(val) ? val.join(', ') : val;
+        return `${k}: ${display}`;
+        }).join(' · ');
+        }
+        function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+        async function playTicker(lines){
+        const zone = document.getElementById('think-zone');
+        zone.innerHTML = `<div class="ticker" id="tk"></div>`;
+        const tk = document.getElementById('tk');
+        for(let i=0;i<lines.length;i++){
+        const el = document.createElement('div');
+        el.className = 'ticker-line';
+        el.innerHTML = `<span class="arrow">›</span><span>${lines[i]}</span>`;
+        tk.appendChild(el);
+        await sleep(i===0?120:260);
+        }
+        await sleep(260);
+        }
+
+        async function runCalculation(){
+        const q = document.getElementById('q').value.trim();
+        const zone = document.getElementById('result-zone');
+        const think = document.getElementById('think-zone');
+        const btn = document.getElementById('calcBtn');
+        if(!q){ zone.innerHTML = `<div class="error-box">पहले अपना सवाल लिखें।</div>`; return; }
+
+        btn.disabled = true;
+        zone.innerHTML = '';
+        think.innerHTML = `<div class="ticker"><div class="ticker-line"><span class="arrow">›</span><span>reading your question…</span></div></div>`;
+
+        try{
+        const parsed = await classifyQuestion(q);
+
+        if(parsed.calculation_type === "unknown"){
+        await playTicker([`reading your question…`, `<b>could not classify this question</b>`]);
+        think.innerHTML = '';
+        zone.innerHTML = `<div class="error-box">यह सवाल अभी समझ नहीं पाया। कृपया numbers के साथ फिर से लिखें — जैसे "5000 ka 20%" या "cost 800 sell 950 profit kitna".</div>`;
+        btn.disabled = false; return;
+        }
+
+        const lines = [
+        `reading your question…`,
+        `detected: <b>${typeLabel(parsed.calculation_type)}</b>`,
+        `extracting values → ${valuesPreview(parsed.values) || '—'}`,
+        ];
+
+        if(parsed.missing && parsed.missing.length){
+        lines.push(`<b>missing info, asking user…</b>`);
+        await playTicker(lines);
+        think.innerHTML = '';
+        zone.innerHTML = `<div class="missing-box"><b>एक और जानकारी चाहिए:</b><br>${parsed.missing.join('<br>')}</div>`;
+        btn.disabled = false; return;
+        }
+
+        lines.push(`running calculation engine…`);
+        lines.push(`<b>verified ✓</b>`);
+        await playTicker(lines);
+
+        const out = compute(parsed.calculation_type, parsed.values);
+        think.innerHTML = '';
+        if(!out){
+        zone.innerHTML = `<div class="error-box">यह calculation type अभी demo में नहीं जुड़ा है।</div>`;
+        btn.disabled = false; return;
+        }
+
+        zone.innerHTML = `
+        <div class="receipt-wrap">
+        <div class="receipt">
+        <div class="receipt-head">
+        <div class="rtype"><span class="dot-verify"></span>${typeLabel(parsed.calculation_type)}</div>
+        <div class="rans">${out.answer}</div>
+        </div>
+        <div class="receipt-body">
+        ${out.steps.map((s,i)=>`<div class="step-row"><div class="step-num mono">${String(i+1).padStart(2,'0')}</div><div class="step-text">${s}</div></div>`).join('')}
+        <div class="formula-box">${out.formula}</div>
+        <div class="explain hi">${out.explanation}</div>
+        </div>
+        <div class="tear"></div>
+        <div class="receipt-actions">
+        <button class="mini-btn" id="copyBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 012-2h10"/></svg>
+        Copy Result
+        </button>
+        <button class="mini-btn" id="followupBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Ask Follow-up
+        </button>
+        </div>
+        </div>
+        </div>
+        `;
+        document.getElementById('copyBtn').onclick = ()=> copyResult(out.answer);
+        document.getElementById('followupBtn').onclick = askFollowup;
+        }catch(err){
+        think.innerHTML = '';
+        zone.innerHTML = `<div class="error-box">कुछ गड़बड़ हो गई, फिर से कोशिश करें।<br><span style="font-size:12px;color:#999">${err.message}</span></div>`;
+        }
+        btn.disabled = false;
+        }
+
+        async function copyResult(text){
+        try{
+        await navigator.clipboard.writeText(text);
+        showToast('Result copied ✓', 'check');
+        }catch(e){
+        try{
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Result copied ✓', 'check');
+        }catch(e2){
+        showToast('Copy नहीं हो पाया — result को manually select करें');
+        }
+        }
+        }
+
+        function askFollowup(){
+        const q = document.getElementById('q');
+        q.scrollIntoView({behavior:'smooth', block:'center'});
+        setTimeout(()=> q.focus(), 250);
+        showToast('अपना follow-up सवाल यहीं लिख दीजिए');
+        }
+
+        document.getElementById('q').addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runCalculation(); }
+        });
+
+        // close mobile menu if user taps outside it
+        document.addEventListener('click', function(e){
+        const menu = document.getElementById('mobileMenu');
+        const btn = document.getElementById('menuBtn');
+        if(menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)){
+        menu.classList.remove('open');
+        }
+        });
     </script>
 </body>
 </html>

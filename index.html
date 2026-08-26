@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Calculator — हर सवाल का हिसाब, AI के साथ।</title>
+    <title>AI Calculator — Calculate anything. Ask AI. ← ⭐</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -872,7 +872,6 @@
         <div class="mobile-menu" id="mobileMenu">
             <button onclick="scrollToCalculators()">📊 Calculators</button>
             <button onclick="showHistoryInfo()">🕓 History</button>
-            <button onclick="showPricingInfo()">💎 Pricing</button>
         </div>
     </header>
 
@@ -880,14 +879,14 @@
         <section class="hero">
             <div class="eyebrow"><span class="ln"></span>Working demo · Local Engine Version</div>
             <h1>Every calculation.<br>One <em>intelligent</em> calculator.</h1>
-            <p class="tagline-hi hi">हर सवाल का हिसाब, AI के साथ।</p>
+            <p class="tagline-hi hi">Calculate anything. Ask AI. ← ⭐</p>
 
             <div class="panel">
                 <div class="panel-row">
                     <div class="ai-cue">
                         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2 2M16.4 16.4l2 2M5.6 18.4l2-2M16.4 7.6l2-2" /><circle cx="12" cy="12" r="3.2" /></svg>
                     </div>
-                    <textarea id="q" placeholder="अपना सवाल लिखें... उदाहरण: ₹50,000 का 12% कितना होगा?"></textarea>
+                    <textarea id="q" placeholder="Ask anything… e.g. ₹50,000 × 12%"></textarea>
                 </div>
                 <div class="panel-actions">
                     <div class="chip-btns">
@@ -1199,7 +1198,7 @@
         let cat = "Normal"; if(bmi<18.5) cat="Underweight"; else if(bmi>=25 && bmi<30) cat="Overweight"; else if(bmi>=30) cat="Obese";
         return { answer: `${fmtNum(bmi,1)} (${cat})`, formula: `BMI = weight(kg) ÷ height(m)²`,
         steps: [`Weight = ${fmtNum(weight_kg)} kg`, `Height = ${fmtNum(height_cm)} cm = ${fmtNum(h,2)} m`, `BMI = ${fmtNum(weight_kg)} ÷ (${fmtNum(h,2)})² = ${fmtNum(bmi,1)}`],
-        explanation: `⚠️ यह estimate है, medical advice नहीं। आपका BMI ${fmtNum(bmi,1)} है, जो "${cat}" range में आता है।` };
+        explanation: `⚠️ This is an estimate, not medical advice. Your BMI is ${fmtNum(bmi,1)}, which falls within the "${cat}" range.` };
         }
         case "age": {
         const dob = new Date(v.dob); const ref = v.ref_date ? new Date(v.ref_date) : new Date();
@@ -1265,7 +1264,7 @@
         const zone = document.getElementById('result-zone');
         const think = document.getElementById('think-zone');
         const btn = document.getElementById('calcBtn');
-        if(!q){ zone.innerHTML = `<div class="error-box">पहले अपना सवाल लिखें।</div>`; return; }
+        if(!q){ zone.innerHTML = `<div class="error-box">Start by asking a question.</div>`; return; }
 
         btn.disabled = true;
         zone.innerHTML = '';
@@ -1277,7 +1276,7 @@
         if(parsed.calculation_type === "unknown"){
         await playTicker([`reading your question…`, `<b>could not classify this question</b>`]);
         think.innerHTML = '';
-        zone.innerHTML = `<div class="error-box">यह सवाल अभी समझ नहीं पाया। कृपया numbers के साथ फिर से लिखें — जैसे "5000 ka 20%" या "cost 800 sell 950 profit kitna".</div>`;
+        zone.innerHTML = `<div class="error-box">Couldn’t understand. Try with numbers — e.g. ‘20% of 5000’ or ‘800 → 950 profit?".</div>`;
         btn.disabled = false; return;
         }
 
@@ -1291,7 +1290,7 @@
         lines.push(`<b>missing info, asking user…</b>`);
         await playTicker(lines);
         think.innerHTML = '';
-        zone.innerHTML = `<div class="missing-box"><b>एक और जानकारी चाहिए:</b><br>${parsed.missing.join('<br>')}</div>`;
+        zone.innerHTML = `<div class="missing-box"><b>More information needed:</b><br>${parsed.missing.join('<br>')}</div>`;
         btn.disabled = false; return;
         }
 
@@ -1336,7 +1335,7 @@
         document.getElementById('followupBtn').onclick = askFollowup;
         }catch(err){
         think.innerHTML = '';
-        zone.innerHTML = `<div class="error-box">कुछ गड़बड़ हो गई, फिर से कोशिश करें।<br><span style="font-size:12px;color:#999">${err.message}</span></div>`;
+        zone.innerHTML = `<div class="error-box">Something went wrong. Please try again.<br><span style="font-size:12px;color:#999">${err.message}</span></div>`;
         }
         btn.disabled = false;
         }
@@ -1354,7 +1353,7 @@
         document.body.removeChild(ta);
         showToast('Result copied ✓', 'check');
         }catch(e2){
-        showToast('Copy नहीं हो पाया — result को manually select करें');
+        showToast('Copy failed — please select the result manually');
         }
         }
         }
@@ -1363,7 +1362,7 @@
         const q = document.getElementById('q');
         q.scrollIntoView({behavior:'smooth', block:'center'});
         setTimeout(()=> q.focus(), 250);
-        showToast('अपना follow-up सवाल यहीं लिख दीजिए');
+        showToast('Ask your follow-up question here…');
         }
 
         document.getElementById('q').addEventListener('keydown', function(e){

@@ -3,74 +3,222 @@
 <head>
   <meta charset="UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-  <title>Percentage Calculator – Calculate Percentages Easily | AI Calculator</title>
+  <title>Percentage Calculator – Calculate Percentages Online | AI Calculator</title>
 
-  <meta
-    name="description"
-    content="Free percentage calculator to calculate percentages, percentage increase, decrease, and percentage difference quickly and easily."
-  >
+  <meta name="description"
+        content="Free online percentage calculator. Calculate percentages, percentage increase or decrease, and find what percent one number is of another quickly and easily.">
 
-  <meta
-    name="keywords"
-    content="percentage calculator, percent calculator, percentage increase calculator, percentage decrease calculator, calculate percentage"
-  >
+  <meta name="keywords"
+        content="percentage calculator, percent calculator, percentage increase calculator, percentage decrease calculator, calculate percentage online">
 
-  <meta name="robots" content="index, follow">
+  <meta name="robots"
+        content="index, follow">
 
-  <link
-    rel="canonical"
-    href="https://ai-calculator-jvuf.onrender.com/seo/percentage-calculator.html"
-  >
+  <link rel="canonical"
+        href="https://ai-calculator-jvuf.onrender.com/seo/percentage-calculator.html">
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
+  <meta property="og:type"
+        content="website">
 
-  <meta
-    property="og:title"
-    content="Percentage Calculator – Free Online Calculator"
-  >
+  <meta property="og:title"
+        content="Percentage Calculator – Calculate Percentages Online">
 
-  <meta
-    property="og:description"
-    content="Calculate percentages, percentage increase and decrease quickly with our free online percentage calculator."
-  >
+  <meta property="og:description"
+        content="Calculate percentages, percentage increase, percentage decrease and more with our free online percentage calculator.">
 
-  <meta
-    property="og:url"
-    content="https://ai-calculator-jvuf.onrender.com/seo/percentage-calculator.html"
-  >
+  <meta property="og:url"
+        content="https://ai-calculator-jvuf.onrender.com/seo/percentage-calculator.html">
 
-  <meta property="og:site_name" content="AI Calculator">
+  <meta property="og:site_name"
+        content="AI Calculator">
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary">
+  <!-- Basic styling -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  <meta
-    name="twitter:title"
-    content="Percentage Calculator – AI Calculator"
-  >
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f6f8fb;
+      color: #1f2937;
+      line-height: 1.7;
+    }
 
-  <meta
-    name="twitter:description"
-    content="Free online percentage calculator for quick and accurate percentage calculations."
-  >
+    .container {
+      width: min(100% - 32px, 1000px);
+      margin: auto;
+    }
 
-  <!-- Basic WebSite Schema -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "AI Calculator Percentage Calculator",
-    "url": "https://ai-calculator-jvuf.onrender.com/seo/percentage-calculator.html",
-    "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "Web",
-    "description": "Free online percentage calculator for calculating percentages, increases and decreases."
-  }
-  </script>
+    header {
+      background: #111827;
+      color: white;
+      padding: 18px 0;
+    }
 
-  <!-- FAQ Schema -->
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .home-link {
+      color: white;
+      text-decoration: none;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 8px;
+    }
+
+    .hero {
+      background: white;
+      margin-top: 30px;
+      padding: 40px 25px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 5px 25px rgba(0,0,0,.06);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.2;
+      color: #111827;
+    }
+
+    h2 {
+      margin-top: 35px;
+      color: #111827;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin: auto;
+      font-size: 18px;
+      color: #4b5563;
+    }
+
+    .calculator-card {
+      background: white;
+      margin-top: 25px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px rgba(0,0,0,.06);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 8px;
+      background: #111827;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 18px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .content {
+      background: white;
+      margin-top: 25px;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px rgba(0,0,0,.05);
+    }
+
+    .formula {
+      background: #f3f4f6;
+      padding: 18px;
+      border-left: 4px solid #111827;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .example {
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      padding: 18px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 15px 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      font-weight: 700;
+      color: #111827;
+    }
+
+    footer {
+      text-align: center;
+      padding: 35px 15px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      .header-inner {
+        flex-direction: column;
+      }
+
+      .hero,
+      .calculator-card,
+      .content {
+        padding: 22px 18px;
+      }
+    }
+  </style>
+
+  <!-- FAQ Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -81,15 +229,7 @@
         "name": "How do I calculate a percentage?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "To calculate a percentage of a number, multiply the number by the percentage and divide the result by 100."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is 20% of 500?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "20% of 500 is 100."
+          "text": "To calculate a percentage, divide the part by the whole and multiply the result by 100. For example, 20 out of 100 is 20%."
         }
       },
       {
@@ -99,388 +239,345 @@
           "@type": "Answer",
           "text": "Subtract the original value from the new value, divide the difference by the original value, and multiply by 100."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this percentage calculator free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The percentage calculator on AI Calculator is available online for free."
+        }
       }
     ]
   }
   </script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      line-height: 1.7;
-      background: #f7f8fa;
-      color: #202124;
-    }
-
-    .container {
-      width: min(900px, 92%);
-      margin: auto;
-    }
-
-    header {
-      background: white;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 18px 0;
-    }
-
-    .brand {
-      font-size: 22px;
-      font-weight: 700;
-      text-decoration: none;
-      color: #111827;
-    }
-
-    main {
-      padding: 45px 0;
-    }
-
-    .hero,
-    .section {
-      background: white;
-      border-radius: 14px;
-      padding: 28px;
-      margin-bottom: 22px;
-      border: 1px solid #e5e7eb;
-    }
-
-    h1 {
-      font-size: clamp(30px, 5vw, 46px);
-      line-height: 1.15;
-      margin-top: 0;
-      margin-bottom: 15px;
-    }
-
-    h2 {
-      font-size: 26px;
-      margin-top: 0;
-    }
-
-    h3 {
-      font-size: 19px;
-    }
-
-    .formula {
-      background: #f1f5f9;
-      padding: 16px;
-      border-radius: 10px;
-      font-weight: 600;
-      overflow-x: auto;
-    }
-
-    .example {
-      border-left: 4px solid #111827;
-      padding: 12px 16px;
-      margin: 15px 0;
-      background: #f8fafc;
-    }
-
-    .button {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 12px 20px;
-      border-radius: 9px;
-      background: #111827;
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .faq {
-      padding: 15px 0;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .faq:last-child {
-      border-bottom: none;
-    }
-
-    footer {
-      text-align: center;
-      padding: 30px 0;
-      color: #6b7280;
-    }
-
-    @media (max-width: 600px) {
-      main {
-        padding: 25px 0;
-      }
-
-      .hero,
-      .section {
-        padding: 21px;
-      }
-    }
-  </style>
 </head>
 
 <body>
 
-  <header>
-    <div class="container">
-      <a class="brand" href="/">
-        AI Calculator
-      </a>
+<header>
+  <div class="container header-inner">
+    <div class="logo">AI Calculator</div>
+
+    <a class="home-link"
+       href="/">
+      Home
+    </a>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+
+    <h1>Percentage Calculator</h1>
+
+    <p class="intro">
+      Calculate percentages quickly and easily with our free
+      online percentage calculator. Find a percentage of a number,
+      determine what percentage one number is of another, and
+      calculate percentage increases or decreases.
+    </p>
+
+  </section>
+
+
+  <!-- Calculator -->
+
+  <section class="calculator-card">
+
+    <h2>Calculate Percentage</h2>
+
+    <div class="form-group">
+
+      <label for="percentage">
+        Percentage (%)
+      </label>
+
+      <input
+        type="number"
+        id="percentage"
+        placeholder="Enter percentage"
+        step="any">
+
     </div>
-  </header>
 
-  <main class="container">
 
-    <!-- HERO -->
-    <section class="hero">
+    <div class="form-group">
 
-      <h1>Percentage Calculator</h1>
+      <label for="number">
+        Number
+      </label>
 
-      <p>
-        Calculate percentages quickly and easily with our free online
-        percentage calculator. Find a percentage of a number, calculate
-        percentage increases and decreases, and solve common percentage
-        problems.
-      </p>
+      <input
+        type="number"
+        id="number"
+        placeholder="Enter number"
+        step="any">
 
-      <a class="button" href="/">
-        Open AI Calculator
-      </a>
+    </div>
 
-    </section>
 
-    <!-- WHAT IS -->
-    <section class="section">
+    <button onclick="calculatePercentage()">
+      Calculate
+    </button>
 
-      <h2>What is a Percentage?</h2>
 
-      <p>
-        A percentage represents a number as a fraction of 100.
-        The percentage symbol is <strong>%</strong>.
-      </p>
+    <div
+      id="result"
+      class="result">
+    </div>
 
-      <p>
-        For example, 25% means 25 out of 100, or 0.25.
-      </p>
+  </section>
 
-    </section>
 
-    <!-- BASIC FORMULA -->
-    <section class="section">
+  <!-- SEO Content -->
 
-      <h2>Percentage Formula</h2>
+  <section class="content">
 
-      <p>
-        To calculate a percentage of a number, use this formula:
-      </p>
+    <h2>What is a Percentage?</h2>
 
-      <div class="formula">
-        Percentage = (Part ÷ Whole) × 100
-      </div>
+    <p>
+      A percentage is a way of expressing a number as a fraction
+      of 100. The word percentage means "per hundred". Percentages
+      are commonly used in shopping discounts, exams, finance,
+      business, statistics, taxes and everyday calculations.
+    </p>
 
-      <p>
-        To find a specific percentage of a number:
-      </p>
 
-      <div class="formula">
-        Result = Number × Percentage ÷ 100
-      </div>
+    <h2>Percentage Formula</h2>
 
-    </section>
+    <div class="formula">
+      Percentage = (Part ÷ Whole) × 100
+    </div>
 
-    <!-- EXAMPLES -->
-    <section class="section">
 
-      <h2>Percentage Calculation Examples</h2>
+    <h2>How to Calculate a Percentage</h2>
 
-      <div class="example">
-        <h3>What is 20% of 500?</h3>
+    <p>
+      To calculate a percentage, first divide the part by the
+      whole amount. Then multiply the result by 100.
+    </p>
 
-        <p>
-          500 × 20 ÷ 100 = <strong>100</strong>
-        </p>
-      </div>
+    <div class="example">
 
-      <div class="example">
-        <h3>What is 15% of 2,000?</h3>
-
-        <p>
-          2,000 × 15 ÷ 100 = <strong>300</strong>
-        </p>
-      </div>
-
-      <div class="example">
-        <h3>What is 12% of 50,000?</h3>
-
-        <p>
-          50,000 × 12 ÷ 100 = <strong>6,000</strong>
-        </p>
-      </div>
-
-    </section>
-
-    <!-- INCREASE -->
-    <section class="section">
-
-      <h2>Percentage Increase</h2>
+      <strong>Example:</strong>
 
       <p>
-        Percentage increase tells you how much a value has increased
-        compared with its original value.
+        Suppose you scored 45 marks out of 60.
       </p>
 
-      <div class="formula">
+      <p>
+        Percentage = (45 ÷ 60) × 100
+      </p>
+
+      <p>
+        Percentage = <strong>75%</strong>
+      </p>
+
+    </div>
+
+
+    <h2>Percentage Increase</h2>
+
+    <p>
+      Percentage increase shows how much a value has increased
+      compared with its original value.
+    </p>
+
+    <div class="formula">
+      Percentage Increase =
+      ((New Value − Original Value) ÷ Original Value) × 100
+    </div>
+
+    <div class="example">
+
+      <strong>Example:</strong>
+
+      <p>
+        If a product price increases from ₹500 to ₹600:
+      </p>
+
+      <p>
+        Increase = ₹600 − ₹500 = ₹100
+      </p>
+
+      <p>
         Percentage Increase =
-        ((New Value − Original Value) ÷ Original Value) × 100
-      </div>
-
-      <div class="example">
-
-        <p>
-          Example: A price increases from ₹1,000 to ₹1,200.
-        </p>
-
-        <p>
-          Increase = ₹200
-        </p>
-
-        <p>
-          Percentage increase =
-          (200 ÷ 1,000) × 100 =
-          <strong>20%</strong>
-        </p>
-
-      </div>
-
-    </section>
-
-    <!-- DECREASE -->
-    <section class="section">
-
-      <h2>Percentage Decrease</h2>
-
-      <p>
-        Percentage decrease shows how much a value has decreased
-        compared with its original value.
+        (100 ÷ 500) × 100 = <strong>20%</strong>
       </p>
 
-      <div class="formula">
-        Percentage Decrease =
-        ((Original Value − New Value) ÷ Original Value) × 100
-      </div>
-
-      <div class="example">
-
-        <p>
-          Example: A price decreases from ₹1,000 to ₹800.
-        </p>
-
-        <p>
-          Decrease = ₹200
-        </p>
-
-        <p>
-          Percentage decrease =
-          (200 ÷ 1,000) × 100 =
-          <strong>20%</strong>
-        </p>
-
-      </div>
-
-    </section>
-
-    <!-- COMMON USES -->
-    <section class="section">
-
-      <h2>Where Are Percentage Calculations Used?</h2>
-
-      <ul>
-        <li>Discount calculations</li>
-        <li>GST and tax calculations</li>
-        <li>Profit and loss</li>
-        <li>Salary increases</li>
-        <li>Marks and exam results</li>
-        <li>Business calculations</li>
-        <li>Interest calculations</li>
-        <li>Price changes</li>
-      </ul>
-
-    </section>
-
-    <!-- FAQ -->
-    <section class="section">
-
-      <h2>Frequently Asked Questions</h2>
-
-      <div class="faq">
-
-        <h3>How do I calculate a percentage?</h3>
-
-        <p>
-          Multiply the number by the percentage and divide the result
-          by 100. For example, 20% of 500 is 500 × 20 ÷ 100 = 100.
-        </p>
-
-      </div>
-
-      <div class="faq">
-
-        <h3>What is 20% of 500?</h3>
-
-        <p>
-          20% of 500 is <strong>100</strong>.
-        </p>
-
-      </div>
-
-      <div class="faq">
-
-        <h3>How do I calculate percentage increase?</h3>
-
-        <p>
-          Subtract the original value from the new value, divide the
-          difference by the original value, and multiply by 100.
-        </p>
-
-      </div>
-
-      <div class="faq">
-
-        <h3>Is this percentage calculator free?</h3>
-
-        <p>
-          Yes. The AI Calculator is designed to provide free calculation
-          tools through the website.
-        </p>
-
-      </div>
-
-    </section>
-
-    <!-- INTERNAL LINK -->
-    <section class="section">
-
-      <h2>Need Another Calculation?</h2>
-
-      <p>
-        Use the AI Calculator to ask your calculation question naturally
-        in English, Hindi, or Hinglish.
-      </p>
-
-      <a class="button" href="/">
-        Try AI Calculator
-      </a>
-
-    </section>
-
-  </main>
-
-  <footer>
-
-    <div class="container">
-      © 2026 AI Calculator. All rights reserved.
     </div>
 
-  </footer>
+
+    <h2>Percentage Decrease</h2>
+
+    <p>
+      Percentage decrease shows how much a value has decreased
+      compared with its original value.
+    </p>
+
+    <div class="formula">
+      Percentage Decrease =
+      ((Original Value − New Value) ÷ Original Value) × 100
+    </div>
+
+    <div class="example">
+
+      <strong>Example:</strong>
+
+      <p>
+        If a price decreases from ₹1,000 to ₹800:
+      </p>
+
+      <p>
+        Decrease = ₹1,000 − ₹800 = ₹200
+      </p>
+
+      <p>
+        Percentage Decrease =
+        (200 ÷ 1000) × 100 = <strong>20%</strong>
+      </p>
+
+    </div>
+
+
+    <h2>Where Are Percentages Used?</h2>
+
+    <p>
+      Percentages are useful in many areas of everyday life.
+      They can be used for:
+    </p>
+
+    <ul>
+      <li>Exam and test scores</li>
+      <li>Shopping discounts</li>
+      <li>Business calculations</li>
+      <li>Profit and loss</li>
+      <li>Taxes and GST calculations</li>
+      <li>Interest calculations</li>
+      <li>Statistics and data analysis</li>
+      <li>Salary increases</li>
+      <li>Price increases and decreases</li>
+    </ul>
+
+
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+
+      <div class="faq-question">
+        How do I calculate a percentage?
+      </div>
+
+      <p>
+        Divide the part by the whole and multiply the result by
+        100. For example, 20 out of 100 equals 20%.
+      </p>
+
+    </div>
+
+
+    <div class="faq-item">
+
+      <div class="faq-question">
+        How do I calculate percentage increase?
+      </div>
+
+      <p>
+        Subtract the original value from the new value, divide
+        the difference by the original value, and multiply by 100.
+      </p>
+
+    </div>
+
+
+    <div class="faq-item">
+
+      <div class="faq-question">
+        Is this percentage calculator free?
+      </div>
+
+      <p>
+        Yes. You can use this online percentage calculator for free.
+      </p>
+
+    </div>
+
+
+    <div class="faq-item">
+
+      <div class="faq-question">
+        Can I use this calculator on a mobile phone?
+      </div>
+
+      <p>
+        Yes. The page is designed to work on mobile phones,
+        tablets and desktop computers.
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+
+  © 2026 AI Calculator. All rights reserved.
+
+</footer>
+
+
+<script>
+
+  function calculatePercentage() {
+
+    const percentage =
+      parseFloat(
+        document.getElementById("percentage").value
+      );
+
+    const number =
+      parseFloat(
+        document.getElementById("number").value
+      );
+
+    const result =
+      document.getElementById("result");
+
+
+    if (
+      isNaN(percentage) ||
+      isNaN(number)
+    ) {
+
+      result.style.display = "block";
+
+      result.textContent =
+        "Please enter both values.";
+
+      return;
+    }
+
+
+    const answer =
+      (percentage / 100) * number;
+
+
+    result.style.display = "block";
+
+    result.textContent =
+      percentage +
+      "% of " +
+      number +
+      " = " +
+      answer;
+  }
+
+</script>
 
 </body>
 </html>

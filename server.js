@@ -4,12 +4,11 @@ const fs = require('fs');
 
 const app = express();
 
-// Node 18+ has fetch built in.
-// Fallback for environments where fetch is unavailable.
+// Node 18+ has fetch built in
 const fetchFn =
   globalThis.fetch ||
   ((...args) =>
-    import('node-fetch').then(({ default: fetch }) => fetch(...args)));
+    import('node-fetch').then(({ default: f }) => f(...args)));
 
 
 // ============================================================
@@ -24,10 +23,7 @@ app.use((req, res, next) => {
 });
 
 
-// ============================================================
-// CORS
-// ============================================================
-
+// CORS safety
 app.use((req, res, next) => {
   const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 
@@ -49,10 +45,6 @@ app.use((req, res, next) => {
 });
 
 
-// ============================================================
-// BODY PARSER
-// ============================================================
-
 app.use(express.json());
 
 
@@ -63,103 +55,31 @@ app.use(express.json());
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const INDEX_FILE = path.join(PUBLIC_DIR, 'index.html');
 
-
-// Serve files from /public
 app.use(express.static(PUBLIC_DIR));
 
 
 // ============================================================
-// DEBUG FILES
+// DEBUG FILE ROUTE
 // ============================================================
 
 app.get('/api/debug-files', (req, res) => {
-  try {
-    res.json({
-      __dirname,
-      PUBLIC_DIR,
-      INDEX_FILE,
+  res.json({
+    __dirname,
+    PUBLIC_DIR,
+    INDEX_FILE,
 
-      publicDirExists: fs.existsSync(PUBLIC_DIR),
-      indexFileExists: fs.existsSync(INDEX_FILE),
+    publicDirExists: fs.existsSync(PUBLIC_DIR),
 
-      rootContents: fs.existsSync(__dirname)
-        ? fs.readdirSync(__dirname)
-        : [],
+    indexFileExists: fs.existsSync(INDEX_FILE),
 
-      publicContents: fs.existsSync(PUBLIC_DIR)
-        ? fs.readdirSync(PUBLIC_DIR)
-        : []
-    });
-  } catch (error) {
-    console.error('Debug files error:', error);
+    rootContents: fs.existsSync(__dirname)
+      ? fs.readdirSync(__dirname)
+      : [],
 
-    res.status(500).json({
-      error: 'Unable to inspect deployed files.',
-      message: error.message
-    });
-  }
-});
-
-
-// ============================================================
-// DEBUG API KEY
-// ============================================================
-// IMPORTANT:
-// This NEVER returns the complete API key.
-// It only shows whether it exists, its length,
-// first 7 characters and whether format looks correct.
-// ============================================================
-
-app.get('/api/debug-key', (req, res) => {
-  try {
-    const raw = process.env.ANTHROPIC_API_KEY;
-
-    if (!raw) {
-      return res.json({
-        readFrom: 'process.env.ANTHROPIC_API_KEY',
-        exists: false,
-        length: 0,
-        lengthAfterTrim: 0,
-        hadSurroundingWhitespace: false,
-        prefix: '',
-        looksLikeAnthropicFormat: false,
-        note:
-          'ANTHROPIC_API_KEY is NOT available on this running Render instance.'
-      });
-    }
-
-    const trimmed = raw.trim();
-
-    res.json({
-      readFrom: 'process.env.ANTHROPIC_API_KEY',
-
-      exists: true,
-
-      length: raw.length,
-
-      lengthAfterTrim: trimmed.length,
-
-      hadSurroundingWhitespace:
-        raw.length !== trimmed.length,
-
-      prefix: raw.slice(0, 7),
-
-      looksLikeAnthropicFormat:
-        trimmed.startsWith('sk-ant-'),
-
-      note: trimmed.startsWith('sk-ant-')
-        ? 'API key prefix looks like an Anthropic key.'
-        : 'WARNING: The value does not start with sk-ant-. Check Render Environment Variables.'
-    });
-
-  } catch (error) {
-    console.error('Debug key error:', error);
-
-    res.status(500).json({
-      error: 'Unable to inspect API key.',
-      message: error.message
-    });
-  }
+    publicContents: fs.existsSync(PUBLIC_DIR)
+      ? fs.readdirSync(PUBLIC_DIR)
+      : []
+  });
 });
 
 
@@ -176,9 +96,8 @@ app.get('/', (req, res) => {
     error:
       'public/index.html was not found on the server.',
     lookedIn: INDEX_FILE,
-
     hint:
-      'Make sure public/index.html exists in GitHub and is committed to the main branch.'
+      'Check that public/index.html exists in GitHub.'
   });
 });
 
@@ -188,23 +107,61 @@ app.get('/', (req, res) => {
 // ============================================================
 
 function healthCheck(req, res) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
   res.json({
     status: 'ok',
 
-    hasApiKey: !!apiKey,
-
-    apiKeyLooksValid:
-      !!apiKey && apiKey.trim().startsWith('sk-ant-'),
+    hasGeminiApiKey:
+      !!process.env.GEMINI_API_KEY,
 
     time: new Date().toISOString()
   });
 }
 
 app.get('/health', healthCheck);
-
 app.get('/api/health', healthCheck);
+
+
+// ============================================================
+// SAFE GEMINI KEY DEBUG
+// NEVER SHOWS FULL API KEY
+// ============================================================
+
+app.get('/api/debug-key', (req, res) => {
+  const raw = process.env.GEMINI_API_KEY;
+
+  if (!raw) {
+    return res.json({
+      readFrom: 'process.env.GEMINI_API_KEY',
+      exists: false,
+
+      note:
+        'GEMINI_API_KEY is not available on this running Render instance. Check Render Environment Variables and redeploy.'
+    });
+  }
+
+  const trimmed = raw.trim();
+
+  return res.json({
+    readFrom: 'process.env.GEMINI_API_KEY',
+
+    exists: true,
+
+    length: raw.length,
+
+    lengthAfterTrim: trimmed.length,
+
+    hadSurroundingWhitespace:
+      raw.length !== trimmed.length,
+
+    prefix: trimmed.slice(0, 7),
+
+    looksLikeGoogleKey:
+      trimmed.length > 10,
+
+    note:
+      'The API key exists. Only its prefix and length are shown for security.'
+  });
+});
 
 
 // ============================================================
@@ -212,17 +169,27 @@ app.get('/api/health', healthCheck);
 // ============================================================
 
 const SYSTEM_PROMPT = `
-You are the natural-language understanding layer for a calculator app used by people typing in English, Hindi, or Hinglish.
+You are the natural-language understanding layer for an AI Calculator app.
 
-Your ONLY job is to read the user's question and output ONE JSON object identifying the calculation type and extracting the numeric inputs.
+The app is used by people typing in:
+- English
+- Hindi
+- Hinglish
 
-You do NOT calculate anything yourself.
+Your ONLY job is to read the user's calculation question and identify:
+1. calculation_type
+2. numeric/input values
+3. detected language
+4. missing required values
 
-Output ONLY the JSON object.
-Do not use markdown.
-Do not add explanations outside the JSON object.
+DO NOT calculate the final answer yourself.
 
-Pick "calculation_type" from exactly this list:
+Return ONLY valid JSON.
+Do not return markdown.
+Do not return code fences.
+Do not return explanations outside JSON.
+
+Choose calculation_type ONLY from this list:
 
 - percentage_of: {base, percent}
 
@@ -234,76 +201,97 @@ Pick "calculation_type" from exactly this list:
 
 - gst: {amount, rate, mode}
   mode must be:
-  "exclusive" = add GST
-  "inclusive" = extract GST from total
+  "exclusive"
+  or
+  "inclusive"
 
 - cgst_sgst: {amount, rate}
-  rate is the TOTAL GST rate to be split equally into CGST + SGST
+  rate is the TOTAL GST rate.
 
-- simple_interest: {principal, rate, time_years}
+- simple_interest:
+  {principal, rate, time_years}
 
-- compound_interest: {principal, rate, time_years, frequency}
-  frequency = times compounded per year
-  default = 1
+- compound_interest:
+  {principal, rate, time_years, frequency}
 
-- emi: {principal, rate_annual, tenure_months}
+- emi:
+  {principal, rate_annual, tenure_months}
 
-- area_rectangle: {length, width}
+- area_rectangle:
+  {length, width}
 
-- area_square: {side}
+- area_square:
+  {side}
 
-- area_circle: {radius}
+- area_circle:
+  {radius}
 
-- area_triangle: {base, height}
+- area_triangle:
+  {base, height}
 
-- ratio: {a, b}
+- ratio:
+  {a, b}
 
-- average: {numbers}
+- average:
+  {numbers}
 
-- statistics: {numbers}
+- statistics:
+  {numbers}
 
-- bmi: {weight_kg, height_cm}
+- bmi:
+  {weight_kg, height_cm}
 
-- age: {dob, ref_date}
+- age:
+  {dob, ref_date}
 
-- date_difference: {date1, date2}
+- date_difference:
+  {date1, date2}
 
-- marks_percentage: {obtained, total_marks}
+- marks_percentage:
+  {obtained, total_marks}
 
-- commission: {sale_amount, commission_percent}
+- commission:
+  {sale_amount, commission_percent}
 
-- salary_convert: {value, from}
+- salary_convert:
+  {value, from}
 
-- break_even: {fixed_cost, price_per_unit, variable_cost_per_unit}
+- break_even:
+  {fixed_cost, price_per_unit, variable_cost_per_unit}
 
 - unit_convert:
   {value, from_unit, to_unit, category}
 
-  category must be one of:
-  length
-  weight
-  volume
-  temperature
-  time
-
 - unknown
 
-Convert units the user gives into plain numeric values.
+Important:
+
+Convert common units/numbers into plain numeric values.
 
 Examples:
 
 "2 lakh" -> 200000
 
+"5 crore" -> 50000000
+
 "12 feet" -> 12
 
-Do not convert feet to meters unless the user specifically asks.
+"5000 rupees" -> 5000
+
+For area calculations, keep the original unit meaning.
+Do not unnecessarily convert feet into meters.
 
 Language detection:
 
-- "hi" = Hindi written in Devanagari script
-- "en" = English
-- "hinglish" = Hindi words written using Roman/Latin letters
-  or mixed English + Hindi
+"hi"
+= Hindi written in Devanagari.
+
+"en"
+= normal English.
+
+"hinglish"
+= Hindi written using Roman/Latin letters,
+or mixed English + Hindi.
 
 Examples:
 
@@ -313,20 +301,18 @@ Examples:
 "10000 का 20% कितना होगा"
 => hi
 
-"What is 20 percent of 10000?"
+"What is 20% of 10000?"
 => en
 
-If required numbers are missing:
+If required information is missing,
+still return the correct calculation_type,
+fill whatever values are available,
+and add a missing array.
 
-Still return the correct calculation_type.
+The missing messages must be written in the same language
+as detected_language.
 
-Fill in whatever values are available.
-
-Add a "missing" array containing short descriptions of what is needed.
-
-The missing text must be written in the same language as detected_language.
-
-Return strictly valid JSON in exactly this shape:
+Return EXACTLY this JSON structure:
 
 {
   "calculation_type": "...",
@@ -334,24 +320,21 @@ Return strictly valid JSON in exactly this shape:
   "missing": [],
   "detected_language": "hi"
 }
-
-Do not return anything else.
 `;
 
 
 // ============================================================
-// ANTHROPIC CLASSIFICATION API
+// GEMINI API
 // ============================================================
 
 app.post('/api/classify', async (req, res) => {
-
   try {
 
-    // --------------------------------------------------------
-    // Validate request
-    // --------------------------------------------------------
-
     const { question } = req.body || {};
+
+    // --------------------------------------------------------
+    // Validate question
+    // --------------------------------------------------------
 
     if (!question || typeof question !== 'string') {
       return res.status(400).json({
@@ -361,177 +344,269 @@ app.post('/api/classify', async (req, res) => {
 
 
     // --------------------------------------------------------
-    // Get API key
+    // Gemini API Key
     // --------------------------------------------------------
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({
         error:
-          'Server is missing ANTHROPIC_API_KEY. Add it in Render Environment Variables.'
+          'Server is missing GEMINI_API_KEY. Add GEMINI_API_KEY in Render Environment Variables.'
       });
     }
 
-
-    // Remove accidental spaces/newlines
     const cleanKey = apiKey.trim();
 
+
+    // --------------------------------------------------------
+    // Gemini Model
+    // --------------------------------------------------------
+
+    const model =
+      process.env.GEMINI_MODEL ||
+      'gemini-3.7-flash';
+
+
     console.log(
-      `Using ANTHROPIC_API_KEY: length=${cleanKey.length}, prefix=${cleanKey.slice(
-        0,
-        7
-      )}..., trimmed=${cleanKey !== apiKey}`
+      `Using Gemini model: ${model}`
+    );
+
+    console.log(
+      `GEMINI_API_KEY present: true, length=${cleanKey.length}`
     );
 
 
     // --------------------------------------------------------
-    // Anthropic request
+    // Gemini REST API
     // --------------------------------------------------------
 
+    const endpoint =
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+
     const requestBody = {
+      systemInstruction: {
+        parts: [
+          {
+            text: SYSTEM_PROMPT
+          }
+        ]
+      },
 
-      model: 'claude-haiku-4-5-20251001',
-
-      max_tokens: 1000,
-
-      system: SYSTEM_PROMPT,
-
-      messages: [
+      contents: [
         {
           role: 'user',
-          content: question
+
+          parts: [
+            {
+              text: question
+            }
+          ]
         }
-      ]
+      ],
+
+      generationConfig: {
+        temperature: 0,
+
+        maxOutputTokens: 1000,
+
+        responseMimeType:
+          'application/json'
+      }
     };
 
 
-    console.log(
-      'Sending request to Anthropic:',
-      requestBody.model
-    );
+    const geminiRes = await fetchFn(endpoint, {
+      method: 'POST',
 
+      headers: {
+        'Content-Type': 'application/json',
 
-    const anthropicRes = await fetchFn(
-      'https://api.anthropic.com/v1/messages',
-      {
-        method: 'POST',
+        'x-goog-api-key': cleanKey
+      },
 
-        headers: {
-          'Content-Type': 'application/json',
-
-          'x-api-key': cleanKey,
-
-          'anthropic-version': '2023-06-01'
-        },
-
-        body: JSON.stringify(requestBody)
-      }
-    );
+      body: JSON.stringify(requestBody)
+    });
 
 
     // --------------------------------------------------------
-    // Handle Anthropic errors
+    // Gemini Error Handling
     // --------------------------------------------------------
 
-    if (!anthropicRes.ok) {
+    if (!geminiRes.ok) {
 
-      const rawErrText = await anthropicRes.text();
+      const rawErrText =
+        await geminiRes.text();
 
       let parsedErr = null;
 
       try {
-        parsedErr = JSON.parse(rawErrText);
+        parsedErr =
+          JSON.parse(rawErrText);
       } catch (_) {
-        // Response wasn't JSON
+        // keep raw text
       }
 
 
       console.error(
-        '========================================'
+        '======================================'
       );
 
       console.error(
-        'ANTHROPIC API CALL FAILED'
+        'GEMINI API CALL FAILED'
       );
 
       console.error(
-        'HTTP STATUS:',
-        anthropicRes.status
+        'HTTP status:',
+        geminiRes.status
       );
 
       console.error(
-        'STATUS TEXT:',
-        anthropicRes.statusText
+        'HTTP status text:',
+        geminiRes.statusText
       );
 
       console.error(
-        'MODEL:',
-        requestBody.model
+        'Model:',
+        model
       );
 
       console.error(
-        'ANTHROPIC RESPONSE:',
+        'Gemini response:',
         rawErrText
       );
 
       console.error(
-        '========================================'
+        '======================================'
       );
 
-
-      const errType =
-        parsedErr?.error?.type ||
-        'unknown_error';
 
       const errMessage =
         parsedErr?.error?.message ||
         rawErrText ||
-        'No details returned by Anthropic.';
+        'Gemini returned an unknown error.';
+
+
+      const errStatus =
+        parsedErr?.error?.status ||
+        'UNKNOWN';
 
 
       return res.status(502).json({
-
         error:
-          `Anthropic API error (${anthropicRes.status} ${errType}): ${errMessage}`,
+          `Gemini API error (${geminiRes.status} ${errStatus}): ${errMessage}`,
 
-        anthropicStatus:
-          anthropicRes.status,
+        geminiStatus:
+          geminiRes.status,
 
-        anthropicErrorType:
-          errType
+        geminiErrorStatus:
+          errStatus,
 
+        model
       });
     }
 
 
     // --------------------------------------------------------
-    // Successful response
+    // Read Gemini Response
     // --------------------------------------------------------
 
-    const data = await anthropicRes.json();
+    const data =
+      await geminiRes.json();
+
 
     console.log(
-      'Anthropic API request successful.'
+      'Gemini API request successful.'
     );
 
-    return res.json(data);
 
-  } catch (error) {
+    const text =
+      data?.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || '')
+        .join('')
+        .trim();
+
+
+    if (!text) {
+
+      console.error(
+        'Gemini returned no text:',
+        JSON.stringify(data)
+      );
+
+      return res.status(502).json({
+        error:
+          'Gemini returned an empty response.'
+      });
+    }
+
+
+    // --------------------------------------------------------
+    // Clean JSON
+    // --------------------------------------------------------
+
+    let cleanText = text
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+
+
+    // Validate JSON before sending it
+    try {
+
+      JSON.parse(cleanText);
+
+    } catch (jsonError) {
+
+      console.error(
+        'Gemini returned invalid JSON:',
+        cleanText
+      );
+
+      return res.status(502).json({
+        error:
+          'Gemini returned invalid JSON. Please try again.'
+      });
+    }
+
+
+    // --------------------------------------------------------
+    // IMPORTANT:
+    // Your existing frontend expects:
+    //
+    // data.content[0].text
+    //
+    // So we return Gemini's response in the same
+    // structure your old Anthropic frontend expects.
+    // --------------------------------------------------------
+
+    return res.json({
+
+      content: [
+        {
+          type: 'text',
+
+          text: cleanText
+        }
+      ],
+
+      model,
+
+      provider: 'google-gemini'
+    });
+
+  } catch (err) {
 
     console.error(
-      'SERVER ERROR:',
-      error
+      'Server error:',
+      err
     );
 
     return res.status(500).json({
-
       error:
-        'Something went wrong on the server.',
-
-      message:
-        error.message
-
+        'Something went wrong on the server. Please try again.'
     });
   }
 });
@@ -543,11 +618,9 @@ app.post('/api/classify', async (req, res) => {
 
 app.use('/api', (req, res) => {
 
-  res.status(404).json({
-
+  return res.status(404).json({
     error:
       `No API route: ${req.method} ${req.originalUrl}`
-
   });
 
 });
@@ -564,11 +637,9 @@ app.use((err, req, res, next) => {
     err
   );
 
-  res.status(500).json({
-
+  return res.status(500).json({
     error:
       'Unexpected server error.'
-
   });
 
 });

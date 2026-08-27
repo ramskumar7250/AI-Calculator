@@ -2,17 +2,17 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-const app = express();
-
-// Node 18+ has fetch built in
+// Node 18+ has fetch built in.
+// Fallback to node-fetch for older Node versions.
 const fetchFn =
   globalThis.fetch ||
   ((...args) =>
     import('node-fetch').then(({ default: f }) => f(...args)));
 
+const app = express();
 
 // ============================================================
-// BASIC APP SETUP
+// REQUEST LOGGER
 // ============================================================
 
 app.use((req, res, next) => {
@@ -22,8 +22,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// ============================================================
+// CORS
+// ============================================================
 
-// CORS safety
 app.use((req, res, next) => {
   const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 
@@ -44,12 +46,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// ============================================================
+// BODY PARSER
+// ============================================================
 
 app.use(express.json());
 
-
 // ============================================================
-// PUBLIC FOLDER
+// FRONTEND / PUBLIC DIRECTORY
 // ============================================================
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -57,9 +61,8 @@ const INDEX_FILE = path.join(PUBLIC_DIR, 'index.html');
 
 app.use(express.static(PUBLIC_DIR));
 
-
 // ============================================================
-// DEBUG FILE ROUTE
+// DEBUG FILES
 // ============================================================
 
 app.get('/api/debug-files', (req, res) => {
@@ -67,24 +70,19 @@ app.get('/api/debug-files', (req, res) => {
     __dirname,
     PUBLIC_DIR,
     INDEX_FILE,
-
     publicDirExists: fs.existsSync(PUBLIC_DIR),
-
     indexFileExists: fs.existsSync(INDEX_FILE),
-
     rootContents: fs.existsSync(__dirname)
       ? fs.readdirSync(__dirname)
       : [],
-
     publicContents: fs.existsSync(PUBLIC_DIR)
       ? fs.readdirSync(PUBLIC_DIR)
       : []
   });
 });
 
-
 // ============================================================
-// HOME PAGE
+// ROOT ROUTE
 // ============================================================
 
 app.get('/', (req, res) => {
@@ -94,13 +92,12 @@ app.get('/', (req, res) => {
 
   return res.status(500).json({
     error:
-      'public/index.html was not found on the server.',
+      'public/index.html was not found on the server at deploy time.',
     lookedIn: INDEX_FILE,
     hint:
-      'Check that public/index.html exists in GitHub.'
+      'Visit /api/debug-files on this same domain to inspect deployed files.'
   });
 });
-
 
 // ============================================================
 // HEALTH CHECK
@@ -109,10 +106,11 @@ app.get('/', (req, res) => {
 function healthCheck(req, res) {
   res.json({
     status: 'ok',
-
-    hasGeminiApiKey:
-      !!process.env.GEMINI_API_KEY,
-
+    provider: 'groq',
+    hasApiKey: !!process.env.GROQ_API_KEY,
+    model:
+      process.env.GROQ_MODEL ||
+      'openai/gpt-oss-20b',
     time: new Date().toISOString()
   });
 }
@@ -120,96 +118,72 @@ function healthCheck(req, res) {
 app.get('/health', healthCheck);
 app.get('/api/health', healthCheck);
 
-
 // ============================================================
-// SAFE GEMINI KEY DEBUG
-// NEVER SHOWS FULL API KEY
+// SAFE GROQ KEY DEBUG
+// NEVER RETURNS THE ACTUAL API KEY
 // ============================================================
 
 app.get('/api/debug-key', (req, res) => {
-  const raw = process.env.GEMINI_API_KEY;
+  const raw = process.env.GROQ_API_KEY;
 
   if (!raw) {
     return res.json({
-      readFrom: 'process.env.GEMINI_API_KEY',
+      readFrom: 'process.env.GROQ_API_KEY',
       exists: false,
-
       note:
-        'GEMINI_API_KEY is not available on this running Render instance. Check Render Environment Variables and redeploy.'
+        'GROQ_API_KEY is not available on this running instance. Check Render Environment Variables and redeploy.'
     });
   }
 
   const trimmed = raw.trim();
 
-  return res.json({
-    readFrom: 'process.env.GEMINI_API_KEY',
-
+  res.json({
+    readFrom: 'process.env.GROQ_API_KEY',
     exists: true,
-
     length: raw.length,
-
     lengthAfterTrim: trimmed.length,
-
     hadSurroundingWhitespace:
       raw.length !== trimmed.length,
-
     prefix: trimmed.slice(0, 7),
-
-    looksLikeGoogleKey:
-      trimmed.length > 10,
-
-    note:
-      'The API key exists. Only its prefix and length are shown for security.'
+    looksLikeGroqFormat:
+      trimmed.startsWith('gsk_'),
+    note: trimmed.startsWith('gsk_')
+      ? 'The key format looks like a Groq API key.'
+      : 'WARNING: The key does not look like the usual Groq gsk_ format. Check the copied value.'
   });
 });
-
 
 // ============================================================
 // SYSTEM PROMPT
 // ============================================================
 
 const SYSTEM_PROMPT = `
-You are the natural-language understanding layer for an AI Calculator app.
+You are the natural-language understanding layer for a calculator app used by people typing in English, Hindi, or Hinglish.
 
-The app is used by people typing in:
-- English
-- Hindi
-- Hinglish
+Your ONLY job is to read the user's question and output ONE valid JSON object identifying the calculation type and extracting the numeric inputs.
 
-Your ONLY job is to read the user's calculation question and identify:
-1. calculation_type
-2. numeric/input values
-3. detected language
-4. missing required values
+You DO NOT calculate anything yourself.
 
-DO NOT calculate the final answer yourself.
+Output ONLY valid JSON.
+Do NOT use markdown.
+Do NOT use code fences.
+Do NOT add explanations outside the JSON.
 
-Return ONLY valid JSON.
-Do not return markdown.
-Do not return code fences.
-Do not return explanations outside JSON.
-
-Choose calculation_type ONLY from this list:
+Pick "calculation_type" from exactly this list:
 
 - percentage_of: {base, percent}
-
 - percentage_change: {from, to}
-
 - profit_loss: {cost_price, selling_price}
-
 - discount: {price, discount_percent}
-
 - gst: {amount, rate, mode}
-  mode must be:
-  "exclusive"
-  or
-  "inclusive"
+  mode must be "exclusive" or "inclusive"
+  exclusive = GST needs to be added
+  inclusive = GST is already included and needs to be extracted
 
 - cgst_sgst: {amount, rate}
-  rate is the TOTAL GST rate.
+  rate is the TOTAL GST rate to split equally into CGST + SGST
 
-- simple_interest:
-  {principal, rate, time_years}
+- simple_interest: {principal, rate, time_years}
 
 - compound_interest:
   {principal, rate, time_years, frequency}
@@ -264,27 +238,26 @@ Choose calculation_type ONLY from this list:
 
 - unknown
 
-Important:
+IMPORTANT NUMBER RULES:
 
-Convert common units/numbers into plain numeric values.
+Convert common number formats into plain numeric values.
 
 Examples:
 
 "2 lakh" -> 200000
-
 "5 crore" -> 50000000
-
+"25,000" -> 25000
+"5000 rupees" -> 5000
+"18%" -> 18
 "12 feet" -> 12
 
-"5000 rupees" -> 5000
-
 For area calculations, keep the original unit meaning.
-Do not unnecessarily convert feet into meters.
+Do NOT unnecessarily convert feet into meters.
 
-Language detection:
+LANGUAGE DETECTION:
 
 "hi"
-= Hindi written in Devanagari.
+= Hindi written in Devanagari script.
 
 "en"
 = normal English.
@@ -304,15 +277,25 @@ Examples:
 "What is 20% of 10000?"
 => en
 
-If required information is missing,
-still return the correct calculation_type,
-fill whatever values are available,
-and add a missing array.
+MISSING INFORMATION:
 
-The missing messages must be written in the same language
-as detected_language.
+If required information is missing, still return the correct calculation_type.
 
-Return EXACTLY this JSON structure:
+Fill whatever values are available.
+
+Then add a "missing" array containing short descriptions of what is required.
+
+The missing messages MUST be written in the SAME language as detected_language.
+
+Hindi question -> Hindi missing message.
+
+English question -> English missing message.
+
+Hinglish question -> Hinglish missing message.
+
+IMPORTANT:
+
+Return this exact top-level structure:
 
 {
   "calculation_type": "...",
@@ -320,16 +303,20 @@ Return EXACTLY this JSON structure:
   "missing": [],
   "detected_language": "hi"
 }
+
+The detected_language must be exactly one of:
+
+"hi"
+"hinglish"
+"en"
 `;
 
-
 // ============================================================
-// GEMINI API
+// GROQ CLASSIFICATION API
 // ============================================================
 
 app.post('/api/classify', async (req, res) => {
   try {
-
     const { question } = req.body || {};
 
     // --------------------------------------------------------
@@ -342,265 +329,321 @@ app.post('/api/classify', async (req, res) => {
       });
     }
 
+    const cleanQuestion = question.trim();
+
+    if (!cleanQuestion) {
+      return res.status(400).json({
+        error: 'Question cannot be empty.'
+      });
+    }
 
     // --------------------------------------------------------
-    // Gemini API Key
+    // GROQ API KEY
     // --------------------------------------------------------
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
+      console.error(
+        'GROQ_API_KEY is missing from environment variables.'
+      );
+
       return res.status(500).json({
         error:
-          'Server is missing GEMINI_API_KEY. Add GEMINI_API_KEY in Render Environment Variables.'
+          'Server is missing GROQ_API_KEY. Add GROQ_API_KEY in Render Environment Variables.'
       });
     }
 
     const cleanKey = apiKey.trim();
 
-
     // --------------------------------------------------------
-    // Gemini Model
+    // GROQ MODEL
     // --------------------------------------------------------
 
     const model =
-      process.env.GEMINI_MODEL ||
-      'gemini-3.7-flash';
-
+      process.env.GROQ_MODEL ||
+      'openai/gpt-oss-20b';
 
     console.log(
-      `Using Gemini model: ${model}`
+      `Using Groq model: ${model}`
     );
 
     console.log(
-      `GEMINI_API_KEY present: true, length=${cleanKey.length}`
+      `GROQ_API_KEY present: true, length=${cleanKey.length}`
     );
 
-
     // --------------------------------------------------------
-    // Gemini REST API
+    // GROQ REQUEST
     // --------------------------------------------------------
-
-    const endpoint =
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-
 
     const requestBody = {
-      systemInstruction: {
-        parts: [
-          {
-            text: SYSTEM_PROMPT
-          }
-        ]
-      },
+      model,
 
-      contents: [
+      messages: [
+        {
+          role: 'system',
+          content: SYSTEM_PROMPT
+        },
         {
           role: 'user',
-
-          parts: [
-            {
-              text: question
-            }
-          ]
+          content: cleanQuestion
         }
       ],
 
-      generationConfig: {
-        temperature: 0,
+      temperature: 0,
 
-        maxOutputTokens: 1000,
+      max_completion_tokens: 1000,
 
-        responseMimeType:
-          'application/json'
+      response_format: {
+        type: 'json_object'
       }
     };
 
-
-    const geminiRes = await fetchFn(endpoint, {
-      method: 'POST',
-
-      headers: {
-        'Content-Type': 'application/json',
-
-        'x-goog-api-key': cleanKey
-      },
-
-      body: JSON.stringify(requestBody)
-    });
-
-
     // --------------------------------------------------------
-    // Gemini Error Handling
+    // GROQ API CALL
     // --------------------------------------------------------
 
-    if (!geminiRes.ok) {
+    const groqRes = await fetchFn(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
 
-      const rawErrText =
-        await geminiRes.text();
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${cleanKey}`
+        },
+
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+    // --------------------------------------------------------
+    // GROQ ERROR HANDLING
+    // --------------------------------------------------------
+
+    if (!groqRes.ok) {
+      const rawErrText = await groqRes.text();
 
       let parsedErr = null;
 
       try {
-        parsedErr =
-          JSON.parse(rawErrText);
+        parsedErr = JSON.parse(rawErrText);
       } catch (_) {
-        // keep raw text
+        // Response was not JSON.
       }
 
-
       console.error(
-        '======================================'
+        '============================================'
       );
 
       console.error(
-        'GEMINI API CALL FAILED'
+        'Groq API call failed'
       );
 
       console.error(
         'HTTP status:',
-        geminiRes.status
+        groqRes.status,
+        groqRes.statusText
       );
 
       console.error(
-        'HTTP status text:',
-        geminiRes.statusText
-      );
-
-      console.error(
-        'Model:',
+        'Request model:',
         model
       );
 
       console.error(
-        'Gemini response:',
+        'Groq response:',
         rawErrText
       );
 
       console.error(
-        '======================================'
+        '============================================'
       );
-
 
       const errMessage =
         parsedErr?.error?.message ||
         rawErrText ||
-        'Gemini returned an unknown error.';
+        'No details returned by Groq.';
 
+      // ------------------------------------------------------
+      // RATE LIMIT / QUOTA
+      // ------------------------------------------------------
 
-      const errStatus =
-        parsedErr?.error?.status ||
-        'UNKNOWN';
+      if (groqRes.status === 429) {
+        const retryAfter =
+          groqRes.headers.get('retry-after');
 
+        return res.status(429).json({
+          error:
+            `Groq API rate limit reached. ${errMessage}`,
+          provider: 'groq',
+          status: 429,
+          retryAfter: retryAfter || null
+        });
+      }
+
+      // ------------------------------------------------------
+      // AUTH ERROR
+      // ------------------------------------------------------
+
+      if (
+        groqRes.status === 401 ||
+        groqRes.status === 403
+      ) {
+        return res.status(502).json({
+          error:
+            'Groq API authentication failed. Check GROQ_API_KEY in Render Environment Variables.',
+          provider: 'groq',
+          status: groqRes.status
+        });
+      }
+
+      // ------------------------------------------------------
+      // OTHER GROQ ERRORS
+      // ------------------------------------------------------
 
       return res.status(502).json({
         error:
-          `Gemini API error (${geminiRes.status} ${errStatus}): ${errMessage}`,
-
-        geminiStatus:
-          geminiRes.status,
-
-        geminiErrorStatus:
-          errStatus,
-
-        model
+          `Groq API error (${groqRes.status}): ${errMessage}`,
+        provider: 'groq',
+        status: groqRes.status
       });
     }
 
-
     // --------------------------------------------------------
-    // Read Gemini Response
+    // READ GROQ RESPONSE
     // --------------------------------------------------------
 
-    const data =
-      await geminiRes.json();
+    const data = await groqRes.json();
 
+    const generatedText =
+      data?.choices?.[0]?.message?.content;
 
-    console.log(
-      'Gemini API request successful.'
-    );
-
-
-    const text =
-      data?.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || '')
-        .join('')
-        .trim();
-
-
-    if (!text) {
-
+    if (
+      !generatedText ||
+      typeof generatedText !== 'string'
+    ) {
       console.error(
-        'Gemini returned no text:',
+        'Groq returned an unexpected response:',
         JSON.stringify(data)
       );
 
       return res.status(502).json({
         error:
-          'Gemini returned an empty response.'
+          'Groq returned an empty or unexpected response.'
       });
     }
 
+    // --------------------------------------------------------
+    // CLEAN JSON
+    // --------------------------------------------------------
+
+    let classificationText =
+      generatedText.trim();
+
+    // Remove accidental markdown fences if model ever adds them.
+    classificationText =
+      classificationText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
 
     // --------------------------------------------------------
-    // Clean JSON
+    // VALIDATE JSON
     // --------------------------------------------------------
 
-    let cleanText = text
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/\s*```$/i, '')
-      .trim();
+    let classification;
 
-
-    // Validate JSON before sending it
     try {
-
-      JSON.parse(cleanText);
-
-    } catch (jsonError) {
-
+      classification =
+        JSON.parse(classificationText);
+    } catch (parseError) {
       console.error(
-        'Gemini returned invalid JSON:',
-        cleanText
+        'Groq returned invalid JSON:',
+        classificationText
       );
 
       return res.status(502).json({
         error:
-          'Gemini returned invalid JSON. Please try again.'
+          'Groq returned invalid JSON. Please try the calculation again.',
+        provider: 'groq'
       });
     }
 
+    // --------------------------------------------------------
+    // BASIC RESPONSE VALIDATION
+    // --------------------------------------------------------
+
+    if (
+      !classification ||
+      typeof classification !== 'object'
+    ) {
+      return res.status(502).json({
+        error:
+          'Groq returned an invalid classification object.'
+      });
+    }
+
+    if (!classification.calculation_type) {
+      return res.status(502).json({
+        error:
+          'Groq response is missing calculation_type.'
+      });
+    }
+
+    if (!classification.values) {
+      classification.values = {};
+    }
+
+    if (!Array.isArray(classification.missing)) {
+      classification.missing = [];
+    }
+
+    if (
+      !['hi', 'hinglish', 'en'].includes(
+        classification.detected_language
+      )
+    ) {
+      classification.detected_language =
+        'en';
+    }
 
     // --------------------------------------------------------
     // IMPORTANT:
-    // Your existing frontend expects:
+    // Return an Anthropic-compatible shape so your existing
+    // frontend does NOT need to be changed.
     //
-    // data.content[0].text
+    // Your old backend returned Anthropic data.
+    // We now wrap Groq's JSON inside:
     //
-    // So we return Gemini's response in the same
-    // structure your old Anthropic frontend expects.
+    // {
+    //   content: [
+    //     {
+    //       type: "text",
+    //       text: "..."
+    //     }
+    //   ]
+    // }
+    //
     // --------------------------------------------------------
 
     return res.json({
-
       content: [
         {
           type: 'text',
-
-          text: cleanText
+          text: JSON.stringify(classification)
         }
       ],
 
-      model,
-
-      provider: 'google-gemini'
+      // Extra metadata is harmless for the frontend.
+      provider: 'groq',
+      model
     });
 
   } catch (err) {
-
     console.error(
-      'Server error:',
+      'Unexpected server error:',
       err
     );
 
@@ -611,39 +654,32 @@ app.post('/api/classify', async (req, res) => {
   }
 });
 
-
 // ============================================================
-// UNKNOWN API ROUTES
+// UNKNOWN API ROUTE
 // ============================================================
 
 app.use('/api', (req, res) => {
-
-  return res.status(404).json({
+  res.status(404).json({
     error:
       `No API route: ${req.method} ${req.originalUrl}`
   });
-
 });
-
 
 // ============================================================
 // GLOBAL ERROR HANDLER
 // ============================================================
 
 app.use((err, req, res, next) => {
-
   console.error(
     'Unhandled error:',
     err
   );
 
-  return res.status(500).json({
+  res.status(500).json({
     error:
       'Unexpected server error.'
   });
-
 });
-
 
 // ============================================================
 // START SERVER
@@ -653,17 +689,18 @@ const PORT =
   process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-
   console.log(
     `AI Calculator server running on port ${PORT}`
   );
 
   console.log(
-    `Public directory: ${PUBLIC_DIR}`
+    `AI Provider: Groq`
   );
 
   console.log(
-    `Index file: ${INDEX_FILE}`
+    `AI Model: ${
+      process.env.GROQ_MODEL ||
+      'openai/gpt-oss-20b'
+    }`
   );
-
 });

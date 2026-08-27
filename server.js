@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 // Node 18+ has fetch built in. If this is running on an older Node version
 // on your host, fall back to node-fetch so the app doesn't crash.
@@ -31,7 +32,43 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Resolve these ONCE, up front, so we can log/inspect them if something's wrong.
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const INDEX_FILE = path.join(PUBLIC_DIR, 'index.html');
+
+app.use(express.static(PUBLIC_DIR));
+
+// Diagnostic route — hit this in a browser to see EXACTLY what got deployed
+// on disk. If "indexFileExists" is false here, the file genuinely isn't in
+// the deployed build (not committed, wrong path in the repo, or excluded by
+// .gitignore) — that's the actual bug, not a code/routing problem.
+app.get('/api/debug-files', (req, res) => {
+  res.json({
+    __dirname,
+    PUBLIC_DIR,
+    INDEX_FILE,
+    publicDirExists: fs.existsSync(PUBLIC_DIR),
+    indexFileExists: fs.existsSync(INDEX_FILE),
+    rootContents: fs.existsSync(__dirname) ? fs.readdirSync(__dirname) : [],
+    publicContents: fs.existsSync(PUBLIC_DIR) ? fs.readdirSync(PUBLIC_DIR) : []
+  });
+});
+
+// Explicit fallback for "/". express.static above should already serve
+// index.html for "/" automatically — this only fires if that lookup failed,
+// and it explains the real reason instead of Express's bare "Cannot GET /".
+app.get('/', (req, res) => {
+  if (fs.existsSync(INDEX_FILE)) {
+    res.sendFile(INDEX_FILE);
+  } else {
+    res.status(500).json({
+      error: 'public/index.html was not found on the server at deploy time. It was likely not committed/pushed to the repo, or is in the wrong folder.',
+      lookedIn: INDEX_FILE,
+      hint: 'Visit /api/debug-files on this same domain to see exactly what files are present on the server.'
+    });
+  }
+});
 
 // Two equivalent health routes (some setups check /health, others /api/health).
 // Both must return JSON. If opening either of these in your browser shows

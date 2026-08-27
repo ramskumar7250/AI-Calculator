@@ -1,1 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Calculator — Every Calculation. One Intelligent Calculator.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F0F3EC;
+    --bg-2:#E6EAE0;
+    --panel:#FFFFFF;
+    --ink:#122420;
+    --ink-soft:#4E5F5A;
+    --ink-faint:#8A968F;
+    --brass:#C7893F;
+    --brass-deep:#A66F2C;
+    --emerald:#0E6B4F;
+    --emerald-soft:#E1F1E8;
+    --rust:#AE4E33;
+    --line:#D8DED2;
+    --line-soft:#E5EADF;
+    --shadow-sm: 0 1px 2px rgba(18,36,32,0.05);
+    --shadow-md: 0 10px 30px rgba(18,36,32,0.08), 0 2px 6px rgba(18,36,32,0.05);
+    --shadow-lg: 0 24px 60px rgba(18,36,32,0.14), 0 6px 16px rgba(18,36,32,0.06);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(199,137,63,0.07), transparent 45%),
+      radial-gradient(circle at 100% 30%, rgba(14,107,79,0.06), transparent 40%);
+    color:var(--ink);
+    font-family:'Inter','Noto Sans Devanagari',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .hi{font-family:'Noto Sans Devanagari','Inter',sans-serif;}
+  h1,h2,h3,.display{font-family:'Fraunces','Noto Sans Devanagari',serif;letter-spacing:-0.015em;}
+  .mono{font-family:'Space Mono',monospace;}
+  ::selection{background:var(--brass);color:#fff;}
+  button{font-family:inherit;}
+  input{font-family:inherit;}
 
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px;}
+
+  /* HEADER */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(240,243,236,0.92);backdrop-filter:blur(10px) saturate(1.2);
+    border-bottom:1px solid var(--line);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:15px 22px;max-width:1000px;margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16.5px;flex-shrink:0;}
+  .logo .mark{
+    width:32px;height:32px;border-radius:9px;
+    background:linear-gradient(155deg,var(--ink) 0%, #0A1917 100%);
+    color:var(--bg);display:flex;align-items:center;justify-content:center;
+    font-family:'Space Mono',monospace;font-size:12px;font-weight:700;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);
+  }
+  .header-right{display:flex;align-items:center;gap:12px;}
+  nav.desktop-nav{display:flex;gap:24px;font-size:13.5px;}
+  nav.desktop-nav button{
+    background:none;border:none;color:var(--ink-soft);font-size:13.5px;cursor:pointer;
+    padding:0;font-weight:500;transition:0.15s;
+  }
+  nav.desktop-nav button:hover{color:var(--emerald);}
+  .pulse-badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--emerald);
+    background:var(--emerald-soft);padding:5px 10px;border-radius:999px;font-weight:600;
+    white-space:nowrap;
+  }
+  .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(14,107,79,0.4);}70%{opacity:0.5;box-shadow:0 0 0 6px rgba(14,107,79,0);}}
+
+  /* ===== AUTH AREA — visibility controlled ONLY via body.is-logged-in / body.is-logged-out classes + media queries.
+     Never toggled with inline styles from JS, to avoid specificity conflicts with the responsive rules below. ===== */
+  .auth-buttons{display:none;align-items:center;gap:12px;}
+  @media(min-width:601px){ body.is-logged-out .auth-buttons{ display:flex; } }
+
+  .auth-secondary{
+    background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:9px;
+    font-size:13.5px;font-weight:600;padding:9px 16px;cursor:pointer;transition:0.15s;white-space:nowrap;
+  }
+  .auth-secondary:hover{border-color:var(--ink);background:var(--bg-2);}
+  .auth-primary{
+    background:var(--ink);color:var(--bg);border:none;border-radius:9px;
+    font-size:13.5px;font-weight:600;padding:9px 16px;cursor:pointer;transition:0.15s;white-space:nowrap;
+  }
+  .auth-primary:hover{background:#0A1917;}
+
+  .user-chip{
+    display:none;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:5px 14px 5px 6px;cursor:pointer;position:relative;
+  }
+  @media(min-width:601px){ body.is-logged-in .user-chip{ display:flex; } }
+
+  .avatar{
+    width:26px;height:26px;border-radius:50%;background:linear-gradient(155deg,var(--brass) 0%, var(--brass-deep) 100%);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
+  }
+  .user-chip span{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .user-dropdown{
+    position:absolute;top:calc(100% + 8px);right:0;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;box-shadow:var(--shadow-md);min-width:150px;padding:6px;display:none;z-index:50;
+  }
+  .user-dropdown.open{display:block;}
+  .user-dropdown button{
+    width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:13.5px;
+    border-radius:8px;cursor:pointer;color:var(--ink);
+  }
+  .user-dropdown button:hover{background:var(--bg-2);}
+
+  /* Mobile-only auth controls */
+  .mobile-signin-btn{
+    display:none;background:var(--ink);color:var(--bg);border:none;border-radius:9px;
+    font-size:13px;font-weight:600;padding:9px 15px;cursor:pointer;white-space:nowrap;
+  }
+  @media(max-width:600px){ body.is-logged-out .mobile-signin-btn{ display:inline-flex; } }
+
+  .menu-btn{
+    display:none;border:1px solid var(--line);background:var(--panel);
+    width:38px;height:38px;border-radius:10px;align-items:center;justify-content:center;
+    cursor:pointer;flex-shrink:0;
+  }
+  @media(max-width:600px){ body.is-logged-in .menu-btn{ display:flex; } }
+  .menu-btn svg{width:18px;height:18px;}
+
+  .mobile-menu{
+    display:none;position:absolute;top:100%;left:0;right:0;
+    background:var(--panel);border-bottom:1px solid var(--line);
+    box-shadow:var(--shadow-md);flex-direction:column;padding:8px;
+  }
+  .mobile-menu.open{display:flex;animation:menuDrop 0.2s ease;}
+  @keyframes menuDrop{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+  .mobile-menu button{
+    text-align:left;background:none;border:none;padding:13px 12px;font-size:15px;
+    color:var(--ink);cursor:pointer;border-radius:9px;font-weight:500;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .mobile-menu button:active{background:var(--bg-2);}
+  .mobile-menu .mm-divider{height:1px;background:var(--line-soft);margin:6px 4px;}
+  .mobile-menu .mm-user{padding:10px 12px 6px;font-size:12px;color:var(--ink-faint);}
+
+  /* HERO */
+  .hero{padding:44px 0 24px;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-size:11.5px;
+    letter-spacing:0.08em;text-transform:uppercase;color:var(--brass-deep);
+    font-weight:700;margin-bottom:16px;
+  }
+  .eyebrow .ln{width:22px;height:1px;background:var(--brass-deep);}
+  .hero h1{font-size:38px;line-height:1.1;margin:0 0 12px;font-weight:600;color:var(--ink);}
+  .hero h1 em{font-style:normal;color:var(--brass-deep);}
+  .hero .tagline{font-size:17.5px;color:var(--ink-soft);margin:0 0 26px;font-weight:500;}
+
+  /* INPUT PANEL */
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow-md);padding:8px;
+    transition:box-shadow 0.25s, border-color 0.25s;
+  }
+  .panel:focus-within{box-shadow:var(--shadow-lg);border-color:var(--brass);}
+  .panel-row{display:flex;gap:10px;padding:14px 16px 6px;}
+  .ai-cue{
+    width:26px;height:26px;border-radius:8px;flex-shrink:0;margin-top:2px;
+    background:linear-gradient(155deg,var(--emerald) 0%, #0A4F3A 100%);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ai-cue svg{width:14px;height:14px;stroke:#fff;}
+  textarea#q{
+    flex:1;border:none;outline:none;resize:none;
+    font-size:17px;font-family:'Inter','Noto Sans Devanagari',sans-serif;
+    line-height:1.55;min-height:56px;background:transparent;color:var(--ink);font-weight:500;
+    width:100%;
+  }
+  textarea#q::placeholder{color:var(--ink-faint);font-weight:400;}
+  .panel-actions{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:10px 12px 12px;border-top:1px dashed var(--line-soft);margin-top:6px;
+  }
+  .chip-btns{display:flex;gap:8px;}
+  .icon-btn{
+    border:1px solid var(--line);background:var(--bg);border-radius:10px;
+    width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink-soft);transition:0.15s;flex-shrink:0;
+  }
+  .icon-btn:hover{border-color:var(--ink);color:var(--ink);}
+  .icon-btn:active{transform:scale(0.94);background:var(--emerald-soft);color:var(--emerald);}
+  .calc-btn{
+    background:var(--ink);color:var(--bg);border:none;border-radius:11px;
+    padding:12px 22px;font-weight:600;font-size:14px;cursor:pointer;
+    display:flex;align-items:center;gap:8px;transition:0.18s;
+    box-shadow:0 6px 16px rgba(18,36,32,0.18);white-space:nowrap;
+  }
+  .calc-btn:hover{background:#0A1917;transform:translateY(-1px);}
+  .calc-btn:active{transform:translateY(0) scale(0.98);}
+  .calc-btn:disabled{opacity:0.5;cursor:default;transform:none;}
+  .calc-btn svg{width:15px;height:15px;flex-shrink:0;}
+
+  .examples-label{
+    font-size:11.5px;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--ink-faint);font-weight:700;margin:20px 0 10px;
+  }
+  .examples{display:flex;flex-wrap:wrap;gap:8px;}
+  .ex-chip{
+    font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink-soft);cursor:pointer;transition:0.15s;
+    font-weight:600;white-space:nowrap;
+  }
+  .ex-chip:hover{border-color:var(--emerald);color:var(--emerald);background:var(--emerald-soft);}
+  .ex-chip:active{transform:scale(0.96);}
+
+  /* THINKING TICKER */
+  #think-zone{margin-top:20px;}
+  .ticker{background:var(--ink);border-radius:14px;padding:16px 18px;font-family:'Space Mono',monospace;font-size:12.5px;color:#B9C7C0;box-shadow:var(--shadow-md);}
+  .ticker-line{display:flex;gap:10px;padding:4px 0;opacity:0;animation:tickIn 0.35s ease forwards;}
+  .ticker-line .arrow{color:var(--brass);flex-shrink:0;}
+  .ticker-line b{color:#fff;font-weight:700;}
+  @keyframes tickIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+
+  /* RESULT ZONE */
+  #result-zone{margin:20px 0 40px;}
+  .receipt-wrap{position:relative;animation:dropIn 0.4s cubic-bezier(.2,.8,.2,1);}
+  @keyframes dropIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+  .receipt{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-lg);overflow:hidden;}
+  .receipt-head{background:linear-gradient(155deg,var(--ink) 0%, #0A1917 100%);color:var(--bg);padding:24px 26px 22px;position:relative;overflow:hidden;}
+  .receipt-head::after{content:"";position:absolute;top:-40%;right:-10%;width:220px;height:220px;background:radial-gradient(circle, rgba(199,137,63,0.18), transparent 70%);}
+  .receipt-head .rtype{font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;color:#8FA69C;margin-bottom:8px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .receipt-head .rtype .dot-verify{width:5px;height:5px;border-radius:50%;background:var(--emerald);}
+  .receipt-head .rans{font-family:'Fraunces',serif;font-size:34px;font-weight:600;position:relative;z-index:1;word-break:break-word;}
+  .receipt-body{padding:22px 26px;}
+  .step-row{display:flex;gap:14px;padding:11px 0;border-bottom:1px dashed var(--line-soft);font-size:14.5px;align-items:baseline;}
+  .step-row:last-child{border-bottom:none;}
+  .step-num{font-family:'Space Mono',monospace;font-size:11px;color:var(--brass-deep);min-width:20px;padding-top:2px;font-weight:700;}
+  .step-text{color:var(--ink-soft);flex:1;line-height:1.5;}
+  .step-text b{color:var(--ink);font-weight:600;}
+  .formula-box{margin-top:16px;background:var(--bg-2);border-radius:11px;padding:15px 17px;font-family:'Space Mono',monospace;font-size:13.5px;color:var(--ink);border:1px solid var(--line-soft);overflow-x:auto;}
+  .explain{margin-top:16px;font-size:14.5px;color:var(--ink);line-height:1.65;background:var(--emerald-soft);border-left:3px solid var(--emerald);padding:14px 16px;border-radius:0 10px 10px 0;}
+  .receipt-actions{display:flex;gap:8px;padding:16px 26px;border-top:1px solid var(--line);flex-wrap:wrap;background:var(--bg);}
+  .mini-btn{
+    font-size:13px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink-soft);cursor:pointer;font-weight:600;transition:0.15s;
+    display:flex;align-items:center;gap:6px;
+  }
+  .mini-btn:hover{border-color:var(--ink);color:var(--ink);}
+  .mini-btn:active{transform:scale(0.96);background:var(--bg-2);}
+  .mini-btn svg{width:13px;height:13px;flex-shrink:0;}
+  .tear{
+    height:12px;
+    background:linear-gradient(-45deg, transparent 6px, var(--bg) 6px) 0 4px, linear-gradient(45deg, transparent 6px, var(--bg) 6px) 0 4px;
+    background-size:16px 16px;background-repeat:repeat-x;
+  }
+
+  .missing-box, .error-box{background:var(--panel);border-radius:var(--radius);padding:20px 22px;color:var(--ink);font-size:14.5px;box-shadow:var(--shadow-md);border-left:4px solid var(--brass);}
+  .error-box{border-left-color:var(--rust);}
+  .missing-box b{color:var(--brass-deep);}
+
+  /* CATEGORY GRID */
+  .section-title{font-size:21px;margin:0 0 4px;font-weight:600;}
+  .section-sub{color:var(--ink-soft);font-size:14px;margin:0 0 20px;}
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px;margin-bottom:48px;scroll-margin-top:80px;}
+  .cat-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:0.18s;}
+  .cat-card:hover{border-color:var(--emerald);transform:translateY(-2px);box-shadow:var(--shadow-sm);}
+  .cat-card:active{transform:translateY(0) scale(0.98);}
+  .cat-card .cicon{width:30px;height:30px;border-radius:8px;background:var(--bg-2);display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:var(--emerald);}
+  .cat-card .cicon svg{width:16px;height:16px;}
+  .cat-card .cname{font-weight:600;font-size:14px;margin-bottom:3px;}
+  .cat-card .cex{font-size:12px;color:var(--ink-soft);}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 44px;text-align:center;}
+  footer .foot-main{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+  footer .foot-sub{color:var(--ink-faint);font-size:12.5px;}
+
+  /* TOAST */
+  #toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;
+    font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);
+    opacity:0;pointer-events:none;transition:opacity 0.25s, transform 0.25s;
+    z-index:100;max-width:90vw;text-align:center;display:flex;align-items:center;gap:8px;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast svg{width:15px;height:15px;flex-shrink:0;color:#8FE3C0;}
+
+  /* MODALS */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(10,20,18,0.45);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:90;padding:20px;
+  }
+  .modal-backdrop.open{display:flex;animation:fadeBg 0.2s ease;}
+  @keyframes fadeBg{from{opacity:0;}to{opacity:1;}}
+  .modal-card{
+    background:var(--panel);border-radius:20px;box-shadow:var(--shadow-lg);
+    width:100%;max-width:400px;padding:28px 26px;animation:modalPop 0.25s cubic-bezier(.2,.8,.2,1);
+    max-height:86vh;overflow-y:auto;
+  }
+  @keyframes modalPop{from{opacity:0;transform:translateY(12px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal-card.wide{max-width:520px;}
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+  .modal-title{font-size:22px;font-weight:600;}
+  .modal-close{background:none;border:none;cursor:pointer;color:var(--ink-faint);padding:4px;}
+  .modal-close svg{width:20px;height:20px;}
+  .modal-sub{color:var(--ink-soft);font-size:13.5px;margin-bottom:22px;}
+  .field-label{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;display:block;}
+  .field-input{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    font-size:14.5px;margin-bottom:16px;outline:none;transition:0.15s;background:var(--bg);
+  }
+  .field-input:focus{border-color:var(--brass);background:#fff;}
+  .modal-submit{
+    width:100%;background:var(--ink);color:var(--bg);border:none;border-radius:11px;
+    padding:13px;font-weight:600;font-size:14.5px;cursor:pointer;transition:0.15s;
+  }
+  .modal-submit:hover{background:#0A1917;}
+  .modal-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);}
+  .modal-switch button{background:none;border:none;color:var(--emerald);font-weight:700;cursor:pointer;font-size:13px;padding:0;}
+  .modal-note{font-size:11.5px;color:var(--ink-faint);margin-top:14px;text-align:center;}
+
+  .history-list{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+  .history-item{
+    border:1px solid var(--line);border-radius:12px;padding:13px 14px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  }
+  .history-item .htype{font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--emerald);font-weight:700;margin-bottom:3px;}
+  .history-item .hq{font-size:13.5px;color:var(--ink-soft);margin-bottom:4px;line-height:1.4;}
+  .history-item .hans{font-family:'Space Mono',monospace;font-size:14.5px;font-weight:700;color:var(--ink);}
+  .history-item .htime{font-size:11px;color:var(--ink-faint);margin-top:4px;}
+  .history-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;padding:4px;flex-shrink:0;}
+  .history-del:hover{color:var(--rust);}
+  .history-del svg{width:15px;height:15px;}
+  .history-empty{text-align:center;padding:30px 10px;color:var(--ink-faint);font-size:14px;}
+  .history-clear{
+    margin-top:16px;width:100%;background:none;border:1px solid var(--line);color:var(--ink-soft);
+    border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .history-clear:hover{border-color:var(--rust);color:var(--rust);}
+
+  @media(max-width:600px){
+    .hero h1{font-size:27px;}
+    .hero .tagline{font-size:15px;}
+    .receipt-head .rans{font-size:26px;}
+    nav.desktop-nav{display:none;}
+    .pulse-badge{display:none;}
+    .ex-chip{font-size:12.5px;padding:7px 12px;}
+    .receipt-body, .receipt-head, .receipt-actions{padding-left:18px;padding-right:18px;}
+  }
+</style>
+</head>
+<body class="is-logged-out">
+
+<header>
+  <div class="header-inner">
+    <div class="logo"><span class="mark">AI</span> AI Calculator</div>
+    <div class="header-right">
+      <nav class="desktop-nav">
+        <button onclick="scrollToCalculators()">Calculators</button>
+        <button onclick="openHistoryModal()">History</button>
+      </nav>
+      <div class="pulse-badge"><span class="pulse-dot"></span>AI Online</div>
+
+      <!-- Desktop: logged-out -->
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-secondary" onclick="openAuthModal('signup')">Sign Up</button>
+        <button class="auth-primary" onclick="openAuthModal('signin')">Sign In</button>
+      </div>
+      <!-- Desktop: logged-in -->
+      <div class="user-chip" id="userChip" onclick="toggleUserDropdown(event)">
+        <div class="avatar" id="avatarInitial">A</div>
+        <span id="userName">User</span>
+        <div class="user-dropdown" id="userDropdown">
+          <button onclick="signOut()">Sign out</button>
+        </div>
+      </div>
+
+      <!-- Mobile: logged-out -->
+      <button class="mobile-signin-btn" id="mobileSignInBtn" onclick="openAuthModal('signin')">Sign In</button>
+      <!-- Mobile: logged-in -->
+      <button class="menu-btn" id="menuBtn" onclick="toggleMenu()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mm-user" id="mmUser"></div>
+    <button onclick="scrollToCalculators()">📊 Calculators</button>
+    <button onclick="openHistoryModal()">🕓 History</button>
+    <div class="mm-divider"></div>
+    <button onclick="signOut()">🚪 Sign out</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow"><span class="ln"></span>No need to pick a calculator — just ask</div>
+    <h1>Every calculation.<br>One <em>intelligent</em> calculator.</h1>
+    <p class="tagline">Ask in English, Hindi, or Hinglish — get an instant, step-by-step answer.</p>
+
+    <div class="panel">
+      <div class="panel-row">
+        <div class="ai-cue">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2 2M16.4 16.4l2 2M5.6 18.4l2-2M16.4 7.6l2-2"/><circle cx="12" cy="12" r="3.2"/></svg>
+        </div>
+        <textarea id="q" placeholder="Type your question... Example: What is 12% of ₹50,000?"></textarea>
+      </div>
+      <div class="panel-actions">
+        <div class="chip-btns">
+          <button class="icon-btn" title="Voice input" onclick="voiceDemo()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z"/><path d="M19 11a7 7 0 01-14 0M12 18v3"/></svg>
+          </button>
+          <button class="icon-btn" title="Scan problem" onclick="scanDemo()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M20 8V6a2 2 0 00-2-2h-2M20 16v2a2 2 0 01-2 2h-2"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <button class="calc-btn" id="calcBtn" onclick="runCalculation()">
+          Calculate
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="examples-label">Popular</div>
+    <div class="examples" id="examples"></div>
+  </section>
+
+  <div id="think-zone"></div>
+  <div id="result-zone"></div>
+
+  <section>
+    <h2 class="section-title" id="catGrid">Try a category</h2>
+    <p class="section-sub">Tap a card to auto-fill an example question</p>
+    <div class="cat-grid" id="catGridInner"></div>
+  </section>
+</div>
+
+<footer>
+  <div class="foot-main">AI-powered calculations.</div>
+  <div class="foot-sub">Simple questions. Smart answers.</div>
+</footer>
+
+<div id="toast"></div>
+
+<!-- AUTH MODAL -->
+<div class="modal-backdrop" id="authBackdrop" onclick="if(event.target===this) closeAuthModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title" id="authTitle">Create your account</div>
+      <button class="modal-close" onclick="closeAuthModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-sub" id="authSub">Save your calculations and pick up where you left off.</div>
+    <label class="field-label">Name</label>
+    <input class="field-input" id="authName" type="text" placeholder="Your name">
+    <label class="field-label">Email</label>
+    <input class="field-input" id="authEmail" type="email" placeholder="you@example.com">
+    <button class="modal-submit" id="authSubmitBtn" onclick="submitAuth()">Create account</button>
+    <div class="modal-switch" id="authSwitch"></div>
+    <div class="modal-note">Saved securely on this device.</div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-backdrop" id="historyBackdrop" onclick="if(event.target===this) closeHistoryModal()">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div class="modal-title">Your History</div>
+      <button class="modal-close" onclick="closeHistoryModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-sub">Every calculation you've run, saved on this device.</div>
+    <div id="historyContent"></div>
+  </div>
+</div>
+
+<script>
+const ICONS = {
+  percent: `<path d="M19 5L5 19M6.5 8.5a2 2 0 100-4 2 2 0 000 4zM17.5 20.5a2 2 0 100-4 2 2 0 000 4z"/>`,
+  coins: `<circle cx="9" cy="9" r="5"/><path d="M14.5 6.2A5 5 0 1117.8 14.5"/>`,
+  bank: `<path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6M8 21v-7M12 21v-7M16 21v-7"/>`,
+  chart: `<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>`,
+  tag: `<path d="M20.6 12.6L12 21.2a2 2 0 01-2.8 0l-6.4-6.4a2 2 0 010-2.8L11.4 3.4a2 2 0 011.4-.6H19a2 2 0 012 2v5.4a2 2 0 01-.6 1.4z"/><circle cx="15.5" cy="8.5" r="1.3"/>`,
+  ruler: `<path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v3M15 8v3M19 8v3"/>`,
+  circle: `<circle cx="12" cy="12" r="8"/><path d="M12 4v16"/>`,
+  scale: `<path d="M12 3v18M7 7l-4 8a4 4 0 008 0l-4-8zM17 7l-4 8a4 4 0 008 0l-4-8zM5 7h14"/>`,
+  heart: `<path d="M20.8 8.6a5.5 5.5 0 00-9.3-3.9L12 5.2l-.5-.5A5.5 5.5 0 002.2 8.6c0 3.5 3.4 6.4 8.6 11.1l1.2 1.1 1.2-1.1c5.2-4.7 8.6-7.6 8.6-11.1z"/>`,
+  cal: `<path d="M3 10h18M7 3v4M17 3v4M4 6h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/>`,
+  convert: `<path d="M7 16V4M7 4L4 7M7 4l3 3M17 8v12M17 20l3-3M17 20l-3-3"/>`,
+  briefcase: `<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>`,
+  stats: `<path d="M4 19h16M7 19V9M12 19V5M17 19v-7"/>`
+};
+function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;}
+
+const EXAMPLES = [
+  {label:"18% GST", query:"What is 18% of ₹5000?"},
+  {label:"Profit/Loss", query:"Bought goods for 10000, sold for 12500. What's the profit?"},
+  {label:"EMI Loan", query:"2 lakh loan at 10% interest for 5 years, what's the EMI?"},
+  {label:"Room Area", query:"A room is 12 feet by 10 feet, what's the area?"},
+  {label:"GST Total", query:"Add 18% GST to 50000, what's the total?"},
+  {label:"BMI Check", query:"weight 68 kg height 172 cm, what's my BMI?"}
+];
+
+const CATEGORIES = [
+  {name:"Percentage", ex:"20% of 500", icon:"percent"},
+  {name:"Profit & Loss", ex:"cost 800 sell 950, profit?", icon:"coins"},
+  {name:"EMI / Loan", ex:"1 lakh loan at 9% for 3 years EMI", icon:"bank"},
+  {name:"Simple Interest", ex:"6% simple interest on 10000 for 2 years", icon:"chart"},
+  {name:"Compound Interest", ex:"8% compound interest on 10000 for 3 years", icon:"chart"},
+  {name:"GST", ex:"12% GST on 2000", icon:"tag"},
+  {name:"CGST / SGST", ex:"split 18% GST on 4000 into CGST and SGST", icon:"tag"},
+  {name:"Discount", ex:"25% discount on 1200", icon:"tag"},
+  {name:"Area — Rectangle", ex:"15ft x 20ft area", icon:"ruler"},
+  {name:"Area — Circle", ex:"radius 7cm circle area", icon:"circle"},
+  {name:"Ratio", ex:"ratio of 45 and 60", icon:"scale"},
+  {name:"Average", ex:"average of 70, 85, 90", icon:"chart"},
+  {name:"Statistics", ex:"mean median mode of 4, 8, 8, 15, 21", icon:"stats"},
+  {name:"BMI", ex:"70kg 175cm BMI", icon:"heart"},
+  {name:"Age", ex:"age from 15 Aug 1998 to today", icon:"cal"},
+  {name:"Date Difference", ex:"days between 1 Jan 2026 and 15 Mar 2026", icon:"cal"},
+  {name:"Marks Percentage", ex:"scored 432 out of 500, what percentage?", icon:"percent"},
+  {name:"Commission", ex:"5% commission on a sale of 40000", icon:"coins"},
+  {name:"Salary Convert", ex:"monthly salary 45000, what's the annual?", icon:"briefcase"},
+  {name:"Break-Even Point", ex:"fixed cost 50000, price 200 per unit, cost 120 per unit, break-even?", icon:"scale"},
+  {name:"Unit Convert", ex:"convert 5 km to miles", icon:"convert"},
+  {name:"Time Convert", ex:"convert 3 hours to minutes", icon:"convert"}
+];
+
+function esc(s){ return s.replace(/'/g,"\\'"); }
+
+function renderChips(){
+  const ec = document.getElementById('examples');
+  ec.innerHTML = EXAMPLES.map(e=>`<div class="ex-chip" onclick="fillQ('${esc(e.query)}')">${e.label}</div>`).join('');
+  const cg = document.getElementById('catGridInner');
+  cg.innerHTML = CATEGORIES.map(c=>`
+    <div class="cat-card" onclick="fillQ('${esc(c.ex)}')">
+      <div class="cicon">${icon(c.icon)}</div>
+      <div class="cname">${c.name}</div>
+      <div class="cex">${c.ex}</div>
+    </div>`).join('');
+}
+renderChips();
+
+/* ============ Local storage layer (falls back to in-memory if unavailable) ============ */
+const memStore = {};
+const LS_OK = (function(){ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }catch(e){ return false; } })();
+function lsGet(key){
+  if(LS_OK){ try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
+  return memStore[key] !== undefined ? memStore[key] : null;
+}
+function lsSet(key, val){
+  if(LS_OK){ try{ localStorage.setItem(key, JSON.stringify(val)); return; }catch(e){} }
+  memStore[key] = val;
+}
+
+/* ============ Auth state ============ */
+let users = lsGet('aic_users') || {};
+let sessionEmail = lsGet('aic_session');
+let currentUser = (sessionEmail && users[sessionEmail]) ? users[sessionEmail] : null;
+let authMode = 'signup';
+
+function initials(name){
+  return (name||'?').trim().split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+}
+
+// The ONLY thing this function does for visibility is toggle body classes.
+// All show/hide logic lives in CSS (see the AUTH AREA rules above), so there's
+// no conflict between JS and the responsive media queries.
+function updateHeaderAuthUI(){
+  document.body.classList.toggle('is-logged-in', !!currentUser);
+  document.body.classList.toggle('is-logged-out', !currentUser);
+  const mmUser = document.getElementById('mmUser');
+  if(currentUser){
+    document.getElementById('avatarInitial').textContent = initials(currentUser.name);
+    document.getElementById('userName').textContent = currentUser.name;
+    mmUser.textContent = 'Signed in as ' + currentUser.name;
+  } else {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+}
+updateHeaderAuthUI();
+
+function toggleUserDropdown(e){
+  e.stopPropagation();
+  document.getElementById('userDropdown').classList.toggle('open');
+}
+document.addEventListener('click', ()=> document.getElementById('userDropdown').classList.remove('open'));
+
+function openAuthModal(mode){
+  authMode = mode;
+  document.getElementById('authTitle').textContent = mode==='signup' ? 'Create your account' : 'Welcome back';
+  document.getElementById('authSub').textContent = mode==='signup' ? 'Save your calculations and pick up where you left off.' : 'Sign in to see your saved calculations.';
+  document.getElementById('authSubmitBtn').textContent = mode==='signup' ? 'Create account' : 'Sign in';
+  document.getElementById('authSwitch').innerHTML = mode==='signup'
+    ? `Already have an account? <button onclick="openAuthModal('signin')">Sign in</button>`
+    : `New here? <button onclick="openAuthModal('signup')">Create an account</button>`;
+  document.getElementById('authBackdrop').classList.add('open');
+  closeMenu();
+}
+function closeAuthModal(){
+  document.getElementById('authBackdrop').classList.remove('open');
+}
+function submitAuth(){
+  const name = document.getElementById('authName').value.trim();
+  const email = document.getElementById('authEmail').value.trim().toLowerCase();
+  if(!email || !email.includes('@')){ showToast('Please enter a valid email address'); return; }
+  if(!users[email]){
+    users[email] = { name: name || email.split('@')[0], email };
+  } else if(name){
+    users[email].name = name;
+  }
+  lsSet('aic_users', users);
+  lsSet('aic_session', email);
+  currentUser = users[email];
+  closeAuthModal();
+  updateHeaderAuthUI();
+  showToast(`Welcome, ${currentUser.name.split(' ')[0]} ✓`, 'check');
+  document.getElementById('authName').value = '';
+  document.getElementById('authEmail').value = '';
+}
+function signOut(){
+  lsSet('aic_session', null);
+  currentUser = null;
+  closeMenu();
+  updateHeaderAuthUI();
+  showToast('Signed out');
+}
+
+/* ============ History ============ */
+function historyKey(){ return 'aic_history_' + (currentUser ? currentUser.email : 'guest'); }
+function loadHistory(){ return lsGet(historyKey()) || []; }
+function saveHistoryEntry(entry){
+  if(!currentUser) return;
+  const h = loadHistory();
+  h.unshift(entry);
+  if(h.length > 60) h.length = 60;
+  lsSet(historyKey(), h);
+}
+function deleteHistoryEntry(id){
+  const h = loadHistory().filter(e=>e.id !== id);
+  lsSet(historyKey(), h);
+  renderHistoryContent();
+}
+function clearHistory(){
+  lsSet(historyKey(), []);
+  renderHistoryContent();
+}
+function timeAgo(ts){
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+function renderHistoryContent(){
+  const el = document.getElementById('historyContent');
+  if(!currentUser){
+    el.innerHTML = `<div class="history-empty">Sign in to save and view your calculation history.</div>`;
+    return;
+  }
+  const items = loadHistory();
+  if(!items.length){
+    el.innerHTML = `<div class="history-empty">No calculations yet — try asking something!</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="history-list">${items.map(e=>`
+    <div class="history-item">
+      <div>
+        <div class="htype">${e.type}</div>
+        <div class="hq">${e.query}</div>
+        <div class="hans">${e.answer}</div>
+        <div class="htime">${timeAgo(e.ts)}</div>
+      </div>
+      <button class="history-del" onclick="deleteHistoryEntry('${e.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6"/></svg>
+      </button>
+    </div>`).join('')}</div>
+    <button class="history-clear" onclick="clearHistory()">Clear all history</button>`;
+}
+function openHistoryModal(){
+  closeMenu();
+  if(!currentUser){
+    openAuthModal('signin');
+    showToast('Sign in to view your history');
+    return;
+  }
+  renderHistoryContent();
+  document.getElementById('historyBackdrop').classList.add('open');
+}
+function closeHistoryModal(){
+  document.getElementById('historyBackdrop').classList.remove('open');
+}
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(msg, iconType){
+  const t = document.getElementById('toast');
+  const iconSvg = iconType === 'check'
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>`;
+  t.innerHTML = iconSvg + `<span>${msg}</span>`;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+/* ---------- Mobile menu ---------- */
+function toggleMenu(){ document.getElementById('mobileMenu').classList.toggle('open'); }
+function closeMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
+
+function scrollToCalculators(){
+  closeMenu();
+  document.getElementById('catGrid').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function fillQ(text){
+  document.getElementById('q').value = text;
+  runCalculation();
+}
+function voiceDemo(){ showToast('🎤 Voice input is coming soon'); }
+function scanDemo(){ showToast('📷 Camera scan is coming soon'); }
+
+/* ---------- Talks to OUR OWN backend now, not Anthropic directly.
+   The server holds the API key and the system prompt — see server.js ----------
+   Free hosting tiers (e.g. Render's free plan) put the server to sleep after
+   inactivity — the first request can time out while it wakes up. If that
+   happens the host's gateway returns an HTML error page instead of JSON, which
+   would otherwise crash here with a confusing "Unexpected token '<'" error.
+   So: check the content-type first, and if it's not JSON, wait a few seconds
+   and retry once (the server is usually awake by then). */
+async function classifyQuestion(question, isRetry){
+  let response;
+  try{
+    response = await fetch("/api/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+  }catch(networkErr){
+    throw new Error("Could not reach the server. Check your connection and try again.");
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  if(!contentType.includes('application/json')){
+    if(!isRetry){
+      showToast('Waking up the server, one moment…');
+      await sleep(4000);
+      return classifyQuestion(question, true);
+    }
+    throw new Error("The server didn't respond correctly (it may still be starting up). Please try again in a few seconds.");
+  }
+
+  const data = await response.json();
+  if(!response.ok || data.error){
+    throw new Error(data.error || 'The server could not process this request.');
+  }
+  const textBlock = (data.content || []).find(b => b.type === "text");
+  if(!textBlock) throw new Error("No response from the AI service.");
+  let clean = textBlock.text.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+  return JSON.parse(clean);
+}
+
+function fmtNum(n, decimals){
+  if(n===undefined||n===null||isNaN(n)) return "—";
+  const d = decimals===undefined ? 2 : decimals;
+  let s = Number(n).toFixed(d);
+  if(s.indexOf('.')>-1) s = s.replace(/0+$/,'').replace(/\.$/,'');
+  return s;
+}
+function inr(n){
+  if(n===undefined||n===null||isNaN(n)) return "—";
+  return "₹" + Number(n).toLocaleString('en-IN', {maximumFractionDigits:2});
+}
+
+// ---------- Deterministic calculation engine (language-aware explanations) ----------
+function compute(type, v, lang){
+  const isHi = lang === "hi";
+  switch(type){
+
+    case "percentage_of": {
+      const {base, percent} = v; const result = base * percent / 100;
+      return { answer: fmtNum(result), formula: `${fmtNum(base)} × ${fmtNum(percent)} ÷ 100`,
+        steps: [`Base value = ${fmtNum(base)}`, `Percent = ${fmtNum(percent)}%`, `${fmtNum(base)} × ${fmtNum(percent)} ÷ 100 = ${fmtNum(result)}`],
+        explanation: isHi ? `${fmtNum(base)} का ${fmtNum(percent)}% होता है ${fmtNum(result)}।` : `${fmtNum(percent)}% of ${fmtNum(base)} is ${fmtNum(result)}.` };
+    }
+    case "percentage_change": {
+      const {from, to} = v; const diff = to - from; const pct = (diff/from)*100;
+      return { answer: `${fmtNum(Math.abs(pct))}% ${diff>=0?'increase':'decrease'}`, formula: `((${fmtNum(to)} − ${fmtNum(from)}) ÷ ${fmtNum(from)}) × 100`,
+        steps: [`From = ${fmtNum(from)}, To = ${fmtNum(to)}`, `Difference = ${fmtNum(to)} − ${fmtNum(from)} = ${fmtNum(diff)}`, `Percent change = ${fmtNum(diff)} ÷ ${fmtNum(from)} × 100 = ${fmtNum(pct)}%`],
+        explanation: isHi ? `यह एक ${diff>=0?'बढ़ोतरी':'कमी'} है, कुल ${fmtNum(Math.abs(pct))}%।` : `That's a ${fmtNum(Math.abs(pct))}% ${diff>=0?'increase':'decrease'}.` };
+    }
+    case "profit_loss": {
+      const {cost_price, selling_price} = v; const diff = selling_price - cost_price; const pct = (diff/cost_price)*100; const isProfit = diff >= 0;
+      return { answer: `${isProfit?'Profit':'Loss'}: ${inr(Math.abs(diff))} (${fmtNum(Math.abs(pct))}%)`, formula: `Selling Price − Cost Price = ${isProfit?'Profit':'Loss'}`,
+        steps: [`Cost Price = ${inr(cost_price)}`, `Selling Price = ${inr(selling_price)}`, `${inr(selling_price)} − ${inr(cost_price)} = ${inr(diff)}`, `${isProfit?'Profit':'Loss'} % = ${inr(Math.abs(diff))} ÷ ${inr(cost_price)} × 100 = ${fmtNum(Math.abs(pct))}%`],
+        explanation: isHi
+          ? (isProfit ? `आपको ${inr(diff)} का profit हुआ (${fmtNum(pct)}%)।` : `आपको ${inr(Math.abs(diff))} का loss हुआ (${fmtNum(Math.abs(pct))}%)।`)
+          : (isProfit ? `You made a profit of ${inr(diff)} (${fmtNum(pct)}%).` : `You made a loss of ${inr(Math.abs(diff))} (${fmtNum(Math.abs(pct))}%).`) };
+    }
+    case "discount": {
+      const {price, discount_percent} = v; const discountAmt = price * discount_percent/100; const final = price - discountAmt;
+      return { answer: inr(final), formula: `${inr(price)} − (${inr(price)} × ${fmtNum(discount_percent)}%)`,
+        steps: [`Marked price = ${inr(price)}`, `Discount = ${fmtNum(discount_percent)}% of ${inr(price)} = ${inr(discountAmt)}`, `Final price = ${inr(price)} − ${inr(discountAmt)} = ${inr(final)}`],
+        explanation: isHi ? `${fmtNum(discount_percent)}% discount के बाद आपको ${inr(final)} देने होंगे (बचत: ${inr(discountAmt)})।` : `After a ${fmtNum(discount_percent)}% discount, you'll pay ${inr(final)} (you save ${inr(discountAmt)}).` };
+    }
+    case "gst": {
+      const {amount, rate, mode} = v;
+      if(mode === "inclusive"){
+        const base = amount / (1 + rate/100); const gstAmt = amount - base;
+        return { answer: inr(amount), formula: `Base = Total ÷ (1 + GST% ÷ 100)`,
+          steps:[`Total (GST included) = ${inr(amount)}`, `Base amount = ${inr(amount)} ÷ (1 + ${fmtNum(rate)}/100) = ${inr(base)}`, `GST amount = ${inr(amount)} − ${inr(base)} = ${inr(gstAmt)}`],
+          explanation: isHi ? `₹${fmtNum(amount)} में से GST निकाल के base price ${inr(base)} है, और GST का हिस्सा ${inr(gstAmt)} है।` : `Out of ${inr(amount)}, the base price is ${inr(base)} and the GST portion is ${inr(gstAmt)}.` };
+      } else {
+        const gstAmt = amount * rate/100; const total = amount + gstAmt;
+        return { answer: inr(total), formula: `${inr(amount)} + (${inr(amount)} × ${fmtNum(rate)}% GST)`,
+          steps:[`Base amount = ${inr(amount)}`, `GST = ${fmtNum(rate)}% of ${inr(amount)} = ${inr(gstAmt)}`, `Final total = ${inr(amount)} + ${inr(gstAmt)} = ${inr(total)}`],
+          explanation: isHi ? `${inr(amount)} पर ${fmtNum(rate)}% GST जोड़कर total ${inr(total)} होगा।` : `Adding ${fmtNum(rate)}% GST to ${inr(amount)} gives a total of ${inr(total)}.` };
+      }
+    }
+    case "cgst_sgst": {
+      const {amount, rate} = v; const half = rate/2; const cgst = amount*half/100; const sgst = amount*half/100; const total = amount + cgst + sgst;
+      return { answer: `CGST ${inr(cgst)} + SGST ${inr(sgst)}`, formula: `CGST = SGST = Amount × (Rate ÷ 2) ÷ 100`,
+        steps: [`Amount = ${inr(amount)}`, `Total GST rate = ${fmtNum(rate)}% → split into ${fmtNum(half)}% + ${fmtNum(half)}%`, `CGST = ${inr(amount)} × ${fmtNum(half)}% = ${inr(cgst)}`, `SGST = ${inr(amount)} × ${fmtNum(half)}% = ${inr(sgst)}`, `Total payable = ${inr(amount)} + ${inr(cgst)} + ${inr(sgst)} = ${inr(total)}`],
+        explanation: isHi ? `${inr(amount)} पर CGST ${inr(cgst)} और SGST ${inr(sgst)} लगेगा, total ${inr(total)} होगा।` : `On ${inr(amount)}, CGST is ${inr(cgst)} and SGST is ${inr(sgst)}, making a total of ${inr(total)}.` };
+    }
+    case "simple_interest": {
+      const {principal, rate, time_years} = v; const si = principal * rate * time_years / 100; const total = principal + si;
+      return { answer: inr(si) + " interest", formula: `SI = P × R × T ÷ 100`,
+        steps: [`P (Principal) = ${inr(principal)}`, `R (Rate) = ${fmtNum(rate)}% per year`, `T (Time) = ${fmtNum(time_years)} years`, `SI = ${inr(principal)} × ${fmtNum(rate)} × ${fmtNum(time_years)} ÷ 100 = ${inr(si)}`, `Total repayment = ${inr(principal)} + ${inr(si)} = ${inr(total)}`],
+        explanation: isHi ? `${fmtNum(time_years)} साल में simple interest ${inr(si)} बनेगा, कुल राशि ${inr(total)} होगी।` : `Over ${fmtNum(time_years)} years the simple interest is ${inr(si)}, for a total of ${inr(total)}.` };
+    }
+    case "compound_interest": {
+      const {principal, rate, time_years} = v; const n = v.frequency || 1;
+      const amount = principal * Math.pow(1 + (rate/100)/n, n*time_years); const ci = amount - principal;
+      return { answer: inr(ci) + " interest", formula: `A = P × (1 + r/n)^(n×t)`,
+        steps: [`P = ${inr(principal)}, R = ${fmtNum(rate)}%, T = ${fmtNum(time_years)} yrs, compounded ${n}×/year`, `A = ${inr(principal)} × (1 + ${fmtNum(rate)}/100/${n})^(${n}×${fmtNum(time_years)})`, `A = ${inr(amount)}`, `Compound Interest = A − P = ${inr(amount)} − ${inr(principal)} = ${inr(ci)}`],
+        explanation: isHi ? `${fmtNum(time_years)} साल बाद कुल राशि ${inr(amount)} होगी, यानी ब्याज ${inr(ci)} जुड़ेगा।` : `After ${fmtNum(time_years)} years the total amount will be ${inr(amount)}, meaning ${inr(ci)} in interest.` };
+    }
+    case "emi": {
+      const {principal, rate_annual, tenure_months} = v; const r = rate_annual/12/100; const n = tenure_months;
+      const emi = r === 0 ? principal/n : (principal * r * Math.pow(1+r,n)) / (Math.pow(1+r,n)-1);
+      const totalPay = emi*n; const totalInt = totalPay - principal;
+      return { answer: inr(emi) + " / month", formula: `EMI = P×r×(1+r)^n ÷ ((1+r)^n − 1)`,
+        steps: [`P (Loan) = ${inr(principal)}`, `r (monthly rate) = ${fmtNum(rate_annual)}% ÷ 12 = ${fmtNum(r*100,4)}%`, `n (months) = ${n}`, `Monthly EMI = ${inr(emi)}`, `Total repayment = ${inr(emi)} × ${n} = ${inr(totalPay)}`, `Total interest paid = ${inr(totalPay)} − ${inr(principal)} = ${inr(totalInt)}`],
+        explanation: isHi ? `आपकी monthly EMI ${inr(emi)} होगी, ${n} महीनों में कुल ${inr(totalPay)} चुकाना होगा (ब्याज: ${inr(totalInt)})।` : `Your monthly EMI will be ${inr(emi)}. Over ${n} months you'll repay ${inr(totalPay)} in total (interest: ${inr(totalInt)}).` };
+    }
+    case "area_rectangle": {
+      const {length, width} = v; const area = length*width; const perimeter = 2*(length+width);
+      return { answer: `${fmtNum(area)} sq units`, formula: `Area = Length × Width`,
+        steps: [`Length = ${fmtNum(length)}, Width = ${fmtNum(width)}`, `Area = ${fmtNum(length)} × ${fmtNum(width)} = ${fmtNum(area)} sq units`, `Perimeter = 2 × (${fmtNum(length)} + ${fmtNum(width)}) = ${fmtNum(perimeter)} units`],
+        explanation: isHi ? `Room/plot का area ${fmtNum(area)} square units है (जिस unit में length-width दिए थे, उसी में)।` : `The area is ${fmtNum(area)} square units (in whichever unit you gave the length and width).` };
+    }
+    case "area_square": {
+      const {side} = v; const area = side*side;
+      return { answer: `${fmtNum(area)} sq units`, formula: `Area = Side²`,
+        steps: [`Side = ${fmtNum(side)}`, `Area = ${fmtNum(side)}² = ${fmtNum(area)} sq units`],
+        explanation: isHi ? `Square का area ${fmtNum(area)} square units है।` : `The area of the square is ${fmtNum(area)} square units.` };
+    }
+    case "area_circle": {
+      const {radius} = v; const area = Math.PI*radius*radius; const circumference = 2*Math.PI*radius;
+      return { answer: `${fmtNum(area)} sq units`, formula: `Area = π × r²`,
+        steps: [`Radius = ${fmtNum(radius)}`, `Area = π × ${fmtNum(radius)}² = ${fmtNum(area)} sq units`, `Circumference = 2 × π × ${fmtNum(radius)} = ${fmtNum(circumference)} units`],
+        explanation: isHi ? `Circle का area ${fmtNum(area)} square units है।` : `The area of the circle is ${fmtNum(area)} square units.` };
+    }
+    case "area_triangle": {
+      const {base, height} = v; const area = 0.5*base*height;
+      return { answer: `${fmtNum(area)} sq units`, formula: `Area = ½ × Base × Height`,
+        steps: [`Base = ${fmtNum(base)}, Height = ${fmtNum(height)}`, `Area = 0.5 × ${fmtNum(base)} × ${fmtNum(height)} = ${fmtNum(area)} sq units`],
+        explanation: isHi ? `Triangle का area ${fmtNum(area)} square units है।` : `The area of the triangle is ${fmtNum(area)} square units.` };
+    }
+    case "ratio": {
+      const {a,b} = v; const gcd = (x,y)=> y===0?x:gcd(y,x%y); const g = gcd(Math.round(a),Math.round(b)) || 1;
+      return { answer: `${a/g} : ${b/g}`, formula: `Simplify using GCD`,
+        steps: [`${fmtNum(a)} : ${fmtNum(b)}`, `GCD (${fmtNum(a)}, ${fmtNum(b)}) = ${g}`, `Simplified ratio = ${a/g} : ${b/g}`],
+        explanation: isHi ? `${fmtNum(a)} और ${fmtNum(b)} का सरल ratio ${a/g}:${b/g} है।` : `The simplified ratio of ${fmtNum(a)} and ${fmtNum(b)} is ${a/g}:${b/g}.` };
+    }
+    case "average": {
+      const nums = v.numbers; const sum = nums.reduce((s,n)=>s+n,0); const avg = sum/nums.length;
+      return { answer: fmtNum(avg), formula: `Average = Sum ÷ Count`,
+        steps: [`Numbers: ${nums.join(', ')}`, `Sum = ${fmtNum(sum)}`, `Count = ${nums.length}`, `Average = ${fmtNum(sum)} ÷ ${nums.length} = ${fmtNum(avg)}`],
+        explanation: isHi ? `दिए गए numbers का average ${fmtNum(avg)} है।` : `The average of these numbers is ${fmtNum(avg)}.` };
+    }
+    case "statistics": {
+      const nums = v.numbers.slice().sort((a,b)=>a-b);
+      const sum = nums.reduce((s,n)=>s+n,0); const mean = sum/nums.length;
+      const mid = Math.floor(nums.length/2);
+      const median = nums.length%2 ? nums[mid] : (nums[mid-1]+nums[mid])/2;
+      const freq = {}; nums.forEach(n=> freq[n]=(freq[n]||0)+1);
+      const maxFreq = Math.max(...Object.values(freq));
+      const modes = Object.keys(freq).filter(k=>freq[k]===maxFreq).map(Number);
+      const modeStr = maxFreq===1 ? (isHi?"कोई नहीं":"none") : modes.join(', ');
+      const range = nums[nums.length-1] - nums[0];
+      return { answer: `Mean ${fmtNum(mean)}`, formula: `Mean, Median, Mode, Range`,
+        steps: [`Sorted: ${nums.join(', ')}`, `Mean = ${fmtNum(sum)} ÷ ${nums.length} = ${fmtNum(mean)}`, `Median = ${fmtNum(median)}`, `Mode = ${modeStr}`, `Range = ${fmtNum(nums[nums.length-1])} − ${fmtNum(nums[0])} = ${fmtNum(range)}`],
+        explanation: isHi ? `Mean ${fmtNum(mean)}, Median ${fmtNum(median)}, Mode ${modeStr}, Range ${fmtNum(range)} है।` : `Mean is ${fmtNum(mean)}, median is ${fmtNum(median)}, mode is ${modeStr}, and range is ${fmtNum(range)}.` };
+    }
+    case "bmi": {
+      const {weight_kg, height_cm} = v; const h = height_cm/100; const bmi = weight_kg/(h*h);
+      let cat = "Normal"; if(bmi<18.5) cat="Underweight"; else if(bmi>=25 && bmi<30) cat="Overweight"; else if(bmi>=30) cat="Obese";
+      return { answer: `${fmtNum(bmi,1)} (${cat})`, formula: `BMI = weight(kg) ÷ height(m)²`,
+        steps: [`Weight = ${fmtNum(weight_kg)} kg`, `Height = ${fmtNum(height_cm)} cm = ${fmtNum(h,2)} m`, `BMI = ${fmtNum(weight_kg)} ÷ (${fmtNum(h,2)})² = ${fmtNum(bmi,1)}`],
+        explanation: isHi ? `⚠️ यह estimate है, medical advice नहीं। आपका BMI ${fmtNum(bmi,1)} है, जो "${cat}" range में आता है।` : `⚠️ This is an estimate, not medical advice. Your BMI is ${fmtNum(bmi,1)}, which falls in the "${cat}" range.` };
+    }
+    case "age": {
+      const dob = new Date(v.dob); const ref = v.ref_date ? new Date(v.ref_date) : new Date();
+      let years = ref.getFullYear()-dob.getFullYear(); let months = ref.getMonth()-dob.getMonth(); let days = ref.getDate()-dob.getDate();
+      if(days<0){months--; const prevMonth=new Date(ref.getFullYear(),ref.getMonth(),0); days+=prevMonth.getDate();}
+      if(months<0){years--; months+=12;}
+      return { answer: `${years} years, ${months} months, ${days} days`, formula: `Reference date − Date of birth`,
+        steps: [`DOB = ${dob.toDateString()}`, `As of = ${ref.toDateString()}`, `Age = ${years} years, ${months} months, ${days} days`],
+        explanation: isHi ? `आपकी उम्र ${years} साल, ${months} महीने और ${days} दिन है।` : `Your age is ${years} years, ${months} months, and ${days} days.` };
+    }
+    case "date_difference": {
+      const d1 = new Date(v.date1); const d2 = new Date(v.date2);
+      const diffDays = Math.round(Math.abs(d2-d1)/86400000);
+      const weeks = Math.floor(diffDays/7);
+      return { answer: `${diffDays} days`, formula: `|Date2 − Date1|`,
+        steps: [`Date 1 = ${d1.toDateString()}`, `Date 2 = ${d2.toDateString()}`, `Difference = ${diffDays} days (${weeks} weeks)`],
+        explanation: isHi ? `दोनों तारीखों के बीच ${diffDays} दिन (लगभग ${weeks} हफ्ते) हैं।` : `There are ${diffDays} days (about ${weeks} weeks) between these two dates.` };
+    }
+    case "marks_percentage": {
+      const {obtained, total_marks} = v; const pct = obtained/total_marks*100;
+      return { answer: `${fmtNum(pct)}%`, formula: `(Obtained ÷ Total) × 100`,
+        steps: [`Obtained = ${fmtNum(obtained)}`, `Total = ${fmtNum(total_marks)}`, `${fmtNum(obtained)} ÷ ${fmtNum(total_marks)} × 100 = ${fmtNum(pct)}%`],
+        explanation: isHi ? `आपके marks ${fmtNum(pct)}% बने।` : `Your score is ${fmtNum(pct)}%.` };
+    }
+    case "commission": {
+      const {sale_amount, commission_percent} = v; const comm = sale_amount*commission_percent/100; const net = sale_amount - comm;
+      return { answer: inr(comm), formula: `Commission = Sale × Rate ÷ 100`,
+        steps: [`Sale amount = ${inr(sale_amount)}`, `Commission rate = ${fmtNum(commission_percent)}%`, `Commission = ${inr(sale_amount)} × ${fmtNum(commission_percent)}% = ${inr(comm)}`, `Net after commission = ${inr(net)}`],
+        explanation: isHi ? `Commission ${inr(comm)} बनता है, net amount ${inr(net)} बचेगा।` : `The commission comes to ${inr(comm)}, leaving ${inr(net)} net.` };
+    }
+    case "salary_convert": {
+      const {value, from} = v;
+      if(from === "monthly"){
+        const annual = value*12;
+        return { answer: inr(annual) + " / year", formula: `Annual = Monthly × 12`,
+          steps: [`Monthly salary = ${inr(value)}`, `Annual = ${inr(value)} × 12 = ${inr(annual)}`],
+          explanation: isHi ? `Monthly ${inr(value)} ka annual salary ${inr(annual)} hota hai।` : `A monthly salary of ${inr(value)} equals ${inr(annual)} annually.` };
+      } else {
+        const monthly = value/12;
+        return { answer: inr(monthly) + " / month", formula: `Monthly = Annual ÷ 12`,
+          steps: [`Annual salary = ${inr(value)}`, `Monthly = ${inr(value)} ÷ 12 = ${inr(monthly)}`],
+          explanation: isHi ? `Annual ${inr(value)} ka monthly salary ${inr(monthly)} hota hai।` : `An annual salary of ${inr(value)} equals ${inr(monthly)} per month.` };
+      }
+    }
+    case "break_even": {
+      const {fixed_cost, price_per_unit, variable_cost_per_unit} = v;
+      const contribution = price_per_unit - variable_cost_per_unit;
+      const units = fixed_cost/contribution;
+      return { answer: `${fmtNum(units,0)} units`, formula: `Break-Even = Fixed Cost ÷ (Price − Variable Cost)`,
+        steps: [`Fixed cost = ${inr(fixed_cost)}`, `Price per unit = ${inr(price_per_unit)}`, `Variable cost per unit = ${inr(variable_cost_per_unit)}`, `Contribution per unit = ${inr(contribution)}`, `Break-even = ${inr(fixed_cost)} ÷ ${inr(contribution)} = ${fmtNum(units,0)} units`],
+        explanation: isHi ? `Break-even point ${fmtNum(units,0)} units par aayega — usse pehle loss, uske baad profit।` : `The break-even point is ${fmtNum(units,0)} units — below that it's a loss, above it's profit.` };
+    }
+    case "unit_convert": {
+      const {value, from_unit, to_unit, category} = v;
+      const tables = { length: {m:1, km:1000, cm:0.01, mm:0.001, ft:0.3048, feet:0.3048, inch:0.0254, yard:0.9144, mile:1609.34},
+        weight: {kg:1, g:0.001, mg:0.000001, tonne:1000, lb:0.453592, pound:0.453592, oz:0.0283495},
+        volume: {l:1, litre:1, ml:0.001, gallon:3.78541},
+        time: {sec:1, second:1, min:60, minute:60, hr:3600, hour:3600, day:86400} };
+      let result;
+      if(category==="temperature"){
+        const toC = (val,u)=> u==='f' ? (val-32)*5/9 : u==='k' ? val-273.15 : val;
+        const fromC = (c,u)=> u==='f' ? c*9/5+32 : u==='k' ? c+273.15 : c;
+        result = fromC(toC(value, from_unit.toLowerCase()), to_unit.toLowerCase());
+      } else {
+        const table = tables[category] || tables.length;
+        const fu = table[from_unit.toLowerCase()] ?? 1; const tu = table[to_unit.toLowerCase()] ?? 1;
+        result = value * fu / tu;
+      }
+      return { answer: `${fmtNum(result)} ${to_unit}`, formula: `Convert via base unit`,
+        steps: [`${fmtNum(value)} ${from_unit} → ${to_unit}`, `Result = ${fmtNum(result)} ${to_unit}`],
+        explanation: isHi ? `${fmtNum(value)} ${from_unit} बराबर है ${fmtNum(result)} ${to_unit} के।` : `${fmtNum(value)} ${from_unit} equals ${fmtNum(result)} ${to_unit}.` };
+    }
+    default: return null;
+  }
+}
+
+function typeLabel(t){
+  const labels = { percentage_of:"Percentage", percentage_change:"Percentage Change", profit_loss:"Profit & Loss", discount:"Discount", gst:"GST",
+    cgst_sgst:"CGST / SGST", simple_interest:"Simple Interest", compound_interest:"Compound Interest", emi:"EMI / Loan",
+    area_rectangle:"Area — Rectangle", area_square:"Area — Square", area_circle:"Area — Circle", area_triangle:"Area — Triangle",
+    ratio:"Ratio", average:"Average", statistics:"Statistics", bmi:"BMI", age:"Age", date_difference:"Date Difference",
+    marks_percentage:"Marks Percentage", commission:"Commission", salary_convert:"Salary Convert", break_even:"Break-Even Point",
+    unit_convert:"Unit Conversion" };
+  return labels[t] || t;
+}
+function valuesPreview(values){
+  return Object.entries(values || {}).map(([k,val])=>{
+    const display = Array.isArray(val) ? val.join(', ') : val;
+    return `${k}: ${display}`;
+  }).join(' · ');
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function playTicker(lines){
+  const zone = document.getElementById('think-zone');
+  zone.innerHTML = `<div class="ticker" id="tk"></div>`;
+  const tk = document.getElementById('tk');
+  for(let i=0;i<lines.length;i++){
+    const el = document.createElement('div');
+    el.className = 'ticker-line';
+    el.innerHTML = `<span class="arrow">›</span><span>${lines[i]}</span>`;
+    tk.appendChild(el);
+    await sleep(i===0?120:260);
+  }
+  await sleep(260);
+}
+
+async function runCalculation(){
+  const q = document.getElementById('q').value.trim();
+  const zone = document.getElementById('result-zone');
+  const think = document.getElementById('think-zone');
+  const btn = document.getElementById('calcBtn');
+  if(!q){ zone.innerHTML = `<div class="error-box">Please type your question first.</div>`; return; }
+
+  btn.disabled = true;
+  zone.innerHTML = '';
+  think.innerHTML = `<div class="ticker"><div class="ticker-line"><span class="arrow">›</span><span>reading your question…</span></div></div>`;
+
+  try{
+    const parsed = await classifyQuestion(q);
+
+    if(parsed.calculation_type === "unknown"){
+      await playTicker([`reading your question…`, `<b>could not classify this question</b>`]);
+      think.innerHTML = '';
+      zone.innerHTML = `<div class="error-box">Couldn't classify this question yet. Please try again with clear numbers — e.g. "20% of 5000" or "cost 800 sell 950 profit".</div>`;
+      btn.disabled = false; return;
+    }
+
+    const lines = [
+      `reading your question…`,
+      `detected: <b>${typeLabel(parsed.calculation_type)}</b>`,
+      `extracting values → ${valuesPreview(parsed.values) || '—'}`,
+    ];
+
+    if(parsed.missing && parsed.missing.length){
+      lines.push(`<b>missing info, asking user…</b>`);
+      await playTicker(lines);
+      think.innerHTML = '';
+      zone.innerHTML = `<div class="missing-box"><b>One more detail needed:</b><br>${parsed.missing.join('<br>')}</div>`;
+      btn.disabled = false; return;
+    }
+
+    lines.push(`running calculation engine…`);
+    lines.push(`<b>verified ✓</b>`);
+    await playTicker(lines);
+
+    const out = compute(parsed.calculation_type, parsed.values, parsed.detected_language);
+    think.innerHTML = '';
+    if(!out){
+      zone.innerHTML = `<div class="error-box">This calculation type isn't wired up yet.</div>`;
+      btn.disabled = false; return;
+    }
+
+    if(currentUser){
+      saveHistoryEntry({ id: 'h'+Date.now(), type: typeLabel(parsed.calculation_type), query: q, answer: out.answer, ts: Date.now() });
+    }
+
+    zone.innerHTML = `
+      <div class="receipt-wrap">
+        <div class="receipt">
+          <div class="receipt-head">
+            <div class="rtype"><span class="dot-verify"></span>${typeLabel(parsed.calculation_type)}</div>
+            <div class="rans">${out.answer}</div>
+          </div>
+          <div class="receipt-body">
+            ${out.steps.map((s,i)=>`<div class="step-row"><div class="step-num mono">${String(i+1).padStart(2,'0')}</div><div class="step-text">${s}</div></div>`).join('')}
+            <div class="formula-box">${out.formula}</div>
+            <div class="explain hi">${out.explanation}</div>
+          </div>
+          <div class="tear"></div>
+          <div class="receipt-actions">
+            <button class="mini-btn" id="copyBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 012-2h10"/></svg>
+              Copy Result
+            </button>
+            <button class="mini-btn" id="followupBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Ask Follow-up
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('copyBtn').onclick = ()=> copyResult(out.answer);
+    document.getElementById('followupBtn').onclick = askFollowup;
+  }catch(err){
+    think.innerHTML = '';
+    zone.innerHTML = `<div class="error-box">Something went wrong, please try again.<br><span style="font-size:12px;color:#999">${err.message}</span></div>`;
+  }
+  btn.disabled = false;
+}
+
+async function copyResult(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('Result copied ✓', 'check');
+  }catch(e){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Result copied ✓', 'check');
+    }catch(e2){
+      showToast("Couldn't copy automatically — please select the result manually");
+    }
+  }
+}
+
+function askFollowup(){
+  const q = document.getElementById('q');
+  q.scrollIntoView({behavior:'smooth', block:'center'});
+  setTimeout(()=> q.focus(), 250);
+  showToast('Type your follow-up question here');
+}
+
+document.getElementById('q').addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runCalculation(); }
+});
+
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('menuBtn');
+  if(menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

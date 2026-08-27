@@ -1,16 +1,17 @@
 {
   "name": "ai-calculator",
   "version": "1.0.0",
-  "description": "AI Calculator with Gemini and deterministic math",
+  "private": true,
+  "description": "AI Calculator - natural language calculation assistant",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "mathjs": "^14.0.1"
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2"
   }
 }

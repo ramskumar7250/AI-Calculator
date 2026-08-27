@@ -140,25 +140,52 @@ app.post('/api/classify', async (req, res) => {
       });
     }
 
+    // Trim defensively — a stray trailing space/newline from copy-pasting the
+    // key into Render's environment variable field is a very common cause of
+    // "invalid x-api-key" errors that otherwise look mysterious.
+    const cleanKey = apiKey.trim();
+    console.log(`Using ANTHROPIC_API_KEY: length=${cleanKey.length}, starts with "${cleanKey.slice(0, 7)}...", had whitespace to trim=${cleanKey !== apiKey}`);
+
+    const requestBody = {
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: question }]
+    };
+
     const anthropicRes = await fetchFn('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'x-api-key': cleanKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: question }]
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!anthropicRes.ok) {
-      const errText = await anthropicRes.text();
-      console.error('Anthropic API error:', anthropicRes.status, errText);
-      return res.status(502).json({ error: 'The AI service returned an error. Please try again.' });
+      const rawErrText = await anthropicRes.text();
+      let parsedErr = null;
+      try { parsedErr = JSON.parse(rawErrText); } catch (_) { /* not JSON, keep raw text */ }
+
+      // Full detail goes to the server logs — this is the actual thing to read.
+      console.error('=== Anthropic API call failed ===');
+      console.error('HTTP status:', anthropicRes.status, anthropicRes.statusText);
+      console.error('Request model:', requestBody.model);
+      console.error('Anthropic response body:', rawErrText);
+      console.error('==================================');
+
+      // Also surface the real type/message in the JSON response (not the key
+      // itself, just Anthropic's own error description) so this is debuggable
+      // from the frontend/network tab too, not only from Render's log viewer.
+      const errType = parsedErr?.error?.type || 'unknown_error';
+      const errMessage = parsedErr?.error?.message || rawErrText || 'No details returned by Anthropic.';
+
+      return res.status(502).json({
+        error: `Anthropic API error (${anthropicRes.status} ${errType}): ${errMessage}`,
+        anthropicStatus: anthropicRes.status,
+        anthropicErrorType: errType
+      });
     }
 
     const data = await anthropicRes.json();

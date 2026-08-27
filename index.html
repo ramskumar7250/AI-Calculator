@@ -184,7 +184,7 @@
            .auth-buttons {
                display: none;
                align-items: center;
-               gap: 8px;
+               gap: 12px;
            }
 
            @media(min-width:601px) {
@@ -193,19 +193,22 @@
                }
            }
 
-           .auth-link {
-               background: none;
-               border: none;
+           .auth-secondary {
+               background: var(--panel);
+               color: var(--ink);
+               border: 1px solid var(--line);
+               border-radius: 9px;
                font-size: 13.5px;
                font-weight: 600;
-               color: var(--ink-soft);
+               padding: 9px 16px;
                cursor: pointer;
-               padding: 8px 4px;
+               transition: 0.15s;
                white-space: nowrap;
            }
 
-               .auth-link:hover {
-                   color: var(--ink);
+               .auth-secondary:hover {
+                   border-color: var(--ink);
+                   background: var(--bg-2);
                }
 
            .auth-primary {
@@ -1279,7 +1282,7 @@
 
                 <!-- Desktop: logged-out -->
                 <div class="auth-buttons" id="authButtons">
-                    <button class="auth-link" onclick="openAuthModal('signup')">Sign Up</button>
+                    <button class="auth-secondary" onclick="openAuthModal('signup')">Sign Up</button>
                     <button class="auth-primary" onclick="openAuthModal('signin')">Sign In</button>
                 </div>
                 <!-- Desktop: logged-in -->
@@ -1639,13 +1642,35 @@
         function scanDemo(){ showToast('📷 Camera scan is coming soon'); }
 
         /* ---------- Talks to OUR OWN backend now, not Anthropic directly.
-        The server holds the API key and the system prompt — see server.js ---------- */
-        async function classifyQuestion(question){
-        const response = await fetch("/api/classify", {
+        The server holds the API key and the system prompt — see server.js ----------
+        Free hosting tiers (e.g. Render's free plan) put the server to sleep after
+        inactivity — the first request can time out while it wakes up. If that
+        happens the host's gateway returns an HTML error page instead of JSON, which
+        would otherwise crash here with a confusing "Unexpected token '<'" error.
+        So: check the content-type first, and if it's not JSON, wait a few seconds
+        and retry once (the server is usually awake by then). */
+        async function classifyQuestion(question, isRetry){
+        let response;
+        try{
+        response = await fetch("/api/classify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question })
         });
+        }catch(networkErr){
+        throw new Error("Could not reach the server. Check your connection and try again.");
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        if(!contentType.includes('application/json')){
+        if(!isRetry){
+        showToast('Waking up the server, one moment…');
+        await sleep(4000);
+        return classifyQuestion(question, true);
+        }
+        throw new Error("The server didn't respond correctly (it may still be starting up). Please try again in a few seconds.");
+        }
+
         const data = await response.json();
         if(!response.ok || data.error){
         throw new Error(data.error || 'The server could not process this request.');

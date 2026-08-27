@@ -2,8 +2,10 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-// Node 18+ has fetch built in.
-// Fallback to node-fetch for older Node versions.
+// ============================================================
+// FETCH
+// ============================================================
+
 const fetchFn =
   globalThis.fetch ||
   ((...args) =>
@@ -27,13 +29,19 @@ app.use((req, res, next) => {
 // ============================================================
 
 app.use((req, res, next) => {
-  const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
+  const allowedOrigin =
+    process.env.ALLOWED_ORIGIN || '*';
 
-  res.header('Access-Control-Allow-Origin', allowedOrigin);
+  res.header(
+    'Access-Control-Allow-Origin',
+    allowedOrigin
+  );
+
   res.header(
     'Access-Control-Allow-Methods',
     'GET,POST,OPTIONS'
   );
+
   res.header(
     'Access-Control-Allow-Headers',
     'Content-Type'
@@ -50,14 +58,17 @@ app.use((req, res, next) => {
 // BODY PARSER
 // ============================================================
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // ============================================================
-// FRONTEND / PUBLIC DIRECTORY
+// FRONTEND
 // ============================================================
 
-const PUBLIC_DIR = path.join(__dirname, 'public');
-const INDEX_FILE = path.join(PUBLIC_DIR, 'index.html');
+const PUBLIC_DIR =
+  path.join(__dirname, 'public');
+
+const INDEX_FILE =
+  path.join(PUBLIC_DIR, 'index.html');
 
 app.use(express.static(PUBLIC_DIR));
 
@@ -70,19 +81,27 @@ app.get('/api/debug-files', (req, res) => {
     __dirname,
     PUBLIC_DIR,
     INDEX_FILE,
-    publicDirExists: fs.existsSync(PUBLIC_DIR),
-    indexFileExists: fs.existsSync(INDEX_FILE),
-    rootContents: fs.existsSync(__dirname)
-      ? fs.readdirSync(__dirname)
-      : [],
-    publicContents: fs.existsSync(PUBLIC_DIR)
-      ? fs.readdirSync(PUBLIC_DIR)
-      : []
+
+    publicDirExists:
+      fs.existsSync(PUBLIC_DIR),
+
+    indexFileExists:
+      fs.existsSync(INDEX_FILE),
+
+    rootContents:
+      fs.existsSync(__dirname)
+        ? fs.readdirSync(__dirname)
+        : [],
+
+    publicContents:
+      fs.existsSync(PUBLIC_DIR)
+        ? fs.readdirSync(PUBLIC_DIR)
+        : []
   });
 });
 
 // ============================================================
-// ROOT ROUTE
+// ROOT
 // ============================================================
 
 app.get('/', (req, res) => {
@@ -92,10 +111,8 @@ app.get('/', (req, res) => {
 
   return res.status(500).json({
     error:
-      'public/index.html was not found on the server at deploy time.',
-    lookedIn: INDEX_FILE,
-    hint:
-      'Visit /api/debug-files on this same domain to inspect deployed files.'
+      'public/index.html was not found on the server.',
+    lookedIn: INDEX_FILE
   });
 });
 
@@ -106,12 +123,18 @@ app.get('/', (req, res) => {
 function healthCheck(req, res) {
   res.json({
     status: 'ok',
+
     provider: 'groq',
-    hasApiKey: !!process.env.GROQ_API_KEY,
+
+    hasApiKey:
+      !!process.env.GROQ_API_KEY,
+
     model:
       process.env.GROQ_MODEL ||
       'openai/gpt-oss-20b',
-    time: new Date().toISOString()
+
+    time:
+      new Date().toISOString()
   });
 }
 
@@ -119,1019 +142,908 @@ app.get('/health', healthCheck);
 app.get('/api/health', healthCheck);
 
 // ============================================================
-// SAFE GROQ KEY DEBUG
-// NEVER RETURNS THE ACTUAL API KEY
+// SAFE API KEY DEBUG
 // ============================================================
 
 app.get('/api/debug-key', (req, res) => {
-  const raw = process.env.GROQ_API_KEY;
+  const raw =
+    process.env.GROQ_API_KEY;
 
   if (!raw) {
     return res.json({
-      readFrom: 'process.env.GROQ_API_KEY',
+      readFrom:
+        'process.env.GROQ_API_KEY',
+
       exists: false,
+
       note:
-        'GROQ_API_KEY is not available on this running instance. Check Render Environment Variables and redeploy.'
+        'GROQ_API_KEY is missing. Check Render Environment Variables.'
     });
   }
 
-  const trimmed = raw.trim();
+  const trimmed =
+    raw.trim();
 
   res.json({
-    readFrom: 'process.env.GROQ_API_KEY',
+    readFrom:
+      'process.env.GROQ_API_KEY',
+
     exists: true,
-    length: raw.length,
-    lengthAfterTrim: trimmed.length,
+
+    length:
+      raw.length,
+
+    lengthAfterTrim:
+      trimmed.length,
+
     hadSurroundingWhitespace:
       raw.length !== trimmed.length,
-    prefix: trimmed.slice(0, 7),
+
+    prefix:
+      trimmed.slice(0, 7),
+
     looksLikeGroqFormat:
-      trimmed.startsWith('gsk_'),
-    note: trimmed.startsWith('gsk_')
-      ? 'The key format looks like a Groq API key.'
-      : 'WARNING: The key does not look like the usual Groq gsk_ format. Check the copied value.'
+      trimmed.startsWith('gsk_')
   });
 });
 
 // ============================================================
 // SYSTEM PROMPT
+// IMPORTANT:
+// This prompt is intentionally SHORT to reduce token usage.
 // ============================================================
 
 const SYSTEM_PROMPT = `
-You are the natural-language understanding layer for a calculator app used by people typing in English, Hindi, or Hinglish.
+You are the classification engine for an AI Calculator.
 
-Your ONLY job is to read the user's question and output ONE valid JSON object identifying the calculation type and extracting the numeric inputs.
+Read the user's English, Hindi, or Hinglish calculation question.
 
-You DO NOT calculate anything yourself.
+Your job is ONLY to identify the calculation type and extract values.
 
-Output ONLY valid JSON.
-Do NOT use markdown.
-Do NOT use code fences.
-Do NOT add explanations outside the JSON.
+DO NOT calculate.
+DO NOT explain.
+Return ONLY valid JSON.
 
-============================================================
-CALCULATION TYPES
-============================================================
-
-Pick "calculation_type" from exactly this list:
-
-- percentage_of: {base, percent}
-
-- percentage_change: {from, to}
-
-- profit_loss: {cost_price, selling_price}
-
-- discount: {price, discount_percent}
-
-- gst: {amount, rate, mode}
-  mode must be exactly:
-  "exclusive" or "inclusive"
-
-  exclusive = GST needs to be added to the amount.
-
-  inclusive = GST is already included in the amount
-  and the base price and GST portion need to be extracted.
-
-- cgst_sgst: {amount, rate}
-  rate is the TOTAL GST rate.
-  It must be split equally into CGST and SGST.
-
-- simple_interest: {principal, rate, time_years}
-
-- compound_interest:
-  {principal, rate, time_years, frequency}
-
-- emi:
-  {principal, rate_annual, tenure_months}
-
-- area_rectangle:
-  {length, width}
-
-- area_square:
-  {side}
-
-- area_circle:
-  {radius}
-
-- area_triangle:
-  {base, height}
-
-- ratio:
-  {a, b}
-
-- average:
-  {numbers}
-
-- statistics:
-  {numbers}
-
-- bmi:
-  {weight_kg, height_cm}
-
-- age:
-  {dob, ref_date}
-
-- date_difference:
-  {date1, date2}
-
-- marks_percentage:
-  {obtained, total_marks}
-
-- commission:
-  {sale_amount, commission_percent}
-
-- salary_convert:
-  {value, from}
-
-- break_even:
-  {fixed_cost, price_per_unit, variable_cost_per_unit}
-
-- unit_convert:
-  {value, from_unit, to_unit, category}
-
-- unknown
-
-
-============================================================
-IMPORTANT COMPOUND INTEREST RULE
-============================================================
-
-Compound interest questions require a compounding frequency such as:
-
-- annual
-- yearly
-- half-yearly
-- quarterly
-- monthly
-- weekly
-- daily
-
-HOWEVER:
-
-If the user asks a compound-interest question and DOES NOT specify
-the compounding frequency, DO NOT ask the user for the frequency.
-
-Instead:
-
-ASSUME ANNUAL COMPOUNDING.
-
-Set:
-
-"frequency": "annual"
-
-and continue normally.
-
-Do NOT put compounding frequency inside the "missing" array
-when it is not provided.
-
-Example:
-
-User:
-"10000 par 8% compound interest 3 saal ka"
-
-Correct classification:
-
-{
-  "calculation_type": "compound_interest",
-  "values": {
-    "principal": 10000,
-    "rate": 8,
-    "time_years": 3,
-    "frequency": "annual"
-  },
-  "missing": [],
-  "detected_language": "hinglish"
-}
-
-Also clearly understand these:
-
-"8% compound interest on 10000 for 3 years"
-=> frequency = "annual"
-
-"10000 par 8% CI 3 years monthly"
-=> frequency = "monthly"
-
-"10000 par 8% compound interest 3 saal quarterly"
-=> frequency = "quarterly"
-
-"10000 par 8% compound interest 3 saal half yearly"
-=> frequency = "half-yearly"
-
-"10000 par 8% compound interest 3 saal daily"
-=> frequency = "daily"
-
-If frequency is not mentioned:
-ALWAYS use "annual".
-
-Never return:
-"frequency required"
-or
-"frequency is missing"
-for a normal compound-interest question.
-
-
-============================================================
-NUMBER RULES
-============================================================
-
-Convert common number formats into plain numeric values.
-
-Examples:
-
-"2 lakh" -> 200000
-
-"5 crore" -> 50000000
-
-"25,000" -> 25000
-
-"5000 rupees" -> 5000
-
-"₹5000" -> 5000
-
-"18%" -> 18
-
-"12 feet" -> 12
-
-"20.5" -> 20.5
-
-"1.5 lakh" -> 150000
-
-
-============================================================
-INDIAN NUMBERING
-============================================================
-
-Understand Indian numbering terms such as:
-
-lakh
-lakhs
-lac
-crore
-crores
-k
-thousand
-
-Examples:
-
-"1 lakh" -> 100000
-
-"2 lakh" -> 200000
-
-"10 lakh" -> 1000000
-
-"1 crore" -> 10000000
-
-"2 crore" -> 20000000
-
-"50k" -> 50000
-
-
-============================================================
-CURRENCY
-============================================================
-
-Understand:
-
-₹
-Rs
-Rs.
-INR
-rupee
-rupees
-रुपये
-रुपया
-
-Currency symbols and words should NOT become part of numeric values.
-
-Example:
-
-"₹25,000 ka 18%" -> base = 25000
-
-"50000 rupees par 10% discount"
--> price = 50000
-
-
-============================================================
-LANGUAGE DETECTION
-============================================================
-
-"hi"
-=
-Hindi written in Devanagari script.
-
-"en"
-=
-normal English.
-
-"hinglish"
-=
-Hindi written using Roman/Latin letters,
-or mixed English + Hindi.
-
-Examples:
-
-"10000 ka 20% kitna hoga"
-=> hinglish
-
-"10000 का 20% कितना होगा"
-=> hi
-
-"What is 20% of 10000?"
-=> en
-
-"25000 par 18 percent GST kitna hoga"
-=> hinglish
-
-"₹10000 में 18% GST शामिल है"
-=> hi
-
-
-============================================================
-GST UNDERSTANDING
-============================================================
-
-Understand the difference between GST exclusive and GST inclusive.
-
-Examples:
-
-"25000 par 18% GST add karo"
-=> gst
-=> mode = "exclusive"
-
-"25000 + 18% GST"
-=> gst
-=> mode = "exclusive"
-
-"25000 mein 18% GST included hai"
-=> gst
-=> mode = "inclusive"
-
-"10000 including 18% GST original price kya hai"
-=> gst
-=> mode = "inclusive"
-
-"10000 mein 18 GST included hai base price batao"
-=> gst
-=> mode = "inclusive"
-
-
-============================================================
-PROFIT AND LOSS
-============================================================
-
-Understand:
-
-"10000 mein kharida aur 12500 mein becha profit?"
-=> profit_loss
-
-cost_price = 10000
-selling_price = 12500
-
-"10000 ka maal 9000 mein becha"
-=> loss
-
-"buying price" means cost_price.
-
-"cost price" means cost_price.
-
-"purchase price" means cost_price.
-
-"selling price" means selling_price.
-
-"sold for" means selling_price.
-
-
-============================================================
-DISCOUNT
-============================================================
-
-Understand:
-
-"50000 par 15% discount"
-=> price = 50000
-=> discount_percent = 15
-
-"50000 ka 15 percent discount ke baad price"
-=> discount
-
-"₹50000 पर 15% discount"
-=> discount
-
-
-============================================================
-INTEREST
-============================================================
-
-Simple interest:
-
-"10000 par 8% simple interest 3 saal"
-=> simple_interest
-
-Compound interest:
-
-"10000 par 8% compound interest 3 saal"
-=> compound_interest
-=> frequency = "annual"
-
-Never confuse simple interest with compound interest.
-
-
-============================================================
-AREA
-============================================================
-
-For rectangle:
-
-"20 feet long aur 15 feet wide"
-=> area_rectangle
-
-length = 20
-width = 15
-
-For square:
-
-"side 10 feet"
-=> area_square
-
-side = 10
-
-For circle:
-
-"radius 7"
-=> area_circle
-
-radius = 7
-
-For triangle:
-
-"base 10 height 5"
-=> area_triangle
-
-base = 10
-height = 5
-
-For area calculations, preserve the original unit meaning.
-
-Do NOT unnecessarily convert feet into meters.
-
-
-============================================================
-EMI
-============================================================
-
-Understand:
-
-"5 lakh loan 10% interest 5 years EMI"
-=> emi
-
-principal = 500000
-
-rate_annual = 10
-
-tenure_months = 60
-
-If the user gives years for loan tenure,
-convert years to months.
-
-Example:
-
-"5 lakh loan 10% for 5 years"
-=> tenure_months = 60
-
-
-============================================================
-PERCENTAGE
-============================================================
-
-"25000 ka 18% kitna hai?"
-=> percentage_of
-
-base = 25000
-percent = 18
-
-"18% of 25000"
-=> percentage_of
-
-base = 25000
-percent = 18
-
-
-============================================================
-PERCENTAGE CHANGE
-============================================================
-
-"100 se 120 hua percentage increase?"
-=> percentage_change
-
-from = 100
-to = 120
-
-
-============================================================
-MISSING INFORMATION
-============================================================
-
-If required information is genuinely missing,
-still return the correct calculation_type.
-
-Fill whatever values are available.
-
-Then add a "missing" array containing short descriptions
-of what is required.
-
-IMPORTANT:
-
-Do NOT mark compound-interest frequency as missing.
-
-For compound interest, if frequency is absent:
-use "annual".
-
-Only mark information as missing when it is genuinely required
-and cannot reasonably be assumed.
-
-Examples:
-
-"compound interest on 10000"
-=> calculation_type = compound_interest
-
-missing may contain:
-"rate"
-"time"
-
-But NOT:
-"frequency"
-
-Because frequency defaults to annual.
-
-
-============================================================
-MISSING LANGUAGE
-============================================================
-
-The missing messages MUST be written in the SAME language
-as detected_language.
-
-Hindi question:
-missing message must be Hindi.
-
-English question:
-missing message must be English.
-
-Hinglish question:
-missing message must be Hinglish.
-
-
-============================================================
-UNKNOWN QUESTIONS
-============================================================
-
-If the question is not related to a supported calculation,
-use:
-
-"calculation_type": "unknown"
-
-Do not invent numeric values.
-
-Do not pretend a calculation type when the user's question
-is clearly unrelated to calculation.
-
-
-============================================================
-OUTPUT FORMAT
-============================================================
-
-Return this exact top-level structure:
+Exact output:
 
 {
   "calculation_type": "...",
   "values": {},
   "missing": [],
-  "detected_language": "hi"
+  "detected_language": "en"
 }
 
-The detected_language must be exactly one of:
+Allowed calculation_type:
 
-"hi"
-"hinglish"
-"en"
+percentage_of:
+{base, percent}
 
-The "missing" value must always be an array.
+percentage_change:
+{from, to}
 
-The "values" value must always be an object.
+profit_loss:
+{cost_price, selling_price}
+
+discount:
+{price, discount_percent}
+
+gst:
+{amount, rate, mode}
+
+cgst_sgst:
+{amount, rate}
+
+simple_interest:
+{principal, rate, time_years}
+
+compound_interest:
+{principal, rate, time_years, frequency}
+
+emi:
+{principal, rate_annual, tenure_months}
+
+area_rectangle:
+{length, width}
+
+area_square:
+{side}
+
+area_circle:
+{radius}
+
+area_triangle:
+{base, height}
+
+ratio:
+{a, b}
+
+average:
+{numbers}
+
+statistics:
+{numbers}
+
+bmi:
+{weight_kg, height_cm}
+
+age:
+{dob, ref_date}
+
+date_difference:
+{date1, date2}
+
+marks_percentage:
+{obtained, total_marks}
+
+commission:
+{sale_amount, commission_percent}
+
+salary_convert:
+{value, from}
+
+break_even:
+{fixed_cost, price_per_unit, variable_cost_per_unit}
+
+unit_convert:
+{value, from_unit, to_unit, category}
+
+unknown
+
+NUMBER RULES:
+
+"2 lakh" = 200000
+"5 crore" = 50000000
+"25,000" = 25000
+"5000 rupees" = 5000
+"18%" = 18
+
+COMPOUND INTEREST:
+
+frequency MUST be numeric:
+
+annual/yearly = 1
+half-yearly/semi-annually = 2
+quarterly = 4
+monthly = 12
+weekly = 52
+daily = 365
+
+If compound interest does not specify frequency, DEFAULT frequency = 1.
+
+Examples:
+
+"10000 par 8% compound interest 3 saal"
+= principal 10000, rate 8, time_years 3, frequency 1
+
+"10000 par 8% compound interest 3 saal monthly"
+= frequency 12
+
+"10000 par 8% compound interest 3 saal quarterly"
+= frequency 4
+
+"10000 par 8% compound interest 3 saal yearly"
+= frequency 1
+
+LANGUAGE:
+
+English = en
+
+Hindi written in Devanagari = hi
+
+Hindi written using English/Roman letters or mixed Hindi-English = hinglish
+
+Examples:
+
+"What is 20% of 10000?"
+= en
+
+"10000 का 20% कितना होगा?"
+= hi
+
+"10000 ka 20% kitna hoga?"
+= hinglish
+
+MISSING DATA:
+
+If required information is genuinely missing, put short descriptions in "missing".
+
+Use the same language as detected_language.
+
+For compound interest, frequency is NOT missing if it is absent because annual frequency must be assumed.
 
 Never return markdown.
-
-Never return explanations outside JSON.
-
-Never return multiple JSON objects.
-
-
-============================================================
-FINAL BEHAVIOR
-============================================================
-
-Be decisive.
-
-Do not unnecessarily ask follow-up questions.
-
-Extract all information available from the user's question.
-
-For common calculator questions, classify them directly.
-
-For compound interest without a stated frequency,
-ALWAYS assume annual compounding.
-
-The goal is to make the calculator feel simple:
-
-USER ASKS -> UNDERSTAND -> CLASSIFY -> RETURN JSON
-
-Do not make the user choose a calculator manually.
+Never return code fences.
+Never return extra text.
 `;
 
 // ============================================================
-// GROQ CLASSIFICATION API
+// HELPER:
+// NORMALIZE COMPOUND INTEREST FREQUENCY
 // ============================================================
 
-app.post('/api/classify', async (req, res) => {
-  try {
-    const { question } = req.body || {};
+function normalizeFrequency(value) {
+  if (
+    typeof value === 'number' &&
+    Number.isFinite(value) &&
+    value > 0
+  ) {
+    return value;
+  }
 
-    // --------------------------------------------------------
-    // Validate question
-    // --------------------------------------------------------
+  if (
+    typeof value !== 'string'
+  ) {
+    return 1;
+  }
 
-    if (!question || typeof question !== 'string') {
-      return res.status(400).json({
-        error: 'A "question" string is required.'
-      });
+  const text =
+    value
+      .trim()
+      .toLowerCase();
+
+  if (
+    text.includes('month')
+  ) {
+    return 12;
+  }
+
+  if (
+    text.includes('quarter')
+  ) {
+    return 4;
+  }
+
+  if (
+    text.includes('half') ||
+    text.includes('semi')
+  ) {
+    return 2;
+  }
+
+  if (
+    text.includes('week')
+  ) {
+    return 52;
+  }
+
+  if (
+    text.includes('day') ||
+    text.includes('daily')
+  ) {
+    return 365;
+  }
+
+  if (
+    text.includes('year') ||
+    text.includes('annual')
+  ) {
+    return 1;
+  }
+
+  const numeric =
+    Number(text);
+
+  if (
+    Number.isFinite(numeric) &&
+    numeric > 0
+  ) {
+    return numeric;
+  }
+
+  // Default = annual compounding
+  return 1;
+}
+
+// ============================================================
+// HELPER:
+// NORMALIZE CLASSIFICATION
+// ============================================================
+
+function normalizeClassification(classification) {
+  if (
+    !classification ||
+    typeof classification !== 'object'
+  ) {
+    return classification;
+  }
+
+  if (
+    !classification.values ||
+    typeof classification.values !== 'object'
+  ) {
+    classification.values = {};
+  }
+
+  if (
+    !Array.isArray(
+      classification.missing
+    )
+  ) {
+    classification.missing = [];
+  }
+
+  // ----------------------------------------------------------
+  // COMPOUND INTEREST
+  // ----------------------------------------------------------
+
+  if (
+    classification.calculation_type ===
+    'compound_interest'
+  ) {
+    const values =
+      classification.values;
+
+    // Principal
+    if (
+      typeof values.principal === 'string'
+    ) {
+      const number =
+        Number(
+          values.principal
+            .replace(/,/g, '')
+            .replace(/[₹$€£]/g, '')
+            .trim()
+        );
+
+      if (Number.isFinite(number)) {
+        values.principal = number;
+      }
     }
 
-    const cleanQuestion = question.trim();
+    // Rate
+    if (
+      typeof values.rate === 'string'
+    ) {
+      const number =
+        Number(
+          values.rate
+            .replace('%', '')
+            .trim()
+        );
 
-    if (!cleanQuestion) {
-      return res.status(400).json({
-        error: 'Question cannot be empty.'
-      });
+      if (Number.isFinite(number)) {
+        values.rate = number;
+      }
     }
 
+    // Time
+    if (
+      typeof values.time_years === 'string'
+    ) {
+      const number =
+        Number(
+          values.time_years
+            .replace(/years?/i, '')
+            .replace(/saal/gi, '')
+            .trim()
+        );
+
+      if (Number.isFinite(number)) {
+        values.time_years = number;
+      }
+    }
+
+    // Frequency
+    values.frequency =
+      normalizeFrequency(
+        values.frequency
+      );
+
     // --------------------------------------------------------
-    // GROQ API KEY
+    // Frequency should NEVER remain missing
+    // because annual is our default.
     // --------------------------------------------------------
 
-    const apiKey = process.env.GROQ_API_KEY;
+    classification.missing =
+      classification.missing.filter(
+        (item) =>
+          !String(item)
+            .toLowerCase()
+            .includes('frequency')
+      );
+  }
 
-    if (!apiKey) {
+  return classification;
+}
+
+// ============================================================
+// GROQ CLASSIFICATION
+// ============================================================
+
+app.post(
+  '/api/classify',
+  async (req, res) => {
+
+    try {
+
+      const {
+        question
+      } = req.body || {};
+
+      // ------------------------------------------------------
+      // VALIDATE QUESTION
+      // ------------------------------------------------------
+
+      if (
+        !question ||
+        typeof question !== 'string'
+      ) {
+        return res.status(400).json({
+          error:
+            'A "question" string is required.'
+        });
+      }
+
+      const cleanQuestion =
+        question.trim();
+
+      if (!cleanQuestion) {
+        return res.status(400).json({
+          error:
+            'Question cannot be empty.'
+        });
+      }
+
+      // ------------------------------------------------------
+      // API KEY
+      // ------------------------------------------------------
+
+      const apiKey =
+        process.env.GROQ_API_KEY;
+
+      if (!apiKey) {
+
+        console.error(
+          'GROQ_API_KEY is missing.'
+        );
+
+        return res.status(500).json({
+          error:
+            'Server is missing GROQ_API_KEY. Add it in Render Environment Variables.'
+        });
+      }
+
+      const cleanKey =
+        apiKey.trim();
+
+      // ------------------------------------------------------
+      // MODEL
+      // ------------------------------------------------------
+
+      const model =
+        process.env.GROQ_MODEL ||
+        'openai/gpt-oss-20b';
+
+      console.log(
+        `Groq model: ${model}`
+      );
+
+      console.log(
+        `Question length: ${cleanQuestion.length}`
+      );
+
+      // ------------------------------------------------------
+      // GROQ REQUEST
+      // ------------------------------------------------------
+
+      const requestBody = {
+
+        model,
+
+        messages: [
+          {
+            role: 'system',
+            content: SYSTEM_PROMPT
+          },
+          {
+            role: 'user',
+            content: cleanQuestion
+          }
+        ],
+
+        // ----------------------------------------------------
+        // GPT-OSS reasoning:
+        // Keep reasoning LOW because this app only needs
+        // classification, not long reasoning.
+        // ----------------------------------------------------
+
+        reasoning_effort: 'low',
+
+        include_reasoning: false,
+
+        temperature: 0,
+
+        // Small output = lower token usage.
+        max_completion_tokens: 300,
+
+        // JSON mode
+        response_format: {
+          type: 'json_object'
+        }
+      };
+
+      // ------------------------------------------------------
+      // GROQ API CALL
+      // ------------------------------------------------------
+
+      const groqRes =
+        await fetchFn(
+          'https://api.groq.com/openai/v1/chat/completions',
+          {
+            method: 'POST',
+
+            headers: {
+              'Content-Type':
+                'application/json',
+
+              Authorization:
+                `Bearer ${cleanKey}`
+            },
+
+            body:
+              JSON.stringify(
+                requestBody
+              )
+          }
+        );
+
+      // ------------------------------------------------------
+      // RATE LIMIT / ERROR
+      // ------------------------------------------------------
+
+      if (!groqRes.ok) {
+
+        const rawErrText =
+          await groqRes.text();
+
+        let parsedErr = null;
+
+        try {
+          parsedErr =
+            JSON.parse(
+              rawErrText
+            );
+        } catch (_) {
+          // Not JSON
+        }
+
+        console.error(
+          '============================================'
+        );
+
+        console.error(
+          'Groq API ERROR'
+        );
+
+        console.error(
+          'HTTP:',
+          groqRes.status,
+          groqRes.statusText
+        );
+
+        console.error(
+          'MODEL:',
+          model
+        );
+
+        console.error(
+          'RESPONSE:',
+          rawErrText
+        );
+
+        console.error(
+          '============================================'
+        );
+
+        const errMessage =
+          parsedErr?.error?.message ||
+          rawErrText ||
+          'No details returned by Groq.';
+
+        // ----------------------------------------------------
+        // 429 RATE LIMIT
+        // ----------------------------------------------------
+
+        if (
+          groqRes.status === 429
+        ) {
+
+          const retryAfter =
+            groqRes.headers.get(
+              'retry-after'
+            );
+
+          const remainingTokens =
+            groqRes.headers.get(
+              'x-ratelimit-remaining-tokens'
+            );
+
+          const limitTokens =
+            groqRes.headers.get(
+              'x-ratelimit-limit-tokens'
+            );
+
+          return res.status(429).json({
+
+            error:
+              'Groq API rate limit reached. Please wait a moment and try again.',
+
+            provider:
+              'groq',
+
+            status:
+              429,
+
+            retryAfter:
+              retryAfter || null,
+
+            rateLimitTokens:
+              limitTokens || null,
+
+            remainingTokens:
+              remainingTokens || null,
+
+            details:
+              errMessage
+          });
+        }
+
+        // ----------------------------------------------------
+        // AUTH
+        // ----------------------------------------------------
+
+        if (
+          groqRes.status === 401 ||
+          groqRes.status === 403
+        ) {
+
+          return res.status(502).json({
+
+            error:
+              'Groq API authentication failed. Check GROQ_API_KEY in Render.',
+
+            provider:
+              'groq',
+
+            status:
+              groqRes.status
+          });
+        }
+
+        // ----------------------------------------------------
+        // OTHER ERROR
+        // ----------------------------------------------------
+
+        return res.status(502).json({
+
+          error:
+            `Groq API error (${groqRes.status}): ${errMessage}`,
+
+          provider:
+            'groq',
+
+          status:
+            groqRes.status
+        });
+      }
+
+      // ------------------------------------------------------
+      // READ RESPONSE
+      // ------------------------------------------------------
+
+      const data =
+        await groqRes.json();
+
+      const generatedText =
+        data?.choices?.[0]?.message?.content;
+
+      if (
+        !generatedText ||
+        typeof generatedText !== 'string'
+      ) {
+
+        console.error(
+          'Unexpected Groq response:',
+          JSON.stringify(data)
+        );
+
+        return res.status(502).json({
+          error:
+            'Groq returned an empty or unexpected response.'
+        });
+      }
+
+      // ------------------------------------------------------
+      // CLEAN JSON
+      // ------------------------------------------------------
+
+      let classificationText =
+        generatedText.trim();
+
+      classificationText =
+        classificationText
+          .replace(
+            /^```json\s*/i,
+            ''
+          )
+          .replace(
+            /^```\s*/i,
+            ''
+          )
+          .replace(
+            /\s*```$/i,
+            ''
+          )
+          .trim();
+
+      // ------------------------------------------------------
+      // PARSE JSON
+      // ------------------------------------------------------
+
+      let classification;
+
+      try {
+
+        classification =
+          JSON.parse(
+            classificationText
+          );
+
+      } catch (parseError) {
+
+        console.error(
+          'Invalid JSON from Groq:',
+          classificationText
+        );
+
+        return res.status(502).json({
+          error:
+            'Groq returned invalid JSON. Please try again.',
+          provider:
+            'groq'
+        });
+      }
+
+      // ------------------------------------------------------
+      // BASIC VALIDATION
+      // ------------------------------------------------------
+
+      if (
+        !classification ||
+        typeof classification !== 'object'
+      ) {
+
+        return res.status(502).json({
+          error:
+            'Groq returned an invalid classification object.'
+        });
+      }
+
+      if (
+        !classification.calculation_type
+      ) {
+
+        return res.status(502).json({
+          error:
+            'Groq response is missing calculation_type.'
+        });
+      }
+
+      // ------------------------------------------------------
+      // NORMALIZE
+      // ------------------------------------------------------
+
+      classification =
+        normalizeClassification(
+          classification
+        );
+
+      // ------------------------------------------------------
+      // LANGUAGE
+      // ------------------------------------------------------
+
+      if (
+        ![
+          'hi',
+          'hinglish',
+          'en'
+        ].includes(
+          classification.detected_language
+        )
+      ) {
+
+        classification.detected_language =
+          'en';
+      }
+
+      // ------------------------------------------------------
+      // FRONTEND COMPATIBLE RESPONSE
+      // ------------------------------------------------------
+
+      return res.json({
+
+        content: [
+          {
+            type: 'text',
+
+            text:
+              JSON.stringify(
+                classification
+              )
+          }
+        ],
+
+        provider:
+          'groq',
+
+        model,
+
+        // Useful debugging metadata.
+        // Does NOT expose API key.
+        usage: {
+          prompt_tokens:
+            data?.usage?.prompt_tokens ??
+            null,
+
+          completion_tokens:
+            data?.usage?.completion_tokens ??
+            null,
+
+          total_tokens:
+            data?.usage?.total_tokens ??
+            null
+        }
+      });
+
+    } catch (err) {
+
       console.error(
-        'GROQ_API_KEY is missing from environment variables.'
+        'Unexpected server error:',
+        err
       );
 
       return res.status(500).json({
+
         error:
-          'Server is missing GROQ_API_KEY. Add GROQ_API_KEY in Render Environment Variables.'
+          'Something went wrong on the server. Please try again.'
       });
     }
-
-    const cleanKey = apiKey.trim();
-
-    // --------------------------------------------------------
-    // GROQ MODEL
-    // --------------------------------------------------------
-
-    const model =
-      process.env.GROQ_MODEL ||
-      'openai/gpt-oss-20b';
-
-    console.log(
-      `Using Groq model: ${model}`
-    );
-
-    console.log(
-      `GROQ_API_KEY present: true, length=${cleanKey.length}`
-    );
-
-    // --------------------------------------------------------
-    // GROQ REQUEST
-    // --------------------------------------------------------
-
-    const requestBody = {
-      model,
-
-      messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT
-        },
-        {
-          role: 'user',
-          content: cleanQuestion
-        }
-      ],
-
-      temperature: 0,
-
-      max_completion_tokens: 1000,
-
-      response_format: {
-        type: 'json_object'
-      }
-    };
-
-    // --------------------------------------------------------
-    // GROQ API CALL
-    // --------------------------------------------------------
-
-    const groqRes = await fetchFn(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${cleanKey}`
-        },
-
-        body: JSON.stringify(requestBody)
-      }
-    );
-
-    // --------------------------------------------------------
-    // GROQ ERROR HANDLING
-    // --------------------------------------------------------
-
-    if (!groqRes.ok) {
-      const rawErrText = await groqRes.text();
-
-      let parsedErr = null;
-
-      try {
-        parsedErr = JSON.parse(rawErrText);
-      } catch (_) {
-        // Response was not JSON.
-      }
-
-      console.error(
-        '============================================'
-      );
-
-      console.error(
-        'Groq API call failed'
-      );
-
-      console.error(
-        'HTTP status:',
-        groqRes.status,
-        groqRes.statusText
-      );
-
-      console.error(
-        'Request model:',
-        model
-      );
-
-      console.error(
-        'Groq response:',
-        rawErrText
-      );
-
-      console.error(
-        '============================================'
-      );
-
-      const errMessage =
-        parsedErr?.error?.message ||
-        rawErrText ||
-        'No details returned by Groq.';
-
-      // ------------------------------------------------------
-      // RATE LIMIT / QUOTA
-      // ------------------------------------------------------
-
-      if (groqRes.status === 429) {
-        const retryAfter =
-          groqRes.headers.get('retry-after');
-
-        return res.status(429).json({
-          error:
-            `Groq API rate limit reached. ${errMessage}`,
-          provider: 'groq',
-          status: 429,
-          retryAfter: retryAfter || null
-        });
-      }
-
-      // ------------------------------------------------------
-      // AUTH ERROR
-      // ------------------------------------------------------
-
-      if (
-        groqRes.status === 401 ||
-        groqRes.status === 403
-      ) {
-        return res.status(502).json({
-          error:
-            'Groq API authentication failed. Check GROQ_API_KEY in Render Environment Variables.',
-          provider: 'groq',
-          status: groqRes.status
-        });
-      }
-
-      // ------------------------------------------------------
-      // OTHER GROQ ERRORS
-      // ------------------------------------------------------
-
-      return res.status(502).json({
-        error:
-          `Groq API error (${groqRes.status}): ${errMessage}`,
-        provider: 'groq',
-        status: groqRes.status
-      });
-    }
-
-    // --------------------------------------------------------
-    // READ GROQ RESPONSE
-    // --------------------------------------------------------
-
-    const data = await groqRes.json();
-
-    const generatedText =
-      data?.choices?.[0]?.message?.content;
-
-    if (
-      !generatedText ||
-      typeof generatedText !== 'string'
-    ) {
-      console.error(
-        'Groq returned an unexpected response:',
-        JSON.stringify(data)
-      );
-
-      return res.status(502).json({
-        error:
-          'Groq returned an empty or unexpected response.'
-      });
-    }
-
-    // --------------------------------------------------------
-    // CLEAN JSON
-    // --------------------------------------------------------
-
-    let classificationText =
-      generatedText.trim();
-
-    classificationText =
-      classificationText
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/\s*```$/i, '')
-        .trim();
-
-    // --------------------------------------------------------
-    // VALIDATE JSON
-    // --------------------------------------------------------
-
-    let classification;
-
-    try {
-      classification =
-        JSON.parse(classificationText);
-    } catch (parseError) {
-      console.error(
-        'Groq returned invalid JSON:',
-        classificationText
-      );
-
-      return res.status(502).json({
-        error:
-          'Groq returned invalid JSON. Please try the calculation again.',
-        provider: 'groq'
-      });
-    }
-
-    // --------------------------------------------------------
-    // BASIC RESPONSE VALIDATION
-    // --------------------------------------------------------
-
-    if (
-      !classification ||
-      typeof classification !== 'object'
-    ) {
-      return res.status(502).json({
-        error:
-          'Groq returned an invalid classification object.'
-      });
-    }
-
-    if (!classification.calculation_type) {
-      return res.status(502).json({
-        error:
-          'Groq response is missing calculation_type.'
-      });
-    }
-
-    if (!classification.values) {
-      classification.values = {};
-    }
-
-    if (!Array.isArray(classification.missing)) {
-      classification.missing = [];
-    }
-
-    if (
-      !['hi', 'hinglish', 'en'].includes(
-        classification.detected_language
-      )
-    ) {
-      classification.detected_language =
-        'en';
-    }
-
-    // --------------------------------------------------------
-    // COMPOUND INTEREST SAFETY FALLBACK
-    //
-    // If Groq somehow forgets the annual default,
-    // the backend enforces it here.
-    // --------------------------------------------------------
-
-    if (
-      classification.calculation_type ===
-      'compound_interest'
-    ) {
-      if (
-        !classification.values.frequency ||
-        typeof classification.values.frequency !==
-          'string'
-      ) {
-        classification.values.frequency =
-          'annual';
-      }
-
-      // Remove accidental frequency-related missing message.
-      classification.missing =
-        classification.missing.filter(
-          (item) =>
-            !/frequency|compounding frequency|compound frequency/i.test(
-              String(item)
-            )
-        );
-    }
-
-    // --------------------------------------------------------
-    // IMPORTANT:
-    // Return an Anthropic-compatible shape so your existing
-    // frontend does NOT need to be changed.
-    // --------------------------------------------------------
-
-    return res.json({
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(classification)
-        }
-      ],
-
-      provider: 'groq',
-      model
-    });
-
-  } catch (err) {
-    console.error(
-      'Unexpected server error:',
-      err
-    );
-
-    return res.status(500).json({
-      error:
-        'Something went wrong on the server. Please try again.'
-    });
   }
-});
+);
 
 // ============================================================
 // UNKNOWN API ROUTE
 // ============================================================
 
-app.use('/api', (req, res) => {
-  res.status(404).json({
-    error:
-      `No API route: ${req.method} ${req.originalUrl}`
-  });
-});
+app.use(
+  '/api',
+  (req, res) => {
+
+    res.status(404).json({
+      error:
+        `No API route: ${req.method} ${req.originalUrl}`
+    });
+  }
+);
 
 // ============================================================
 // GLOBAL ERROR HANDLER
 // ============================================================
 
-app.use((err, req, res, next) => {
-  console.error(
-    'Unhandled error:',
-    err
-  );
+app.use(
+  (err, req, res, next) => {
 
-  res.status(500).json({
-    error:
-      'Unexpected server error.'
-  });
-});
+    console.error(
+      'Unhandled error:',
+      err
+    );
+
+    res.status(500).json({
+      error:
+        'Unexpected server error.'
+    });
+  }
+);
 
 // ============================================================
 // START SERVER
@@ -1140,19 +1052,31 @@ app.use((err, req, res, next) => {
 const PORT =
   process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(
-    `AI Calculator server running on port ${PORT}`
-  );
+app.listen(
+  PORT,
+  () => {
 
-  console.log(
-    `AI Provider: Groq`
-  );
+    console.log(
+      `AI Calculator server running on port ${PORT}`
+    );
 
-  console.log(
-    `AI Model: ${
-      process.env.GROQ_MODEL ||
-      'openai/gpt-oss-20b'
-    }`
-  );
-});
+    console.log(
+      'AI Provider: Groq'
+    );
+
+    console.log(
+      `AI Model: ${
+        process.env.GROQ_MODEL ||
+        'openai/gpt-oss-20b'
+      }`
+    );
+
+    console.log(
+      'Compound frequency normalization: ENABLED'
+    );
+
+    console.log(
+      'Reasoning effort: LOW'
+    );
+  }
+);

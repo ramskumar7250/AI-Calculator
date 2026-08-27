@@ -169,19 +169,32 @@ Do NOT use markdown.
 Do NOT use code fences.
 Do NOT add explanations outside the JSON.
 
+============================================================
+CALCULATION TYPES
+============================================================
+
 Pick "calculation_type" from exactly this list:
 
 - percentage_of: {base, percent}
+
 - percentage_change: {from, to}
+
 - profit_loss: {cost_price, selling_price}
+
 - discount: {price, discount_percent}
+
 - gst: {amount, rate, mode}
-  mode must be "exclusive" or "inclusive"
-  exclusive = GST needs to be added
-  inclusive = GST is already included and needs to be extracted
+  mode must be exactly:
+  "exclusive" or "inclusive"
+
+  exclusive = GST needs to be added to the amount.
+
+  inclusive = GST is already included in the amount
+  and the base price and GST portion need to be extracted.
 
 - cgst_sgst: {amount, rate}
-  rate is the TOTAL GST rate to split equally into CGST + SGST
+  rate is the TOTAL GST rate.
+  It must be split equally into CGST and SGST.
 
 - simple_interest: {principal, rate, time_years}
 
@@ -238,32 +251,181 @@ Pick "calculation_type" from exactly this list:
 
 - unknown
 
-IMPORTANT NUMBER RULES:
+
+============================================================
+IMPORTANT COMPOUND INTEREST RULE
+============================================================
+
+Compound interest questions require a compounding frequency such as:
+
+- annual
+- yearly
+- half-yearly
+- quarterly
+- monthly
+- weekly
+- daily
+
+HOWEVER:
+
+If the user asks a compound-interest question and DOES NOT specify
+the compounding frequency, DO NOT ask the user for the frequency.
+
+Instead:
+
+ASSUME ANNUAL COMPOUNDING.
+
+Set:
+
+"frequency": "annual"
+
+and continue normally.
+
+Do NOT put compounding frequency inside the "missing" array
+when it is not provided.
+
+Example:
+
+User:
+"10000 par 8% compound interest 3 saal ka"
+
+Correct classification:
+
+{
+  "calculation_type": "compound_interest",
+  "values": {
+    "principal": 10000,
+    "rate": 8,
+    "time_years": 3,
+    "frequency": "annual"
+  },
+  "missing": [],
+  "detected_language": "hinglish"
+}
+
+Also clearly understand these:
+
+"8% compound interest on 10000 for 3 years"
+=> frequency = "annual"
+
+"10000 par 8% CI 3 years monthly"
+=> frequency = "monthly"
+
+"10000 par 8% compound interest 3 saal quarterly"
+=> frequency = "quarterly"
+
+"10000 par 8% compound interest 3 saal half yearly"
+=> frequency = "half-yearly"
+
+"10000 par 8% compound interest 3 saal daily"
+=> frequency = "daily"
+
+If frequency is not mentioned:
+ALWAYS use "annual".
+
+Never return:
+"frequency required"
+or
+"frequency is missing"
+for a normal compound-interest question.
+
+
+============================================================
+NUMBER RULES
+============================================================
 
 Convert common number formats into plain numeric values.
 
 Examples:
 
 "2 lakh" -> 200000
+
 "5 crore" -> 50000000
+
 "25,000" -> 25000
+
 "5000 rupees" -> 5000
+
+"₹5000" -> 5000
+
 "18%" -> 18
+
 "12 feet" -> 12
 
-For area calculations, keep the original unit meaning.
-Do NOT unnecessarily convert feet into meters.
+"20.5" -> 20.5
 
-LANGUAGE DETECTION:
+"1.5 lakh" -> 150000
+
+
+============================================================
+INDIAN NUMBERING
+============================================================
+
+Understand Indian numbering terms such as:
+
+lakh
+lakhs
+lac
+crore
+crores
+k
+thousand
+
+Examples:
+
+"1 lakh" -> 100000
+
+"2 lakh" -> 200000
+
+"10 lakh" -> 1000000
+
+"1 crore" -> 10000000
+
+"2 crore" -> 20000000
+
+"50k" -> 50000
+
+
+============================================================
+CURRENCY
+============================================================
+
+Understand:
+
+₹
+Rs
+Rs.
+INR
+rupee
+rupees
+रुपये
+रुपया
+
+Currency symbols and words should NOT become part of numeric values.
+
+Example:
+
+"₹25,000 ka 18%" -> base = 25000
+
+"50000 rupees par 10% discount"
+-> price = 50000
+
+
+============================================================
+LANGUAGE DETECTION
+============================================================
 
 "hi"
-= Hindi written in Devanagari script.
+=
+Hindi written in Devanagari script.
 
 "en"
-= normal English.
+=
+normal English.
 
 "hinglish"
-= Hindi written using Roman/Latin letters,
+=
+Hindi written using Roman/Latin letters,
 or mixed English + Hindi.
 
 Examples:
@@ -277,23 +439,266 @@ Examples:
 "What is 20% of 10000?"
 => en
 
-MISSING INFORMATION:
+"25000 par 18 percent GST kitna hoga"
+=> hinglish
 
-If required information is missing, still return the correct calculation_type.
+"₹10000 में 18% GST शामिल है"
+=> hi
+
+
+============================================================
+GST UNDERSTANDING
+============================================================
+
+Understand the difference between GST exclusive and GST inclusive.
+
+Examples:
+
+"25000 par 18% GST add karo"
+=> gst
+=> mode = "exclusive"
+
+"25000 + 18% GST"
+=> gst
+=> mode = "exclusive"
+
+"25000 mein 18% GST included hai"
+=> gst
+=> mode = "inclusive"
+
+"10000 including 18% GST original price kya hai"
+=> gst
+=> mode = "inclusive"
+
+"10000 mein 18 GST included hai base price batao"
+=> gst
+=> mode = "inclusive"
+
+
+============================================================
+PROFIT AND LOSS
+============================================================
+
+Understand:
+
+"10000 mein kharida aur 12500 mein becha profit?"
+=> profit_loss
+
+cost_price = 10000
+selling_price = 12500
+
+"10000 ka maal 9000 mein becha"
+=> loss
+
+"buying price" means cost_price.
+
+"cost price" means cost_price.
+
+"purchase price" means cost_price.
+
+"selling price" means selling_price.
+
+"sold for" means selling_price.
+
+
+============================================================
+DISCOUNT
+============================================================
+
+Understand:
+
+"50000 par 15% discount"
+=> price = 50000
+=> discount_percent = 15
+
+"50000 ka 15 percent discount ke baad price"
+=> discount
+
+"₹50000 पर 15% discount"
+=> discount
+
+
+============================================================
+INTEREST
+============================================================
+
+Simple interest:
+
+"10000 par 8% simple interest 3 saal"
+=> simple_interest
+
+Compound interest:
+
+"10000 par 8% compound interest 3 saal"
+=> compound_interest
+=> frequency = "annual"
+
+Never confuse simple interest with compound interest.
+
+
+============================================================
+AREA
+============================================================
+
+For rectangle:
+
+"20 feet long aur 15 feet wide"
+=> area_rectangle
+
+length = 20
+width = 15
+
+For square:
+
+"side 10 feet"
+=> area_square
+
+side = 10
+
+For circle:
+
+"radius 7"
+=> area_circle
+
+radius = 7
+
+For triangle:
+
+"base 10 height 5"
+=> area_triangle
+
+base = 10
+height = 5
+
+For area calculations, preserve the original unit meaning.
+
+Do NOT unnecessarily convert feet into meters.
+
+
+============================================================
+EMI
+============================================================
+
+Understand:
+
+"5 lakh loan 10% interest 5 years EMI"
+=> emi
+
+principal = 500000
+
+rate_annual = 10
+
+tenure_months = 60
+
+If the user gives years for loan tenure,
+convert years to months.
+
+Example:
+
+"5 lakh loan 10% for 5 years"
+=> tenure_months = 60
+
+
+============================================================
+PERCENTAGE
+============================================================
+
+"25000 ka 18% kitna hai?"
+=> percentage_of
+
+base = 25000
+percent = 18
+
+"18% of 25000"
+=> percentage_of
+
+base = 25000
+percent = 18
+
+
+============================================================
+PERCENTAGE CHANGE
+============================================================
+
+"100 se 120 hua percentage increase?"
+=> percentage_change
+
+from = 100
+to = 120
+
+
+============================================================
+MISSING INFORMATION
+============================================================
+
+If required information is genuinely missing,
+still return the correct calculation_type.
 
 Fill whatever values are available.
 
-Then add a "missing" array containing short descriptions of what is required.
-
-The missing messages MUST be written in the SAME language as detected_language.
-
-Hindi question -> Hindi missing message.
-
-English question -> English missing message.
-
-Hinglish question -> Hinglish missing message.
+Then add a "missing" array containing short descriptions
+of what is required.
 
 IMPORTANT:
+
+Do NOT mark compound-interest frequency as missing.
+
+For compound interest, if frequency is absent:
+use "annual".
+
+Only mark information as missing when it is genuinely required
+and cannot reasonably be assumed.
+
+Examples:
+
+"compound interest on 10000"
+=> calculation_type = compound_interest
+
+missing may contain:
+"rate"
+"time"
+
+But NOT:
+"frequency"
+
+Because frequency defaults to annual.
+
+
+============================================================
+MISSING LANGUAGE
+============================================================
+
+The missing messages MUST be written in the SAME language
+as detected_language.
+
+Hindi question:
+missing message must be Hindi.
+
+English question:
+missing message must be English.
+
+Hinglish question:
+missing message must be Hinglish.
+
+
+============================================================
+UNKNOWN QUESTIONS
+============================================================
+
+If the question is not related to a supported calculation,
+use:
+
+"calculation_type": "unknown"
+
+Do not invent numeric values.
+
+Do not pretend a calculation type when the user's question
+is clearly unrelated to calculation.
+
+
+============================================================
+OUTPUT FORMAT
+============================================================
 
 Return this exact top-level structure:
 
@@ -309,6 +714,38 @@ The detected_language must be exactly one of:
 "hi"
 "hinglish"
 "en"
+
+The "missing" value must always be an array.
+
+The "values" value must always be an object.
+
+Never return markdown.
+
+Never return explanations outside JSON.
+
+Never return multiple JSON objects.
+
+
+============================================================
+FINAL BEHAVIOR
+============================================================
+
+Be decisive.
+
+Do not unnecessarily ask follow-up questions.
+
+Extract all information available from the user's question.
+
+For common calculator questions, classify them directly.
+
+For compound interest without a stated frequency,
+ALWAYS assume annual compounding.
+
+The goal is to make the calculator feel simple:
+
+USER ASKS -> UNDERSTAND -> CLASSIFY -> RETURN JSON
+
+Do not make the user choose a calculator manually.
 `;
 
 // ============================================================
@@ -541,7 +978,6 @@ app.post('/api/classify', async (req, res) => {
     let classificationText =
       generatedText.trim();
 
-    // Remove accidental markdown fences if model ever adds them.
     classificationText =
       classificationText
         .replace(/^```json\s*/i, '')
@@ -610,22 +1046,39 @@ app.post('/api/classify', async (req, res) => {
     }
 
     // --------------------------------------------------------
+    // COMPOUND INTEREST SAFETY FALLBACK
+    //
+    // If Groq somehow forgets the annual default,
+    // the backend enforces it here.
+    // --------------------------------------------------------
+
+    if (
+      classification.calculation_type ===
+      'compound_interest'
+    ) {
+      if (
+        !classification.values.frequency ||
+        typeof classification.values.frequency !==
+          'string'
+      ) {
+        classification.values.frequency =
+          'annual';
+      }
+
+      // Remove accidental frequency-related missing message.
+      classification.missing =
+        classification.missing.filter(
+          (item) =>
+            !/frequency|compounding frequency|compound frequency/i.test(
+              String(item)
+            )
+        );
+    }
+
+    // --------------------------------------------------------
     // IMPORTANT:
     // Return an Anthropic-compatible shape so your existing
     // frontend does NOT need to be changed.
-    //
-    // Your old backend returned Anthropic data.
-    // We now wrap Groq's JSON inside:
-    //
-    // {
-    //   content: [
-    //     {
-    //       type: "text",
-    //       text: "..."
-    //     }
-    //   ]
-    // }
-    //
     // --------------------------------------------------------
 
     return res.json({
@@ -636,7 +1089,6 @@ app.post('/api/classify', async (req, res) => {
         }
       ],
 
-      // Extra metadata is harmless for the frontend.
       provider: 'groq',
       model
     });
